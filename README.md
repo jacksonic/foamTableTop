@@ -7,4 +7,4 @@ Examples to test graphics and spatial indexing.
 Clone https://github.com/jacksonic/vjlofvhjfgm.git beside this repo.
 
 Run an HTTP server below both folders.
-View [localhost:8000/foamTableTop/test/BrowserTest.html](localhost:8000/foamTableTop/test/BrowserTest.html)
+View [http://localhost:8000/foamTableTop/test/BrowserTest.html](http://localhost:8000/foamTableTop/test/BrowserTest.html)
