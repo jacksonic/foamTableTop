@@ -72,6 +72,9 @@ foam.CLASS({
         the existing buckets. */
       name: 'bucketWidth',
       defaultValue: 10,
+      postSet: function(old, nu) {
+        // TODO: removeAll and re-add
+      }
     },
   ],
 
@@ -86,14 +89,16 @@ foam.CLASS({
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
       if ( bounds.width === Infinity || bounds.height === Infinity ) {
-        return this.buckets;
+        return null;
       }
 
-      for ( var w = 0; w < ( obj.width || 0.000001 ); w += bw ) {
-        for ( var h = 0; h < ( obj.height || 0.000001 ); h += bw ) {
+      var xOffs = bounds.x - Math.floor( ( bounds.x ) / bw ) * bw;
+      var yOffs = bounds.y - Math.floor( ( bounds.y ) / bw ) * bw;
+      for ( var w = 0; w < ( bounds.width+xOffs || 0.000001 ); w += bw ) {
+        for ( var h = 0; h < ( bounds.height+yOffs || 0.000001 ); h += bw ) {
           var key = "x" +
-            Math.floor( ( obj.x + w ) / bw ) * bw + "y" +
-            Math.floor( ( obj.y + h ) / bw ) * bw;
+            Math.floor( ( bounds.x + w ) / bw ) * bw + "y" +
+            Math.floor( ( bounds.y + h ) / bw ) * bw;
           var bucket = this.buckets[key];
           if ( ( ! bucket ) && createMode ) {
             bucket = this.buckets[key] = {};
@@ -101,7 +106,7 @@ foam.CLASS({
           bucket && ret.push(bucket);
         }
       }
-      ret.object = obj;
+      ret.object = bounds;
       return ret;
     },
 
@@ -111,7 +116,9 @@ foam.CLASS({
     function put(obj, sink) {
       sink = sink || this.ArraySink.create();
 
-      this.remove(obj); // TODO: don't remove from buckets it's going back into
+      if ( this.items[obj.id] ) {
+        this.remove(obj); // TODO: don't remove from buckets it's going back into
+      }
 
       // add to the buckets the item overlaps
       var buckets = this.hashXY_(obj, true);
@@ -130,16 +137,16 @@ foam.CLASS({
       sink = sink || this.ArraySink.create();
 
       var buckets = this.items[obj.id];
-      for (var i = 0; i < buckets.length; ++i) {
-        delete buckets[i][obj.id];
-        // TODO: delete empty buckets
-      }
 
-      if (! buckets.length ) {
+      if (! buckets || ! buckets.length ) {
         var err = this.ObjectNotFoundException.create({ id: obj.id });
         sink.error(err);
         return Promise.reject(err);
       } else {
+        for (var i = 0; i < buckets.length; ++i) {
+          delete buckets[i][obj.id];
+          // TODO: delete empty buckets
+        }
         delete this.items[obj.id];
         sink.remove(obj);
         this.on.remove.publish(obj);
@@ -154,15 +161,13 @@ foam.CLASS({
       // TODO: fast bucket lookup for ranges and comparisons to hashed axes
       // in 2d case, x, y: BOUNDED comparisons should be fast
 
-      // limit result set if BOUNDED filter is found
-//////////////////////// from MDAO
-      var items = this.items;
       var query = options.where.clone();
 
+      // TODO: the axis properties will be configurable for any number of axes
+      // named whatever you want (as long as they are properties on your model)
       var axes = { x: true, y: true };
       var isIndexed = function(mlangArg) {
         // any old x and y will do
-        // TODO: these will be configurable
         return !! axes[mlangArg.name];
       }
 
@@ -245,10 +250,9 @@ foam.CLASS({
         ranges[args.arg1.name][0] = Math.max( ranges[args.arg1.name][0], args.arg2 );
       }
 
-////////////////////////
       var fc = this.FlowControl.create();
 
-      // if bounds end up infinite, hash will return all buckets, forcing all
+      // if bounds end up infinite, hash will return null, forcing all
       // items through the predicatedSink by default.
       var bounds = {};
       bounds.x = ranges.x[0];
@@ -257,20 +261,32 @@ foam.CLASS({
       bounds.height = ranges.y[1] - ranges.y[0];
 
       var buckets = this.hashXY_(bounds);
-      for ( var i = 0; ( i < buckets.length ) && ! fc.stopped; ++i ) {
-        for ( var key in buckets[i] ) {
-          var obj = buckets[i][key];
-          if ( obj.id ) {
-            if ( fc.stopped ) break;
-            if ( fc.errorEvt ) {
-              sink.error(fc.errorEvt);
-              return Promise.reject(fc.errorEvt);
+      if ( buckets ) {
+        for ( var i = 0; ( i < buckets.length ) && ! fc.stopped; ++i ) {
+          for ( var key in buckets[i] ) {
+            var obj = buckets[i][key];
+            if ( obj.id ) {
+              if ( fc.stopped ) break;
+              if ( fc.errorEvt ) {
+                sink.error(fc.errorEvt);
+                return Promise.reject(fc.errorEvt);
+              }
+              sink.put(obj, null, fc);
             }
-            sink.put(obj, null, fc);
           }
         }
+      } else {
+        // no optimal filtering available, so run all items through
+        var items = this.items;
+        for ( var key in items ) {
+          if ( fc.stopped ) break;
+          if ( fc.errorEvt ) {
+            sink.error(fc.errorEvt);
+            return Promise.reject(fc.errorEvt);
+           }
+          sink.put(items[key].object, null, fc);
+        }
       }
-
       sink && sink.eof && sink.eof();
 
       return Promise.resolve(resultSink);

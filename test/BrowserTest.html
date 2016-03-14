@@ -1,0 +1,83 @@
+<html>
+ <head>
+  <script>console.time('boot');</script>
+  <script language="javascript" src="../../vjlofvhjfgm/src/core/foam.js"></script>
+  <script language="javascript" src="../../vjlofvhjfgm/src/lib/dao.js"></script>
+  <script language="javascript" src="../../vjlofvhjfgm/src/lib/mlang.js"></script>
+  <script language="javascript" src="../src/dao/SpatialDAO.js"></script>
+  <script>console.timeEnd('boot');</script>
+  <title>FOAM TableTop</title>
+  <style>
+    code {color:blue; white-space: pre-wrap; }
+  </style>
+ </head>
+
+ <body style="font-family:monospace;">
+
+<script id="demo" language="xjavascript">
+// A simple item class with x,y,width,height
+foam.CLASS({
+  name: 'ItemXY',
+  properties: [
+    'id',
+    [ 'x', 0 ],
+    [ 'y', 0 ],
+    [ 'width', 0 ],
+    [ 'height', 0 ],
+  ]
+});
+var sd = foam.dao.SpatialHashDAO.create({ of: ItemXY });
+sd.describe();
+
+// test data inserted into the DAO
+var testData = [
+  ItemXY.create({ id: 'a', x: 0, y: 0, width: 1, height: 1 }),
+  ItemXY.create({ id: 'b', x: 5, y: 3, width: 2, height: 2 }),
+  ItemXY.create({ id: 'c', x: 30, y: 10, width: 1, height: 1 }),
+];
+testData.forEach(function(d) { sd.put(d); });
+
+// execute a hash lookup for item 'c'
+var buckets = sd.hashXY_({ x:29, y:9, width:3, height:3 });
+for (var i=0; i < buckets.length; ++i ) {
+  for (var b in buckets[i]) {
+    console.log("bucket[",i,"]:", buckets[i][b], ":", b);
+  }
+}
+</script>
+
+  <div id='output'></div>
+
+  <script language="javascript">
+    var demo = document.getElementById('demo');
+    var out  = document.getElementById('output');
+    var log_ = function(o) {
+    document.body.insertAdjacentHTML('beforeend', o + '<br/>');
+    }
+    var oldLog = console.log;
+    console.assert = function(b, e) { if ( ! b ) { log('Assertion failed:', e); throw 'assert'; } };
+    console.log = function() { log_([].join.call(arguments, ' ')); };
+    console.log.put = console.log.bind(console);
+    console.log.str = oldLog.str;
+    console.log.json = oldLog.json;
+    var log = function() { log_(' <b>&gt;</b> ' + [].join.call(arguments, ' ')); }
+
+    var s_ = demo.textContent.split('\n\n');
+    for ( var i_ = 0 ; i_ < s_.length ; i_++ ) {
+      var line = s_[i_];
+      log_(' <h3>Example ' + (i_+1) + '</h3><code>' + line + '</code><br>');
+      log_.output = "";
+      try {
+        eval(line);
+      } catch (x) {
+        log('Exception: ', x);
+      }
+      log_.capture = false;
+
+      log_('');
+    }
+
+    </script>
+
+ </body>
+</html>
