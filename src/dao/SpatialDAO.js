@@ -117,6 +117,10 @@ foam.CLASS({
         return null;
       }
 
+      // Ensure we catch the last buckets of the range by adding the offset
+      // from the first bucket's start to our actual start point (we are
+      // incrementing by bucketWidth each time, so the last increment may fall
+      // outside the actual bounds and would fail the loop test without the offset)
       var xOffs = bounds.x - Math.floor( ( bounds.x ) / bw ) * bw;
       var yOffs = bounds.y - Math.floor( ( bounds.y ) / bw ) * bw;
       for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw ) {
@@ -124,7 +128,7 @@ foam.CLASS({
           var key = this.hashXY_(bounds.x + w, bounds.y + h);
           var bucket = this.buckets[key];
           if ( ( ! bucket ) && createMode ) {
-            bucket = this.buckets[key] = {};
+            bucket = this.buckets[key] = { _hash_: key };
           }
           bucket && ret.push(bucket);
         }
@@ -177,7 +181,13 @@ foam.CLASS({
       } else {
         for (var i = 0; i < buckets.length; ++i) {
           delete buckets[i][obj.id];
-          // TODO: delete empty buckets
+
+          // check for empty bucket
+          // TODO: maybe batch this on the next frame to avoid churn when removing
+          // and re-adding immediately
+          if ( Object.keys( buckets[i] ).length == 1 ) {
+            delete this.buckets[buckets[i]._hash_];
+          }
         }
         delete this.items[obj.id];
         sink && sink.remove(obj);
@@ -346,8 +356,8 @@ foam.CLASS({
       var predicate = ( options && options.where ) || this.True.create();
 
       for ( var key in this.items ) {
-        if ( predicate.f(this.items[key].object) ) {
-          var obj = this.items[key];
+        var obj = this.items[key].object;
+        if ( predicate.f(obj) ) {
           this.remove(obj);
           sink && sink.remove(obj);
           this.on.remove.publish(obj);
