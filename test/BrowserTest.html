@@ -26,6 +26,19 @@ foam.CLASS({
     [ 'height', 0 ],
   ]
 });
+function logBuckets(buckets) {
+  for (var i=0; i < buckets.length; ++i ) {
+    for (var b in buckets[i]) {
+      console.log("bucket[",i,"]:", buckets[i][b], ":", b);
+    }
+  }
+}
+function logArraySink(sink) {
+  for (var i=0; i < sink.a.length; ++i ) {
+    var item = sink.a[i];
+    console.log("sink[",i,"]: (", item.id, ")", item.x, item.y, item.width, item.height);
+  }
+}
 var sd = foam.dao.SpatialHashDAO.create({ of: ItemXY });
 sd.describe();
 
@@ -38,12 +51,89 @@ var testData = [
 testData.forEach(function(d) { sd.put(d); });
 
 // execute a hash lookup for item 'c'
-var buckets = sd.hashXY_({ x:29, y:9, width:3, height:3 });
-for (var i=0; i < buckets.length; ++i ) {
-  for (var b in buckets[i]) {
-    console.log("bucket[",i,"]:", buckets[i][b], ":", b);
-  }
+logBuckets(sd.hashXY_({ x:29, y:9, width:3, height:3 }));
+
+// execute a hash lookup for item 'a,b'
+logBuckets(sd.hashXY_({ x:0, y:0, width:5, height:3 }));
+
+// remove item a
+sd.remove({id:'a'});
+
+// re-execute a hash lookup for item 'a,b'
+logBuckets(sd.hashXY_({ x:0, y:0, width:5, height:3 }));
+
+// time insertion of random items
+var COUNT = 10000;
+var start = Date.now();
+for (var k=0; k<COUNT; ++k) {
+  sd.put(ItemXY.create({
+    id: ""+k,
+    x: Math.random() * 1000,
+    y: Math.random() * 1000,
+    width: Math.random() * 20,
+    height: Math.random() * 20,
+  }));
 }
+var end = Date.now();
+console.log("Time to insert "+COUNT+":", end - start, "ms");
+
+// select some items
+var EXPRS = foam.mlang.Expressions.create();
+var OR = EXPRS.OR.bind(EXPRS);
+var AND = EXPRS.AND.bind(EXPRS);
+var EQ = EXPRS.EQ.bind(EXPRS);
+var LT = EXPRS.LT.bind(EXPRS);
+var GT = EXPRS.GT.bind(EXPRS);
+var GTE = EXPRS.GTE.bind(EXPRS);
+var LTE = EXPRS.LTE.bind(EXPRS);
+var BOUNDED = function(a, b) {
+  return foam.mlang.predicate.Bounded.create({ arg1: a, arg2: b});
+};
+var result = foam.dao.ArraySink.create();
+start = Date.now();
+sd.where(AND(
+  BOUNDED(ItemXY.X, [20, 40]),
+  BOUNDED(ItemXY.Y, [30, 50])
+)).select(result).then(
+  function(sink) {
+    end = Date.now();
+    console.log("items found in:", end - start, "ms");
+    logArraySink(sink);
+  },
+  function(err) {
+    console.log("error", err);
+  }
+);
+
+// select lots of times
+var countDown = 1000;
+start = Date.now();
+function selectAgain() {
+  result = foam.dao.ArraySink.create();
+  var x = Math.round(Math.random() * 1000);
+  var y = Math.round(Math.random() * 1000);
+  var x2 = x + Math.round(Math.random() * 30);
+  var y2 = y + Math.round(Math.random() * 30);
+  sd.where(AND(
+    BOUNDED(ItemXY.X, [x, x2]),
+    BOUNDED(ItemXY.Y, [y, y2])
+  )).select(result).then(
+    function(sink) {
+      console.log("Result", countDown, "found", sink.a.length, "inside", x,y,x2-x,y2-y);
+      if (--countDown < 0) {
+        end = Date.now();
+        console.log("searches done in:", end - start, "ms");
+        return; // escape!
+      }
+      selectAgain();
+    },
+    function(err) {
+      console.log("error", err);
+    }
+  );
+}
+selectAgain();
+
 </script>
 
   <div id='output'></div>

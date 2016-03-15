@@ -22,9 +22,21 @@ foam.CLASS({
   package: 'foam.mlang.predicate',
   name: 'Bounded',
   extends: 'foam.mlang.predicate.Binary',
+  properties: [
+    {
+      name: 'arg2',
+      adapt: function(old,nu) {
+        if ( Array.isArray(nu) ) {
+          return foam.mlang.predicate.Constant.create({ value: nu });
+        } else {
+          return nu;
+        }
+      }
+    }
+  ],
   methods: [
     function f(o) {
-      return
+      return !!
         ( foam.util.compare(this.arg1.f(o), this.arg2.f(o)[0]) >= 0 ) &&
         ( foam.util.compare(this.arg1.f(o), this.arg2.f(o)[1]) <= 0 );
     }
@@ -190,7 +202,7 @@ foam.CLASS({
             return arg2;
           }
 
-          if ( AndExpr.isInstance(query) ) {
+          if ( foam.mlang.predicate.And.isInstance(query) ) {
             for ( var i = 0 ; i < query.args.length ; i++ ) {
               var q = query.args[i];
               if ( model.isInstance(q) && isIndexed(q.arg1) ) {
