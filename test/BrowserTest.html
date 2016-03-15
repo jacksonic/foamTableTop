@@ -123,10 +123,10 @@ function selectAgain() {
     BOUNDED(ItemXY.Y2, [y, y2])
   )).select(result).then(
     function(sink) {
-      console.log("Result", countDown, "found", sink.a.length, "inside", x,y,x2-x,y2-y);
+      //console.log("Result", countDown, "found", sink.a.length, "inside", x,y,x2-x,y2-y);
       if (--countDown < 0) {
         end = Date.now();
-        console.log("searches done in:", end - start, "ms");
+        console.log("1000 searches done in:", end - start, "ms");
         return; // escape!
       }
       selectAgain();
@@ -137,6 +137,46 @@ function selectAgain() {
   );
 }
 selectAgain();
+
+// time insertion of the same item with new position
+COUNT = 10000;
+start = Date.now();
+var item = ItemXY.create({
+  id: 'theItem',
+  x: 0,
+  y: 0,
+  x2: 23,
+  y2: 23,
+});
+for (var k = 0; k < COUNT; ++k) {
+  item.x = k/10;
+  item.y = k/10;
+  item.x2 = k/10 + 23;
+  item.y2 = k/10 + 23;
+  sd.put(item);
+}
+end = Date.now();
+console.log("Time to move item "+COUNT+" times:", end - start, "ms");
+
+// time insertion of the same item with new bucket each time
+COUNT = 10000;
+start = Date.now();
+var item = ItemXY.create({
+  id: 'theItem',
+  x: 0,
+  y: 0,
+  x2: 23,
+  y2: 23,
+});
+for (var k = 0; k < COUNT; ++k) {
+  item.x = k * 10;
+  item.y = k * 10;
+  item.x2 = k * 10 + 23;
+  item.y2 = k * 10 + 23;
+  sd.put(item);
+}
+end = Date.now();
+console.log("Time to move item "+COUNT+" times in new buckets:", end - start, "ms");
 
 </script>
   <div id='output'></div>

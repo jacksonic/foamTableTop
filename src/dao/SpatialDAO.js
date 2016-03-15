@@ -98,7 +98,14 @@ foam.CLASS({
     /** A default hash for any object with an x, y, x2, y2.
       Returns an array of buckets the object should occupy. if createMode is
       true, buckets will be created if not present. */
-    function hashXY_(bounds, createMode /* array */) {
+    function hashXY_(x, y) {
+      var bw = this.bucketWidth;
+      return "x" + Math.floor( ( x ) / bw ) * bw +
+             "y" + Math.floor( ( y ) / bw ) * bw;
+    },
+
+    /** Find all the buckets the given bounds overlaps */
+    function findBuckets_(bounds, createMode /* array */) {
       var ret = [];
       var bw = this.bucketWidth;
 
@@ -114,9 +121,7 @@ foam.CLASS({
       var yOffs = bounds.y - Math.floor( ( bounds.y ) / bw ) * bw;
       for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw ) {
         for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw ) {
-          var key = "x" +
-            Math.floor( ( bounds.x + w ) / bw ) * bw + "y" +
-            Math.floor( ( bounds.y + h ) / bw ) * bw;
+          var key = this.hashXY_(bounds.x + w, bounds.y + h);
           var bucket = this.buckets[key];
           if ( ( ! bucket ) && createMode ) {
             bucket = this.buckets[key] = {};
@@ -132,33 +137,42 @@ foam.CLASS({
     },
 
     function put(obj, sink) {
-      sink = sink || this.ArraySink.create();
-
       if ( this.items[obj.id] ) {
-        this.remove(obj); // TODO: don't remove from buckets it's going back into
+        var prev = this.items[obj.id];
+        // If the object moved, but the min/max points are in the same buckets
+        // as before, none of the buckets need to be altered.
+        var min = this.hashXY_(obj.x, obj.y);
+        var max = this.hashXY_(obj.x2, obj.y2);
+        if ( min == prev.min && max == prev.max ) {
+          // hashes match, no change in buckets
+          sink && sink.put(obj);
+          this.on.put.publish(obj);
+          return Promise.resolve(obj);
+        }
+        // otherwise remove the old bucket entries and continue to re-insert
+        this.remove(obj);
       }
 
       // add to the buckets the item overlaps
-      var buckets = this.hashXY_(obj, true);
+      var buckets = this.findBuckets_(obj, true);
+      buckets.min = this.hashXY_(obj.x, obj.y); // if the object moves, we might
+      buckets.max = this.hashXY_(obj.x2, obj.y2); // not need to alter any buckets
       this.items[obj.id] = buckets; // for fast removal later
       for (var i = 0; i < buckets.length; ++i) {
         buckets[i][obj.id] = obj;
       }
 
-      sink.put(obj);
+      sink && sink.put(obj);
       this.on.put.publish(obj);
-
       return Promise.resolve(obj);
     },
 
     function remove(obj, sink) {
-      sink = sink || this.ArraySink.create();
-
       var buckets = this.items[obj.id];
 
       if (! buckets || ! buckets.length ) {
         var err = this.ObjectNotFoundException.create({ id: obj.id });
-        sink.error(err);
+        sink && sink.error(err);
         return Promise.reject(err);
       } else {
         for (var i = 0; i < buckets.length; ++i) {
@@ -166,7 +180,7 @@ foam.CLASS({
           // TODO: delete empty buckets
         }
         delete this.items[obj.id];
-        sink.remove(obj);
+        sink && sink.remove(obj);
         this.on.remove.publish(obj);
         return Promise.resolve(sink);
       }
@@ -293,7 +307,7 @@ foam.CLASS({
       bounds.y2 = ranges.y2[1];
 
       var duplicates = {};
-      var buckets = this.hashXY_(bounds);
+      var buckets = this.findBuckets_(bounds);
       if ( buckets ) {
         for ( var i = 0; ( i < buckets.length ) && ! fc.stopped; ++i ) {
           for ( var key in buckets[i] ) {
