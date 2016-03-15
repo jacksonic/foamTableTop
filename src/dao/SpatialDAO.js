@@ -43,6 +43,10 @@ foam.CLASS({
   ]
 });
 
+// TODO: implement CONTAINED_BY, INTERSECTS, etc.
+// They should accept a 'space' that also works with the spatial DAOs, to
+// define which properties to use for axes. For mlangs you could set that
+// once on creation, and only specify the range values when querying.
 
 /**
   Spatial hashing DAO
@@ -91,23 +95,25 @@ foam.CLASS({
   ],
 
   methods: [
-    /** A default hash for any object with an x, y, width, height.
+    /** A default hash for any object with an x, y, x2, y2.
       Returns an array of buckets the object should occupy. if createMode is
       true, buckets will be created if not present. */
     function hashXY_(bounds, createMode /* array */) {
       var ret = [];
       var bw = this.bucketWidth;
 
+      var width = bounds.x2 - bounds.x;
+      var height = bounds.y2 - bounds.y;
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
-      if ( bounds.width === Infinity || bounds.height === Infinity ) {
+      if ( width === Infinity || height === Infinity ) {
         return null;
       }
 
       var xOffs = bounds.x - Math.floor( ( bounds.x ) / bw ) * bw;
       var yOffs = bounds.y - Math.floor( ( bounds.y ) / bw ) * bw;
-      for ( var w = 0; w < ( bounds.width+xOffs || 0.000001 ); w += bw ) {
-        for ( var h = 0; h < ( bounds.height+yOffs || 0.000001 ); h += bw ) {
+      for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw ) {
+        for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw ) {
           var key = "x" +
             Math.floor( ( bounds.x + w ) / bw ) * bw + "y" +
             Math.floor( ( bounds.y + h ) / bw ) * bw;
@@ -177,7 +183,7 @@ foam.CLASS({
 
       // TODO: the axis properties will be configurable for any number of axes
       // named whatever you want (as long as they are properties on your model)
-      var axes = { x: true, y: true };
+      var axes = { x: true, y: true, x2: true, y2: true };
       var isIndexed = function(mlangArg) {
         // any old x and y will do
         return !! axes[mlangArg.name];
@@ -221,7 +227,9 @@ foam.CLASS({
       // accumulate range limits so we can make as specific query as possible
       var ranges = {
         x: [-Infinity, Infinity],
-        y: [-Infinity, Infinity]
+        y: [-Infinity, Infinity],
+        x2: [-Infinity, Infinity],
+        y2: [-Infinity, Infinity]
       }
 
       var args;
@@ -230,36 +238,48 @@ foam.CLASS({
       // search bounds.
       // TODO: use compare instead of Math.min, to allow for non-number ranges
       while ( args = isExprMatch(this.Bounded) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
         // accumulate the bounds (largest minimum, smallest maximum)
-        ranges[args.arg1.name][0] = Math.max( ranges[args.arg1.name][0], args.arg2[0] );
-        ranges[args.arg1.name][1] = Math.min( ranges[args.arg1.name][1], args.arg2[1] );
+        ranges[name][0] = Math.max( ranges[name][0], r[0] );
+        ranges[name][1] = Math.min( ranges[name][1], r[1] );
       }
 
       // Equals will completely restrict one axis to a zero-width range (one value)
       while ( args = isExprMatch(this.Eq) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
         // accumulate the bounds (largest minimum, smallest maximum)
-        ranges[args.arg1.name][0] = args.arg2;
-        ranges[args.arg1.name][1] = args.arg2;
+        ranges[name][0] = r;
+        ranges[name][1] = r;
       }
 
       // Less than restricts the maximum for an axis
       while ( args = isExprMatch(this.Lte) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
         // accumulate the bounds(smallest maximum)
-        ranges[args.arg1.name][1] = Math.min( ranges[args.arg1.name][1], args.arg2 );
+        ranges[name][1] = Math.min( ranges[name][1], r );
       }
       while ( args = isExprMatch(this.Lt) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
         // accumulate the bounds(smallest maximum)
-        ranges[args.arg1.name][1] = Math.min( ranges[args.arg1.name][1], args.arg2 );
+        ranges[name][1] = Math.min( ranges[name][1], r );
       }
 
       // Greater than restricts the minimum for an axis
       while ( args = isExprMatch(this.Gte) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
         // accumulate the bounds(smallest maximum)
-        ranges[args.arg1.name][0] = Math.max( ranges[args.arg1.name][0], args.arg2 );
+        ranges[name][0] = Math.max( ranges[name][0], r );
       }
       while ( args = isExprMatch(this.Gt) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
         // accumulate the bounds(smallest maximum)
-        ranges[args.arg1.name][0] = Math.max( ranges[args.arg1.name][0], args.arg2 );
+        ranges[name][0] = Math.max( ranges[name][0], r );
       }
 
       var fc = this.FlowControl.create();
@@ -268,14 +288,18 @@ foam.CLASS({
       // items through the predicatedSink by default.
       var bounds = {};
       bounds.x = ranges.x[0];
-      bounds.y = ranges.y[1];
-      bounds.width = ranges.x[1] - ranges.x[0];
-      bounds.height = ranges.y[1] - ranges.y[0];
+      bounds.y = ranges.y[0];
+      bounds.x2 = ranges.x2[1];
+      bounds.y2 = ranges.y2[1];
 
+      var duplicates = {};
       var buckets = this.hashXY_(bounds);
       if ( buckets ) {
         for ( var i = 0; ( i < buckets.length ) && ! fc.stopped; ++i ) {
           for ( var key in buckets[i] ) {
+            // skip things we've already seen from other buckets
+            if ( duplicates[key] ) { continue; }
+            duplicates[key] = true;
             var obj = buckets[i][key];
             if ( obj.id ) {
               if ( fc.stopped ) break;
