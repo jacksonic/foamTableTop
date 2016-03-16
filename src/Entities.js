@@ -22,20 +22,29 @@ foam.CLASS({
   package: 'tabletop',
   name: 'Entity',
   properties: [
-    { /** World coords */
-      name: 'x'
+    {
+      name: 'id',
+      factory: function() { return this.$UID; }
     },
     { /** World coords */
-      name: 'y'
+      name: 'x',
+      defaultValue: 0,
+    },
+    { /** World coords */
+      name: 'y',
+      defaultValue: 0,
     },
     { /** x velocity, world units/sec */
-      name: 'vx'
+      name: 'vx',
+      defaultValue: 0,
     },
     { /** y velocity, world units/sec */
-      name: 'vy'
+      name: 'vy',
+      defaultValue: 0,
     },
     { /** World relative */
-      name: 'angle'
+      name: 'rotation',
+      defaultValue: 0,
     },
     {
       /** The EntityManager that owns this entity. */
@@ -46,6 +55,14 @@ foam.CLASS({
       name: 'sprite'
     },
   ],
+  // listener for property changes, framed, put back to worldDAO when changed?
+  methods: [
+    function getBounds() {
+      /** Override to calculate the bounding box of this entity, in world coords. */
+      // default to a point
+      return { x: this.x, y: this.y, x2: this.x, y2: this.y };
+    },
+  ]
 });
 
 /**
@@ -64,7 +81,7 @@ foam.CLASS({
       name: 'y'
     },
     { /** Parent sprite relative */
-      name: 'angle'
+      name: 'rotation'
     },
     {
       /** The entity that owns this sprite. */

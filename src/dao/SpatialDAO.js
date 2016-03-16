@@ -43,6 +43,32 @@ foam.CLASS({
   ]
 });
 
+
+/** Binary expression for bounds check of the first argument within the
+ range given by the second argument (an array of [min, max]). */
+foam.CLASS({
+  package: 'foam.mlang.sink',
+  name: 'Map',
+  implements: ['foam.dao.Sink'],
+  properties: [
+    {
+      name: 'f',
+    },
+    {
+      name: 'delegate',
+    }
+  ],
+  methods: [
+    function put(o) {
+      this.delegate.put(this.f(o));
+    },
+    function toString() {
+      return 'MAP('+this.f.toString()+":"+this.delegate.toString()+')';
+    },
+  ]
+});
+
+
 // TODO: implement CONTAINED_BY, INTERSECTS, etc.
 // They should accept a 'space' that also works with the spatial DAOs, to
 // define which properties to use for axes. For mlangs you could set that
@@ -203,7 +229,7 @@ foam.CLASS({
       // TODO: fast bucket lookup for ranges and comparisons to hashed axes
       // in 2d case, x, y: BOUNDED comparisons should be fast
 
-      var query = options.where.clone();
+      var query = options ? options.where.clone() : null;
 
       // TODO: the axis properties will be configurable for any number of axes
       // named whatever you want (as long as they are properties on your model)

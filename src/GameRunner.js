@@ -20,13 +20,23 @@ foam.CLASS({
   name: 'GameRunner',
   requires: [
     'foam.graphics.Canvas',
-    'foam.graphics.Arc',
-    'foam.graphics.Box',
-    'foam.graphics.Circle',
+    'tabletop.TestEntity',
+    'foam.dao.SpatialHashDAO',
     'foam.graphics.CView',
-    'foam.graphics.Gradient'
+    'foam.dao.ArraySink',
+    'tabletop.Entity',
+    'foam.mlang.sink.Map',
+  ],
+  exports: [
+    'worldDAO'
   ],
   properties: [
+    {
+      name: 'worldDAO',
+      factory: function() {
+        return this.SpatialHashDAO.create();
+      }
+    },
     {
       name: 'canvas',
       factory: function() {
@@ -35,21 +45,29 @@ foam.CLASS({
           height: 500,
           id: 'game-runner'
         });
-        c.cview = this.CView.create({
-          children: this.objects
-        });
+        c.cview = this.CView.create();
         return c;
-      }
-    },
-    {
-      name: 'objects',
-      factory: function() {
-        return [];
       }
     },
     {
       name: 'time',
       defaultValue: 0
+    }
+  ],
+  methods: [
+    function init() {
+      // create test entities
+      for (var k = 0; k < 100; ++k) {
+        this.worldDAO.put(this.TestEntity.create({ id: 'test'+k,
+          x: Math.random() * this.canvas.width,
+          y: Math.random() * this.canvas.height,
+        }));
+      }
+
+      // make views
+      var views = this.ArraySink.create();
+      this.worldDAO.select(this.Map.create({ f: this.Entity.SPRITE.f, delegate: views }));
+      this.canvas.cview.children = views.a;
     }
   ],
   listeners: [
@@ -58,6 +76,19 @@ foam.CLASS({
       isFramed: true,
       code: function() {
         this.time = Date.now();
+        //this.canvas.cview.invalidated.publish();
+
+        var self = this;
+        this.worldDAO.select({
+          put: function(o) {
+            o.x += Math.random() * 2 - 1;
+            o.y += Math.random() * 2 - 1;
+            o.rotation += Math.random() * 0.02 - 0.01;
+            self.worldDAO.put(o); // TODO: automate putting back in a framed listener
+          }
+        });
+
+
         this.step();
       }
     }
@@ -65,6 +96,5 @@ foam.CLASS({
 });
 var g = tabletop.GameRunner.create();
 document.body.innerHTML = g.canvas.toHTML();
-g.step();
-
+setInterval(g.step, 16);
 
