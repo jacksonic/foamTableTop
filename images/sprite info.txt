@@ -1,0 +1,3 @@
+enemy: starts at 0,0 and is width 1266 height 1578
+missile: starts at 1419, 0 and is width 522 height 1101
+rift: starts at 0, 2043 and is width 3800 height 1501
