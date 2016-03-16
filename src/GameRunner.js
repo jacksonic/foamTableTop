@@ -92,7 +92,7 @@ foam.CLASS({
             o.x2 = o.x + 1;
             o.y2 = o.y + 1;
             o.rotation += Math.random() * 0.02 - 0.01;
-            //self.worldDAO.put(o); // TODO: automate putting back in a framed listener
+            self.worldDAO.put(o); // TODO: automate putting back in a framed listener
           }
         });
       }
