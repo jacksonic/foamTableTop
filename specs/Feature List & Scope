@@ -1,0 +1,18 @@
+Required features:
+*Turrets: aiming of guns, firing on tap, damage state represented, hitbox for enemy projectiles
+*Sheilds: take hits before turrets, deplete and recharge after a delay, consume energy while charging
+*Energy meter: fills up at a contstant rate, shots and sheilds consume energy, bar flashes when energy is low
+*Projectiles: move at a constant speed on their starting heading, impact and are destroyed on contact with appropriate target, removed if they leave area of play
+*Enemies: spawn in under the rift graphic, spawn in increasing numbers over time, choose a target to attack and navigate towards it, fire once within X distance of and facing directly towards a player turret, hit by mass driver projectiles and velocity/heading affected as in design doc, destroyed after recieving set number of hits, stop firing once rotational velocity hits a certain number (disoriented state), bounce of edges of play area (confined to the screen, cannot leave)
+*Missile: comes into view on screen as points are accumulated, limit of 3, fire by tapping on it, fired out of turret instead of regular projectile (pause regular firing), homes in on closest enemy inside a narrow arc in front of it, moves faster than enemies, creates large explosion on impact and is destroyed, bounces off edges like enemies
+*Rift: animates
+*Instruction Window: displayed at start of new game, may be dragged around and rotated to be readable at any angle, explains basics of game
+*Join button: drawn on top of turret/energy bar, double tapping it joins the game and activates that turret, first join button used starts a countdown to the game beginning and the other buttons must be used in that time or else the player cannot participate (no turret)
+*Score Screen: shown at the end of a game for a set time (show countdown timer to next game), displays each player's score, hightlights the winner, shows other statistics (player with most kills, player with most missile kills, player who took the most hits, player who fired the most shots), make it draggable and rotatable like instructions for optimal viewing.
+
+Nice to have features: (outside of initial scope)
+*Different Modes: set number of waves, sudden death (turrets have 1 HP and cannot be repaired), selectable from a menu during the join game phase
+*Demo: after a set period of inactivity the game plays itself in brief bursts, returns to join screen frequently to ensure players know they can play!
+*Upgrades: in game modes with waves present a menu for each player by their turret between waves, menus collapse and expand to give upgrade options, upgrades are purchased with dollars, dollars are earned alongside points 1:1 but can be spent
+*Different Superweapons: missiles may be upgraded or switched out for different superweapon via upgrades as above, each may have a different point total to "charge up"
+*Bosses: large and tough enemies with special attacks, spawn periodically (every X seconds or every Y waves)
