@@ -57,10 +57,15 @@ foam.CLASS({
   methods: [
     function init() {
       // create test entities
+      var x, y;
       for (var k = 0; k < 100; ++k) {
+        x = Math.random() * this.canvas.width,
+        y = Math.random() * this.canvas.height,
         this.worldDAO.put(this.TestEntity.create({ id: 'test'+k,
-          x: Math.random() * this.canvas.width,
-          y: Math.random() * this.canvas.height,
+          x: x,
+          y: y,
+          x2: x+1,
+          y2: y+1,
         }));
       }
 
@@ -83,13 +88,12 @@ foam.CLASS({
           put: function(o) {
             o.x += Math.random() * 2 - 1;
             o.y += Math.random() * 2 - 1;
+            o.x2 = o.x + 1;
+            o.y2 = o.y + 1;
             o.rotation += Math.random() * 0.02 - 0.01;
             self.worldDAO.put(o); // TODO: automate putting back in a framed listener
           }
         });
-
-
-        this.step();
       }
     }
   ]

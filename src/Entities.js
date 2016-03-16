@@ -34,6 +34,14 @@ foam.CLASS({
       name: 'y',
       defaultValue: 0,
     },
+    { /** World coords */
+      name: 'x2',
+      defaultValue: 0,
+    },
+    { /** World coords */
+      name: 'y2',
+      defaultValue: 0,
+    },
     { /** x velocity, world units/sec */
       name: 'vx',
       defaultValue: 0,
@@ -60,7 +68,7 @@ foam.CLASS({
     function getBounds() {
       /** Override to calculate the bounding box of this entity, in world coords. */
       // default to a point
-      return { x: this.x, y: this.y, x2: this.x, y2: this.y };
+      return { x: this.x, y: this.y, x2: this.x2, y2: this.y2 };
     },
   ]
 });

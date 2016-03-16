@@ -132,7 +132,6 @@ foam.CLASS({
 
     /** Find all the buckets the given bounds overlaps */
     function findBuckets_(bounds, createMode /* array */) {
-      var ret = [];
       var bw = this.bucketWidth;
 
       var width = bounds.x2 - bounds.x;
@@ -143,6 +142,7 @@ foam.CLASS({
         return null;
       }
 
+      var ret;
       // Ensure we catch the last buckets of the range by adding the offset
       // from the first bucket's start to our actual start point (we are
       // incrementing by bucketWidth each time, so the last increment may fall
@@ -156,10 +156,13 @@ foam.CLASS({
           if ( ( ! bucket ) && createMode ) {
             bucket = this.buckets[key] = { _hash_: key };
           }
-          bucket && ret.push(bucket);
+          if ( bucket ) {
+            if ( ! ret ) { ret = []; }
+            ret.push(bucket);
+          }
         }
       }
-      ret.object = bounds;
+      if ( ret ) { ret.object = bounds; }
       return ret;
     },
 
@@ -350,6 +353,7 @@ foam.CLASS({
             // skip things we've already seen from other buckets
             if ( duplicates[key] ) { continue; }
             duplicates[key] = true;
+
             var obj = buckets[i][key];
             if ( obj.id ) {
               if ( fc.stopped ) break;
