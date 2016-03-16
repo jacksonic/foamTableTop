@@ -41,8 +41,8 @@ foam.CLASS({
       name: 'canvas',
       factory: function() {
         var c = this.Canvas.create({
-          width: 500,
-          height: 500,
+          width:  document.body.clientWidth,
+          height: document.body.clientHeight,
           id: 'game-runner'
         });
         c.cview = this.CView.create();
@@ -61,7 +61,8 @@ foam.CLASS({
       for (var k = 0; k < 100; ++k) {
         x = Math.random() * this.canvas.width,
         y = Math.random() * this.canvas.height,
-        this.worldDAO.put(this.TestEntity.create({ id: 'test'+k,
+        this.worldDAO.put(this.TestEntity.create({
+          id: 'test'+k,
           x: x,
           y: y,
           x2: x+1,
@@ -91,7 +92,7 @@ foam.CLASS({
             o.x2 = o.x + 1;
             o.y2 = o.y + 1;
             o.rotation += Math.random() * 0.02 - 0.01;
-            self.worldDAO.put(o); // TODO: automate putting back in a framed listener
+            //self.worldDAO.put(o); // TODO: automate putting back in a framed listener
           }
         });
       }
@@ -100,5 +101,10 @@ foam.CLASS({
 });
 var g = tabletop.GameRunner.create();
 document.body.innerHTML = g.canvas.toHTML();
+window.onresize = function() {
+  g.canvas.width = document.body.clientWidth;
+  g.canvas.height = document.body.clientHeight;
+  g.canvas.element = g.canvas.element;
+};
 setInterval(g.step, 16);
 
