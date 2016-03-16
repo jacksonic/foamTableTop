@@ -39,7 +39,10 @@ function logArraySink(sink) {
     console.log("sink[",i,"]: (", item.id, ")", item.x, item.y, item.width, item.height);
   }
 }
-var sd = foam.dao.SpatialHashDAO.create({ of: ItemXY });
+var sd = foam.dao.SpatialHashDAO.create({
+  of: ItemXY,
+  space: [ ['x', 'x2'], ['y', 'y2']]
+});
 sd.describe();
 var asyncs = [];
 var runAsync = function(fn) { // simple afunc to run select()s one after the other
@@ -64,16 +67,16 @@ var testData = [
 testData.forEach(function(d) { sd.put(d); });
 
 // execute a hash lookup for item 'c'
-logBuckets(sd.findBuckets_({ x:29, y:9, x2:32, y2:12 }));
+logBuckets(sd.findBucketsFn({ x:29, y:9, x2:32, y2:12 }));
 
 // execute a hash lookup for item 'a,b'
-logBuckets(sd.findBuckets_({ x:0, y:0, x2:5, y2:3 }));
+logBuckets(sd.findBucketsFn({ x:0, y:0, x2:5, y2:3 }));
 
 // remove item a
 sd.remove({id:'a'});
 
 // re-execute a hash lookup for item 'a,b'
-logBuckets(sd.findBuckets_({ x:0, y:0, x2:5, y2:3 }));
+logBuckets(sd.findBucketsFn({ x:0, y:0, x2:5, y2:3 }));
 
 // time insertion of the same item with new position
 COUNT = 10000;

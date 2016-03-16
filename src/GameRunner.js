@@ -45,7 +45,7 @@ foam.CLASS({
           height: document.body.clientHeight,
           id: 'game-runner'
         });
-        c.cview = this.CView.create();
+        c.cview = this.CView.create(); // the root cview of the scene
         return c;
       }
     },
@@ -63,10 +63,10 @@ foam.CLASS({
         y = Math.random() * this.canvas.height,
         this.worldDAO.put(this.TestEntity.create({
           id: 'test'+k,
-          x: x,
-          y: y,
-          x2: x+1,
-          y2: y+1,
+          bx: x,
+          by: y,
+          bx2: x+1,
+          by2: y+1,
         }));
       }
 
@@ -82,16 +82,17 @@ foam.CLASS({
       isFramed: true,
       code: function() {
         this.time = Date.now();
-        //this.canvas.cview.invalidated.publish();
 
         var self = this;
         this.worldDAO.select({
           put: function(o) {
-            o.x += Math.random() * 2 - 1;
-            o.y += Math.random() * 2 - 1;
-            o.x2 = o.x + 1;
-            o.y2 = o.y + 1;
-            o.rotation += Math.random() * 0.02 - 0.01;
+            o.bx += Math.random() * 2 - 1;
+            o.by += Math.random() * 2 - 1;
+            o.bx2 = o.bx + 1;
+            o.by2 = o.by + 1;
+            o.x = o.bx;
+            o.y = o.by;
+            o.rotation += Math.random() * 0.2 - 0.1;
             self.worldDAO.put(o); // TODO: automate putting back in a framed listener
           }
         });

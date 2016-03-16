@@ -109,11 +109,46 @@ foam.CLASS({
       factory: function() { return {}; }
     },
     {
-      /** The size of each bucket (effectively divide each coordinate by this
+      /** Swaps to the appropriate findBuckets function depending on the number
+        of dimensions in the space. */
+      name: 'findBucketsFn',
+      factory: function() { return this.findBuckets2_; }
+    },
+    {
+      /**
+        The space contains the names of the properties that define the
+        range on each axis.
+        <p>For example, a simple 2D space might use bx, by, bx2, by2. An item's
+        axis-aligned bounding box would range from bx to bx2 on one axis,
+        and by to by2 on the other.
+        <p>Spaces can have any number of dimensions, so a z, time, level, etc.
+        axis can also be added.
+      */
+      name: 'space',
+      factory: function() {
+        return [
+          [ 'bx', 'bx2' ],
+          [ 'by', 'by2' ]
+        ];
+      },
+      postSet: function(old, nu) {
+        if ( nu.length === 2 ) {
+          this.findBucketsFn = this.findBuckets2_;
+        } else if ( nu.length === 3 ) {
+          this.findBucketsFn = this.findBuckets3_;
+        } else if ( nu.length === 4 ) {
+          this.findBucketsFn = this.findBuckets4_;
+        } else {
+          throw new Error("Unsupported dimensions in SpatialHashDAO: " + nu.length);
+        }
+      }
+    },
+    {
+      /** The size of each bucket, per axis (effectively divide each coordinate by this
         value and round off to get the hash). Changing this value invalidates
-        the existing buckets. */
-      name: 'bucketWidth',
-      defaultValue: 10,
+        the existing buckets. The default is for 10 unit buckets on the x and y axes. */
+      name: 'bucketWidths',
+      factory: function() { return [10, 10]; },
       postSet: function(old, nu) {
         // TODO: removeAll and re-add
       }
@@ -124,18 +159,47 @@ foam.CLASS({
     /** A default hash for any object with an x, y, x2, y2.
       Returns an array of buckets the object should occupy. if createMode is
       true, buckets will be created if not present. */
-    function hashXY_(x, y) {
-      var bw = this.bucketWidth;
-      return "x" + Math.floor( ( x ) / bw ) * bw +
-             "y" + Math.floor( ( y ) / bw ) * bw;
+    function hash2_(x, y) {
+      var bw = this.bucketWidths;
+      return "p" + Math.floor( ( x ) / bw[0] ) * bw[0] +
+             "p" + Math.floor( ( y ) / bw[1] ) * bw[1];
+    },
+    function hash3_(x, y, z) {
+      var bw = this.bucketWidths;
+      return "p" + Math.floor( ( x ) / bw[0] ) * bw[0] +
+             "p" + Math.floor( ( y ) / bw[1] ) * bw[1] +
+             "p" + Math.floor( ( z ) / bw[2] ) * bw[2];
+    },
+    function hash4_(x, y, z, w) {
+      var bw = this.bucketWidths;
+      return "p" + Math.floor( ( x ) / bw[0] ) * bw[0] +
+             "p" + Math.floor( ( y ) / bw[1] ) * bw[1] +
+             "p" + Math.floor( ( z ) / bw[2] ) * bw[2] +
+             "p" + Math.floor( ( w ) / bw[3] ) * bw[3];
+    },
+    /** Calculates the hash for an item, using the minimum bound point by default
+      or the maximum if max is true. In 2D space, the default is to use the
+      top-left corner of the bounding box, max == true uses the bottom-right. */
+    function hash_(/* object */ bounds, /* boolean */ max) {
+      var bw = this.bucketWidths;
+      var s = this.space;
+      var minmax = max ? 1 : 0;
+      var ret = "";
+      for (var axis = 0; axis < s.length; ++axis) {
+        ret += "p" + Math.floor( bounds[s[axis][minmax]] / bw[axis] ) * bw[axis];
+      }
+      return ret;
     },
 
     /** Find all the buckets the given bounds overlaps */
-    function findBuckets_(bounds, createMode /* array */) {
-      var bw = this.bucketWidth;
+    function findBuckets2_(bounds, createMode /* array */) {
+      var bw = this.bucketWidths;
+      var s = this.space;
 
-      var width = bounds.x2 - bounds.x;
-      var height = bounds.y2 - bounds.y;
+      var lowerBx = bounds[s[0][0]];
+      var lowerBy = bounds[s[1][0]];
+      var width = bounds[s[0][1]] - lowerBx;
+      var height = bounds[s[1][1]] - lowerBy;
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
       if ( width === Infinity || height === Infinity ) {
@@ -147,11 +211,11 @@ foam.CLASS({
       // from the first bucket's start to our actual start point (we are
       // incrementing by bucketWidth each time, so the last increment may fall
       // outside the actual bounds and would fail the loop test without the offset)
-      var xOffs = bounds.x - Math.floor( ( bounds.x ) / bw ) * bw;
-      var yOffs = bounds.y - Math.floor( ( bounds.y ) / bw ) * bw;
-      for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw ) {
-        for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw ) {
-          var key = this.hashXY_(bounds.x + w, bounds.y + h);
+      var xOffs = lowerBx - Math.floor( lowerBx / bw[0] ) * bw[0];
+      var yOffs = lowerBy - Math.floor( lowerBy / bw[1] ) * bw[1];
+      for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw[0] ) {
+        for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw[1] ) {
+          var key = this.hash2_(lowerBx + w, lowerBy + h);
           var bucket = this.buckets[key];
           if ( ( ! bucket ) && createMode ) {
             bucket = this.buckets[key] = { _hash_: key };
@@ -166,16 +230,108 @@ foam.CLASS({
       return ret;
     },
 
+    function findBuckets3_(bounds, createMode /* array */) {
+      var bw = this.bucketWidths;
+      var s = this.space;
+
+      var lowerBx = bounds[s[0][0]];
+      var lowerBy = bounds[s[1][0]];
+      var lowerBz = bounds[s[2][0]];
+      var width = bounds[s[0][1]] - lowerBx;
+      var height = bounds[s[1][1]] - lowerBy;
+      var depth = bounds[s[2][1]] - lowerBz;
+      // if infinite area, don't try to filter (not optimal: we might only
+      // want half, but this data structure is not equipped for space partitioning)
+      if ( width === Infinity || height === Infinity || depth == Infinity ) {
+        return null;
+      }
+
+      var ret;
+      // Ensure we catch the last buckets of the range by adding the offset
+      // from the first bucket's start to our actual start point (we are
+      // incrementing by bucketWidth each time, so the last increment may fall
+      // outside the actual bounds and would fail the loop test without the offset)
+      var xOffs = lowerBx - Math.floor( lowerBx / bw[0] ) * bw[0];
+      var yOffs = lowerBy - Math.floor( lowerBy / bw[1] ) * bw[1];
+      var zOffs = lowerBz - Math.floor( lowerBz / bw[2] ) * bw[2];
+      for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw[0] ) {
+        for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw[1] ) {
+          for ( var d = 0; d < ( depth+zOffs || 0.000001 ); d += bw[2] ) {
+            var key = this.hash3_(lowerBx + w, lowerBy + h, lowerBz + d);
+            var bucket = this.buckets[key];
+            if ( ( ! bucket ) && createMode ) {
+              bucket = this.buckets[key] = { _hash_: key };
+            }
+            if ( bucket ) {
+              if ( ! ret ) { ret = []; }
+              ret.push(bucket);
+            }
+          }
+        }
+      }
+      if ( ret ) { ret.object = bounds; }
+      return ret;
+    },
+
+    function findBuckets4_(bounds, createMode /* array */) {
+      var bw = this.bucketWidths;
+      var s = this.space;
+
+      var lowerBx = bounds[s[0][0]];
+      var lowerBy = bounds[s[1][0]];
+      var lowerBz = bounds[s[2][0]];
+      var lowerBw = bounds[s[3][0]];
+      var width = bounds[s[0][1]] - lowerBx;
+      var height = bounds[s[1][1]] - lowerBy;
+      var depth = bounds[s[2][1]] - lowerBz;
+      var wert = bounds[s[3][1]] - lowerBw;
+      // if infinite area, don't try to filter (not optimal: we might only
+      // want half, but this data structure is not equipped for space partitioning)
+      if ( width === Infinity || height === Infinity || depth == Infinity || wert == Infinity ) {
+        return null;
+      }
+
+      var ret;
+      // Ensure we catch the last buckets of the range by adding the offset
+      // from the first bucket's start to our actual start point (we are
+      // incrementing by bucketWidth each time, so the last increment may fall
+      // outside the actual bounds and would fail the loop test without the offset)
+      var xOffs = lowerBx - Math.floor( lowerBx / bw[0] ) * bw[0];
+      var yOffs = lowerBy - Math.floor( lowerBy / bw[1] ) * bw[1];
+      var zOffs = lowerBz - Math.floor( lowerBz / bw[2] ) * bw[2];
+      var wOffs = lowerBw - Math.floor( lowerBw / bw[3] ) * bw[3];
+      for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw[0] ) {
+        for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw[1] ) {
+          for ( var d = 0; d < ( depth+zOffs || 0.000001 ); d += bw[2] ) {
+            for ( var t = 0; t < ( wert+wOffs || 0.000001 ); t += bw[3] ) {
+              var key = this.hash3_(lowerBx + w, lowerBy + h, lowerBz + d, lowerBw + t);
+              var bucket = this.buckets[key];
+              if ( ( ! bucket ) && createMode ) {
+                bucket = this.buckets[key] = { _hash_: key };
+              }
+              if ( bucket ) {
+                if ( ! ret ) { ret = []; }
+                ret.push(bucket);
+              }
+            }
+          }
+        }
+      }
+      if ( ret ) { ret.object = bounds; }
+      return ret;
+    },
+
     function listen(sink, options) {
     },
 
     function put(obj, sink) {
+      var min = this.hash_(obj, false);
+      var max = this.hash_(obj, true);
+
       if ( this.items[obj.id] ) {
         var prev = this.items[obj.id];
         // If the object moved, but the min/max points are in the same buckets
         // as before, none of the buckets need to be altered.
-        var min = this.hashXY_(obj.x, obj.y);
-        var max = this.hashXY_(obj.x2, obj.y2);
         if ( min == prev.min && max == prev.max ) {
           // hashes match, no change in buckets
           sink && sink.put(obj);
@@ -187,9 +343,9 @@ foam.CLASS({
       }
 
       // add to the buckets the item overlaps
-      var buckets = this.findBuckets_(obj, true);
-      buckets.min = this.hashXY_(obj.x, obj.y); // if the object moves, we might
-      buckets.max = this.hashXY_(obj.x2, obj.y2); // not need to alter any buckets
+      var buckets = this.findBucketsFn(obj, true);
+      buckets.min = min;
+      buckets.max = max;
       this.items[obj.id] = buckets; // for fast removal later
       for (var i = 0; i < buckets.length; ++i) {
         buckets[i][obj.id] = obj;
@@ -346,7 +502,7 @@ foam.CLASS({
       bounds.y2 = ranges.y2[1];
 
       var duplicates = {};
-      var buckets = this.findBuckets_(bounds);
+      var buckets = this.findBucketsFn(bounds);
       if ( buckets ) {
         for ( var i = 0; ( i < buckets.length ) && ! fc.stopped; ++i ) {
           for ( var key in buckets[i] ) {
