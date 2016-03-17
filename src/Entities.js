@@ -34,14 +34,11 @@ foam.CLASS({
       name: 'y',
       defaultValue: 0,
     },
-    { /** World coords */
-      name: 'x2',
+    { /** World relative */
+      name: 'rotation',
       defaultValue: 0,
     },
-    { /** World coords */
-      name: 'y2',
-      defaultValue: 0,
-    },
+
     { /** x velocity, world units/sec */
       name: 'vx',
       defaultValue: 0,
@@ -50,9 +47,51 @@ foam.CLASS({
       name: 'vy',
       defaultValue: 0,
     },
-    { /** World relative */
-      name: 'rotation',
+    { /** rotational velocity, radians/sec */
+      name: 'vrotation',
       defaultValue: 0,
+    },
+
+    { /** x acceleration, world units/sec */
+      name: 'ax',
+      defaultValue: 0,
+    },
+    { /** y acceleration, world units/sec */
+      name: 'ay',
+      defaultValue: 0,
+    },
+    { /** rotational acceleration, radians/sec */
+      name: 'arotation',
+      defaultValue: 0,
+    },
+
+    { /** Bounding box size (radius from x,y) */
+      name: 'br',
+      defaultValue: 10
+    },
+    { /** Axis aligned bounding box, World coords */
+      name: 'bx',
+      getter: function() {
+        return this.x - this.br;
+      }
+    },
+    { /** AABB, World coords */
+      name: 'by',
+      getter: function() {
+        return this.y - this.br;
+      }
+    },
+    { /** AABB, World coords */
+      name: 'bx2',
+      getter: function() {
+        return this.x + this.br;
+      }
+    },
+    { /** AABB, World coords */
+      name: 'by2',
+      getter: function() {
+        return this.y + this.br;
+      }
     },
     {
       /** The EntityManager that owns this entity. */
@@ -63,14 +102,7 @@ foam.CLASS({
       name: 'sprite'
     },
   ],
-  // listener for property changes, framed, put back to worldDAO when changed?
-  methods: [
-    function getBounds() {
-      /** Override to calculate the bounding box of this entity, in world coords. */
-      // default to a point
-      return { x: this.x, y: this.y, x2: this.x2, y2: this.y2 };
-    },
-  ]
+
 });
 
 /**

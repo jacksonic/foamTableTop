@@ -61,7 +61,7 @@ foam.CLASS({
     {
       /** This is standing in for buggy direct bindings, though being framed is handy */
       name: 'updateSprite',
-      framed: true,
+      isFramed: true,
       code: function() {
         var s = this.sprite;
         s.x = this.x;

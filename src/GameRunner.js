@@ -26,15 +26,23 @@ foam.CLASS({
     'foam.dao.ArraySink',
     'tabletop.Entity',
     'foam.mlang.sink.Map',
+    'tabletop.Physics',
   ],
   exports: [
-    'worldDAO'
+    'worldDAO',
+    'time',
   ],
   properties: [
     {
       name: 'worldDAO',
       factory: function() {
         return this.SpatialHashDAO.create();
+      }
+    },
+    {
+      name: 'physicsManager',
+      factory: function() {
+        return this.Physics.create();
       }
     },
     {
@@ -65,8 +73,12 @@ foam.CLASS({
           id: 'test'+k,
           x: x,
           y: y,
-          x2: x+1,
-          y2: y+1,
+          br: 10,
+          ax: Math.random() * 0.2 - 0.1,
+          ay: Math.random() * 0.2 - 0.1,
+          arotation: Math.random() * 0.02 - 0.01,
+          vx: Math.random() * 1,
+          vy: Math.random() * 1,
         }));
       }
 
@@ -79,6 +91,8 @@ foam.CLASS({
       document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;
 
       window.onresize = this.windowResize;
+
+      this.physicsManager;
     }
   ],
   listeners: [
@@ -89,17 +103,15 @@ foam.CLASS({
         this.time = Date.now();
         //this.canvas.cview.invalidated.publish();
 
-        var self = this;
-        this.worldDAO.select({
-          put: function(o) {
-            o.x += Math.random() * 2 - 1;
-            o.y += Math.random() * 2 - 1;
-            o.x2 = o.x + 1;
-            o.y2 = o.y + 1;
-            o.rotation += Math.random() * 0.02 - 0.01;
-            self.worldDAO.put(o); // TODO: automate putting back in a framed listener
-          }
-        });
+//         var self = this;
+//         this.worldDAO.select({
+//           put: function(o) {
+//             o.x += Math.random() * 2 - 1;
+//             o.y += Math.random() * 2 - 1;
+//             o.rotation += Math.random() * 0.02 - 0.01;
+//             self.worldDAO.put(o); // TODO: automate putting back in a framed listener
+//           }
+//         });
       }
     },
     {
