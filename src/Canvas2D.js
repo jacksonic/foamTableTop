@@ -31,10 +31,9 @@ foam.CLASS({
   ],
   methods: [
     function paintSelf(x) {
-
-    var hw = 126/4;
-    var hh = 158/4;
-    x.drawImage(this.imageElement,0,0,1266,1578, -hw, -hh, hw, hh);
+      var hw = 126/4;
+      var hh = 158/4;
+      x.drawImage(this.imageElement,0,0,1266,1578, -hw, -hh, hw, hh);
     }
   ]
 });
@@ -61,7 +60,7 @@ foam.CLASS({
     {
       /** This is standing in for buggy direct bindings, though being framed is handy */
       name: 'updateSprite',
-      isFramed: true,
+      //isFramed: true, // ends up taking too much time
       code: function() {
         var s = this.sprite;
         s.x = this.x;
