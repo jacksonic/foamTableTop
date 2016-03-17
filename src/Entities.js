@@ -21,6 +21,13 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'Entity',
+  requires: [
+    'foam.mlang.Expressions',
+  ],
+  imports: [
+    'worldDAO',
+  ],
+
   properties: [
     {
       name: 'id',
@@ -109,6 +116,24 @@ foam.CLASS({
       /** The renderable Sprite for this entity. */
       name: 'sprite'
     },
+
+    {
+      name: 'overlappingEntities',
+      factory: function() {
+        var m = this.Expressions.create();
+        var self = this;
+        var bx =  { f: function() { return self.bx;  } };
+        var by =  { f: function() { return self.by;  } };
+        var bx2 = { f: function() { return self.bx2; } };
+        var by2 = { f: function() { return self.by2; } };
+        // TODO: this should be an intersect mlang
+        // TODO: radius check too
+        return this.worldDAO.get().where(m.AND(
+          m.GTE(this.cls_.BX2, bx), m.LTE(this.cls_.BX, bx2),
+          m.GTE(this.cls_.BY2, by), m.LTE(this.cls_.BY, by2)
+        ));
+      }
+    }
   ],
 
   methods: [
@@ -123,8 +148,44 @@ foam.CLASS({
       this.x += this.vx * ft;
       this.y += this.vy * ft;
       this.rotation += this.vrotation * ft;
-    }
+
+      this.collide();
+    },
   ],
+
+  listeners: [
+    /** Checks for collisions with nearby entities */
+    {
+      name: 'collide',
+      //isMerged: true,
+      //mergeDelay: 500,
+      code: function() {
+        var self = this;
+        // TODO: radius check too
+        this.overlappingEntities.select({
+          put: function(e) {
+            self.collideWith(e)
+          },
+          remove: function() {},
+          error: function() {},
+          eof: function() {},
+        });
+      }
+    },
+    {
+      name: 'collideWith',
+      code: function(e) {
+        if ( this === e ) return;
+        var dx = this.x - e.x, dy = this.y - e.y;
+        var len = Math.sqrt(dx*dx+dy*dy) || 1;
+//if ( len > 40 ) console.log("long length", len, this, e);
+        this.vx = -(dx / len) * (this.br - len);
+        this.vy = -(dy / len) * (this.br - len);
+        e.vx = -this.vx;
+        e.vy = -this.vy;
+      }
+    }
+  ]
 });
 
 /**
@@ -145,10 +206,10 @@ foam.CLASS({
     { /** Parent sprite relative */
       name: 'rotation'
     },
-    {
-      /** The entity that owns this sprite. */
-      name: 'entity'
-    },
+//     {
+//       /** The entity that owns this sprite. */
+//       name: 'entity'
+//     },
     // TODO: image, offset....
   ],
 });

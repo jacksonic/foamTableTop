@@ -202,11 +202,12 @@ foam.CLASS({
       var height = bounds[s[1][1]] - lowerBy;
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
-      if ( width === Infinity || height === Infinity ) {
+      if ( width !== width || height !== height ||
+           width === Infinity || height === Infinity ) {
         return null;
       }
 
-      var ret;
+      var ret = [];
       // Ensure we catch the last buckets of the range by adding the offset
       // from the first bucket's start to our actual start point (we are
       // incrementing by bucketWidth each time, so the last increment may fall
@@ -221,12 +222,11 @@ foam.CLASS({
             bucket = this.buckets[key] = { _hash_: key };
           }
           if ( bucket ) {
-            if ( ! ret ) { ret = []; }
             ret.push(bucket);
           }
         }
       }
-      if ( ret ) { ret.object = bounds; }
+      ret.object = bounds;
       return ret;
     },
 
@@ -242,11 +242,12 @@ foam.CLASS({
       var depth = bounds[s[2][1]] - lowerBz;
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
-      if ( width === Infinity || height === Infinity || depth == Infinity ) {
+      if ( width !== width || height !== height || depth !== depth ||
+           width === Infinity || height === Infinity || depth === Infinity ) {
         return null;
       }
 
-      var ret;
+      var ret = [];
       // Ensure we catch the last buckets of the range by adding the offset
       // from the first bucket's start to our actual start point (we are
       // incrementing by bucketWidth each time, so the last increment may fall
@@ -263,13 +264,12 @@ foam.CLASS({
               bucket = this.buckets[key] = { _hash_: key };
             }
             if ( bucket ) {
-              if ( ! ret ) { ret = []; }
               ret.push(bucket);
             }
           }
         }
       }
-      if ( ret ) { ret.object = bounds; }
+      ret.object = bounds;
       return ret;
     },
 
@@ -287,11 +287,12 @@ foam.CLASS({
       var wert = bounds[s[3][1]] - lowerBw;
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
-      if ( width === Infinity || height === Infinity || depth == Infinity || wert == Infinity ) {
+      if ( width !== width || height !== height || depth !== depth || wert !== wert ||
+          width === Infinity || height === Infinity || depth == Infinity || wert == Infinity ) {
         return null;
       }
 
-      var ret;
+      var ret = [];
       // Ensure we catch the last buckets of the range by adding the offset
       // from the first bucket's start to our actual start point (we are
       // incrementing by bucketWidth each time, so the last increment may fall
@@ -310,14 +311,13 @@ foam.CLASS({
                 bucket = this.buckets[key] = { _hash_: key };
               }
               if ( bucket ) {
-                if ( ! ret ) { ret = []; }
                 ret.push(bucket);
               }
             }
           }
         }
       }
-      if ( ret ) { ret.object = bounds; }
+      ret.object = bounds;
       return ret;
     },
 
@@ -388,17 +388,18 @@ foam.CLASS({
       // TODO: fast bucket lookup for ranges and comparisons to hashed axes
       // in 2d case, x, y: BOUNDED comparisons should be fast
 
-      var query = options ? options.where.clone() : null;
+      var whereQuery = options ? options.where.clone() : null;
 
-      // TODO: the axis properties will be configurable for any number of axes
-      // named whatever you want (as long as they are properties on your model)
-      var axes = { x: true, y: true, x2: true, y2: true };
+      var space = this.space;
       var isIndexed = function(mlangArg) {
-        // any old x and y will do
-        return !! axes[mlangArg.name];
+        var n = mlangArg.name;
+        for (var ax = 0; ax < space.length; ++ax) {
+          if ( space[ax][0] == n || space[ax][1] == n ) {
+            return true;
+          }
+        }
+        return false;
       }
-
-      // TODO: make sure a top level OR is handled
 
       // Actually want to grab all nested bounds and filter buckets based
       // on all of them... the intersection for AND, and the
@@ -406,8 +407,9 @@ foam.CLASS({
       // In the AND/intersection case, we want to know all the bounds together and
       // do the search once, since any unspecified bound will catch lots of
       // buckets.
-      var isExprMatch = function(model) {
+      var isExprMatch = function(model, opt_query) {
         if ( ! model ) return undefined;
+        var query = opt_query || whereQuery;
 
         if ( query ) {
 
@@ -417,11 +419,20 @@ foam.CLASS({
             return arg2;
           }
 
-          if ( foam.mlang.predicate.And.isInstance(query) ) {
+          // in the AND or OR case, cycle through each arg, removing them as they are processed
+          if ( foam.mlang.predicate.And.isInstance(query) ||
+               foam.mlang.predicate.Or.isInstance(query) ) {
             for ( var i = 0 ; i < query.args.length ; i++ ) {
               var q = query.args[i];
+
+              // recurse into nested OR
+              if ( foam.mlang.predicate.Or.isInstance(q) ) {
+                q = isExprMatch(model, q);
+                if ( q ) return q;
+                continue;
+              }
+
               if ( model.isInstance(q) && isIndexed(q.arg1) ) {
-                query = query.clone();
                 query.args[i] = this.True;
                 query = query.partialEval();
                 if ( query === this.True ) query = null;
@@ -434,11 +445,10 @@ foam.CLASS({
       };
 
       // accumulate range limits so we can make as specific query as possible
-      var ranges = {
-        x: [-Infinity, Infinity],
-        y: [-Infinity, Infinity],
-        x2: [-Infinity, Infinity],
-        y2: [-Infinity, Infinity]
+      var ranges = {};
+      for (var ax = 0; ax < space.length; ++ax) {
+        ranges[space[ax][0]] = [Infinity, -Infinity];
+        ranges[space[ax][1]] = [Infinity, -Infinity];
       }
 
       var args;
@@ -467,28 +477,28 @@ foam.CLASS({
       while ( args = isExprMatch(this.Lte) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
-        // accumulate the bounds(smallest maximum)
-        ranges[name][1] = Math.min( ranges[name][1], r );
+        // accumulate the bounds(biggest maximum)
+        ranges[name][1] = Math.max( ranges[name][1], r );
       }
       while ( args = isExprMatch(this.Lt) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
-        // accumulate the bounds(smallest maximum)
-        ranges[name][1] = Math.min( ranges[name][1], r );
+        // accumulate the bounds(biggest maximum)
+        ranges[name][1] = Math.max( ranges[name][1], r );
       }
 
       // Greater than restricts the minimum for an axis
       while ( args = isExprMatch(this.Gte) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
-        // accumulate the bounds(smallest maximum)
-        ranges[name][0] = Math.max( ranges[name][0], r );
+        // accumulate the bounds(smallest minimum)
+        ranges[name][0] = Math.min( ranges[name][0], r );
       }
       while ( args = isExprMatch(this.Gt) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
         // accumulate the bounds(smallest maximum)
-        ranges[name][0] = Math.max( ranges[name][0], r );
+        ranges[name][0] = Math.min( ranges[name][0], r );
       }
 
       var fc = this.FlowControl.create();
@@ -496,10 +506,12 @@ foam.CLASS({
       // if bounds end up infinite, hash will return null, forcing all
       // items through the predicatedSink by default.
       var bounds = {};
-      bounds.x = ranges.x[0];
-      bounds.y = ranges.y[0];
-      bounds.x2 = ranges.x2[1];
-      bounds.y2 = ranges.y2[1];
+      for (var ax = 0; ax < space.length; ++ax) {
+        var a = ranges[space[ax][0]][1];
+        var b = ranges[space[ax][1]][0];
+        bounds[space[ax][0]] = Math.min(a,b);
+        bounds[space[ax][1]] = Math.max(a,b);
+      }
 
       var duplicates = {};
       var buckets = this.findBucketsFn(bounds);
@@ -509,7 +521,6 @@ foam.CLASS({
             // skip things we've already seen from other buckets
             if ( duplicates[key] ) { continue; }
             duplicates[key] = true;
-
             var obj = buckets[i][key];
             if ( obj.id ) {
               if ( fc.stopped ) break;

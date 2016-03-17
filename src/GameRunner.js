@@ -74,7 +74,7 @@ foam.CLASS({
             id: 'test'+k,
             x: x,
             y: y,
-            br: 10,
+            br: 20,
             ax: Math.random() * 0.2 - 0.1,
             ay: Math.random() * 0.2 - 0.1,
             arotation: Math.random() * 0.02 - 0.01,
@@ -84,12 +84,20 @@ foam.CLASS({
         } else {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: x,
-            y: y,
-            br: 10,
+            x: (k%10) * 50,
+            y: Math.floor(k/10) * 50,
+            br: 20,
           }));
         }
       }
+
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'test'+1000,
+        x: 300,
+        y: 300,
+        vy: -10,
+        br: 20,
+      }));
 
 
       // make views
