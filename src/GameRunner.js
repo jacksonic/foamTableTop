@@ -69,7 +69,7 @@ foam.CLASS({
       for (var k = 0; k < 100; ++k) {
         x = Math.random() * this.canvas.width;
         y = Math.random() * this.canvas.height;
-        if (Math.random() > 0.5) {
+        if (Math.random() > 0.2) {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
             x: x,
