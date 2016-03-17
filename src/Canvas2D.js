@@ -27,13 +27,18 @@ foam.CLASS({
       factory: function() {
         return document.getElementById(this.image);
       }
-    }
+    },
+	{
+	  name: 'bitblt',
+	  factory: function() {
+		return spritesheetplot;
+	  }
+	}
   ],
   methods: [
     function paintSelf(x) {
-      var hw = 126/4;
-      var hh = 158/4;
-      x.drawImage(this.imageElement,0,0,1266,1578, -hw, -hh, hw*2, hh*2);
+      var hw = window.innerWidth / 3840;
+      x.drawImage(this.imageElement,this.bitblt[0].left,this.bitblt[0].top,this.bitblt[0].width,this.bitblt[0].height, -this.bitblt[0].width, -this.bitblt[0].height, this.bitblt[0].width*hw, this.bitblt[0].height*hw);
     }
   ]
 });
