@@ -33,7 +33,7 @@ foam.CLASS({
     function paintSelf(x) {
       var hw = 126/4;
       var hh = 158/4;
-      x.drawImage(this.imageElement,0,0,1266,1578, -hw, -hh, hw, hh);
+      x.drawImage(this.imageElement,0,0,1266,1578, -hw, -hh, hw*2, hh*2);
     }
   ]
 });
