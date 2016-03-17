@@ -74,6 +74,11 @@ foam.CLASS({
       var views = this.ArraySink.create();
       this.worldDAO.select(this.Map.create({ f: this.Entity.SPRITE.f, delegate: views }));
       this.canvas.cview.children = views.a;
+
+      // insert canvas
+      document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;
+
+      window.onresize = this.windowResize;
     }
   ],
   listeners: [
@@ -96,15 +101,18 @@ foam.CLASS({
           }
         });
       }
+    },
+    {
+      name: 'windowResize',
+      isFramed: true,
+      code: function() {
+        this.canvas.width = document.body.clientWidth;
+        this.canvas.height = document.body.clientHeight;
+        this.canvas.element = this.canvas.element;
+      }
     }
   ]
 });
 var g = tabletop.GameRunner.create();
-document.body.innerHTML = g.canvas.toHTML() + '<img id="spritesheet" src="img/testspritesheet.png" height="4000px" width="4000px" style="display:none" />';
-window.onresize = function() {
-  g.canvas.width = document.body.clientWidth;
-  g.canvas.height = document.body.clientHeight;
-  g.canvas.element = g.canvas.element;
-};
 setInterval(g.step, 16);
 

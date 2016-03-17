@@ -22,11 +22,19 @@ foam.CLASS({
   implements: ['tabletop.Sprite'],
   properties: [
     [ 'image', 'spritesheet' ],
+    {
+      name: 'imageElement',
+      factory: function() {
+        return document.getElementById(this.image);
+      }
+    }
   ],
   methods: [
     function paintSelf(x) {
-		var img = document.getElementById(this.image);
-		x.drawImage(img,0,0,1266,1578,0,0,126,158);
+
+    var hw = 126/4;
+    var hh = 158/4;
+    x.drawImage(this.imageElement,0,0,1266,1578, -hw, -hh, hw, hh);
     }
   ]
 });
