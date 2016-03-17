@@ -22,7 +22,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'Physics',
   requires: [
-    'foam.mlangs.Expressions as EXPRS',
+    'foam.mlang.Expressions as EXPRS',
     'foam.dao.ArraySink',
   ],
   imports: [
@@ -36,27 +36,15 @@ foam.CLASS({
       /** Queries the world for entities with velocity or acceleration above zero */
       name: 'entitesToMoveDAO',
       factory: function() {
-//         var GT = this.EXPRS.GT;
-//         var OR = this.EXPRS.OR;
-//         var EQ = this.EXPRS.EQ;
-//         var NOT = this.EXPRS.NOT;
-        var HAS = this.EXPRS.HAS;
-//         return this.worldDAO.where(OR(
-//           GT(tabletop.Entity.VX, 0),
-//           GT(tabletop.Entity.VY, 0),
-//           GT(tabletop.Entity.AX, 0),
-//           GT(tabletop.Entity.AY, 0)
-//           GT(tabletop.Entity.AROTATION, 0),
-//           GT(tabletop.Entity.VROTATION, 0)
-//         ));
-        return this.worldDAO.where(OR(
-          HAS(tabletop.Entity.VX),
-          HAS(tabletop.Entity.VY),
-          HAS(tabletop.Entity.AX),
-          HAS(tabletop.Entity.AY),
-          HAS(tabletop.Entity.AROTATION),
-          HAS(tabletop.Entity.VROTATION)
-        ));
+        var m = this.EXPRS.create();
+        return this.worldDAO.get().where(m.NOT(m.AND(
+          m.EQ(tabletop.Entity.VX, 0),
+          m.EQ(tabletop.Entity.VY, 0),
+          m.EQ(tabletop.Entity.AX, 0),
+          m.EQ(tabletop.Entity.AY, 0),
+          m.EQ(tabletop.Entity.AROTATION, 0),
+          m.EQ(tabletop.Entity.VROTATION, 0)
+        )));
       }
     },
     {
@@ -110,7 +98,7 @@ foam.CLASS({
         var entsToMove = this.entitiesToMoveSink;
         entsToMove.a = []; // quick reset
 
-        this.worldDAO.get().select(entsToMove);
+        this.entitesToMoveDAO.select(entsToMove);
 
         // iterate over the results and process their movement
         var e;
