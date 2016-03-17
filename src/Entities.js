@@ -65,6 +65,14 @@ foam.CLASS({
       defaultValue: 0,
     },
 
+    { /** Computed, true if a new moveStep() call is needed */
+      name: 'moveRequired',
+      getter: function() {
+        return !! (this.vx || this.vy || this.vrotation ||
+          this.ax || this.ay || this.arotation);
+      }
+    },
+
     { /** Bounding box size (radius from x,y) */
       name: 'br',
       defaultValue: 10
@@ -103,6 +111,20 @@ foam.CLASS({
     },
   ],
 
+  methods: [
+    /** Applies movement and physics calculations required for a frame. */
+    function moveStep(/* number // seconds since the last frame */ ft) {
+      /** Changes velocity of the given entity. */
+      this.vx += this.ax * ft;
+      this.vy += this.ay * ft;
+      this.vrotation += this.arotation * ft;
+
+      /** Changes position of the given entity. */
+      this.x += this.vx * ft;
+      this.y += this.vy * ft;
+      this.rotation += this.vrotation * ft;
+    }
+  ],
 });
 
 /**
