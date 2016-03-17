@@ -18,12 +18,17 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'TestSprite',
-  extends: 'foam.graphics.Box',
+  extends: 'foam.graphics.CView',
   implements: ['tabletop.Sprite'],
   properties: [
-    [ 'width', 20 ],
-    [ 'height', 10 ],
+    [ 'image', 'spritesheet' ],
   ],
+  methods: [
+    function paintSelf(x) {
+		var img = document.getElementById(this.image);
+		x.drawImage(img,0,0,1266,1578,0,0,126,158);
+    }
+  ]
 });
 
 foam.CLASS({

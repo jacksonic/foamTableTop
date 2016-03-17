@@ -23,10 +23,6 @@ foam.CLASS({
   properties: [
     [ 'image', 'spritesheet' ],
   ],
-  /*methods: [ function selfDraw() {
-	  var img = document.getElementById("spritesheet");
-	  this.drawImage(img,0,0,1266,1578,0,0,126,158);
-  } ]*/
   methods: [
     function paintSelf(x) {
 		var img = document.getElementById(this.image);
