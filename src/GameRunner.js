@@ -66,14 +66,15 @@ foam.CLASS({
     function init() {
       // create test entities
       var x, y;
+      var spacing = 80;
       for (var k = 0; k < 100; ++k) {
-        x = Math.random() * this.canvas.width;
-        y = Math.random() * this.canvas.height;
+//        x = Math.random() * this.canvas.width;
+//        y = Math.random() * this.canvas.height;
         if (Math.random() > 0.8) {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: (k%10) * 60,
-            y: Math.floor(k/10) * 60,
+            x: (k%10) * spacing,
+            y: Math.floor(k/10) * spacing,
             br: 20,
             ax: Math.random() * 10 - 5,
             ay: Math.random() * 10 - 5,
@@ -84,12 +85,49 @@ foam.CLASS({
         } else {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: (k%10) * 60,
-            y: Math.floor(k/10) * 60,
+            x: (k%10) * spacing,
+            y: Math.floor(k/10) * spacing,
             br: 20,
           }));
         }
       }
+
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet',
+        x: 2000,
+        y: 300,
+        br: 20,
+        ax: -20,
+      }));
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet2',
+        x: 4000,
+        y: 500,
+        br: 20,
+        ax: -20,
+      }));
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet3',
+        x: 6000,
+        y: 400,
+        br: 20,
+        ax: -20,
+      }));
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet4',
+        x: 7000,
+        y: 200,
+        br: 20,
+        ax: -20,
+      }));
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet5',
+        x: 8000,
+        y: 300,
+        br: 20,
+        ax: -20,
+      }));
+
 
       // make views
       var views = this.ArraySink.create();
