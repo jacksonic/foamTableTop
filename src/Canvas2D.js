@@ -38,8 +38,13 @@ foam.CLASS({
   methods: [
     function paintSelf(x) {
       var hw = window.innerWidth / 3840 / 2;
-      x.drawImage(this.imageElement,this.bitblt[0].left,this.bitblt[0].top,this.bitblt[0].width,this.bitblt[0].height,
-         -this.bitblt[0].width*hw, -this.bitblt[0].height*hw, this.bitblt[0].width*hw*2, this.bitblt[0].height*hw*2);
+      var imageInfo = this.bitblt[0];
+      x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
+        -(imageInfo.centerX - imageInfo.left) * hw,
+        -(imageInfo.centerY - imageInfo.top) * hw,
+        imageInfo.width*hw*2, 
+        imageInfo.height*hw*2
+      );
     }
   ]
 });
