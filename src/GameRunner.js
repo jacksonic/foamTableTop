@@ -69,36 +69,27 @@ foam.CLASS({
       for (var k = 0; k < 100; ++k) {
         x = Math.random() * this.canvas.width;
         y = Math.random() * this.canvas.height;
-        if (Math.random() > 0.2) {
+        if (Math.random() > 0.8) {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: x,
-            y: y,
+            x: (k%10) * 60,
+            y: Math.floor(k/10) * 60,
             br: 20,
-            ax: Math.random() * 0.2 - 0.1,
-            ay: Math.random() * 0.2 - 0.1,
+            ax: Math.random() * 10 - 5,
+            ay: Math.random() * 10 - 5,
             arotation: Math.random() * 0.02 - 0.01,
-            vx: Math.random() * 1,
-            vy: Math.random() * 1,
+            vx: Math.random() * 10 - 5,
+            vy: Math.random() * 10 - 5,
           }));
         } else {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: (k%10) * 50,
-            y: Math.floor(k/10) * 50,
+            x: (k%10) * 60,
+            y: Math.floor(k/10) * 60,
             br: 20,
           }));
         }
       }
-
-      this.worldDAO.put(this.TestEntity.create({
-        id: 'test'+1000,
-        x: 300,
-        y: 300,
-        vy: -10,
-        br: 20,
-      }));
-
 
       // make views
       var views = this.ArraySink.create();
