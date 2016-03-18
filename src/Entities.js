@@ -23,6 +23,7 @@ foam.CLASS({
   name: 'Entity',
   requires: [
     'foam.mlang.Expressions',
+	'tabletop.Audio',
   ],
   imports: [
     'worldDAO',
@@ -176,6 +177,7 @@ foam.CLASS({
       name: 'collideWith',
       code: function(e) {
         if ( this === e ) return;
+		impact.playInstance();
         var dx = this.x - e.x, dy = this.y - e.y;
         var len = Math.sqrt(dx*dx+dy*dy) || 1;
 //if ( len > 40 ) console.log("long length", len, this, e);
