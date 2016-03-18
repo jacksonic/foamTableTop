@@ -43,7 +43,7 @@ foam.CLASS({
 
   methods: [
     function init() {
-      var sources;
+      var sources = "";
       for (i = 0; i < this.instances; i++) {
         sources = sources + '<audio id="' + this.ident + i + '"><source src="' + this.src + '" type="audio/mpeg"></audio>';
       }
