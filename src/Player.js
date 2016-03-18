@@ -35,8 +35,20 @@ foam.CLASS({
         this.canvas.get().cview.addChild_(s);
         return s;
       }
+    },
+    {
+      name: 'moveRequired',
+      getter: function() { return false; }
     }
   ],
+  
+  methods: [
+    /** Applies movement and physics calculations required for a frame. */
+    function moveStep(/* number // seconds since the last frame */ ft) {
+      // Doesn't move
+    },
+  ],
+  
   listeners: [
     {
       /** This is standing in for buggy direct bindings, though being framed is handy */
@@ -76,6 +88,7 @@ foam.CLASS({
       postSet: function(old,nu) {
         this.main.x = nu[0] ? 1000 - 20 : 20;
         this.main.y = nu[1] ? 700 - 20 : 20;
+        this.main.rotation = Math.PI * ( nu[0] ? 1 : -1 ) * ( nu[1] ? 1/4 : 3/4 );
       }
     }
     
