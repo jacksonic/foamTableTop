@@ -67,37 +67,66 @@ foam.CLASS({
     function init() {
       // create test entities
       var x, y;
+      var spacing = 80;
       for (var k = 0; k < 100; ++k) {
-        x = Math.random() * this.canvas.width;
-        y = Math.random() * this.canvas.height;
-        if (Math.random() > 0.2) {
+//        x = Math.random() * this.canvas.width;
+//        y = Math.random() * this.canvas.height;
+        if (Math.random() > 0.8) {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: x,
-            y: y,
+            x: (k%10) * spacing,
+            y: Math.floor(k/10) * spacing,
             br: 20,
-            ax: Math.random() * 0.2 - 0.1,
-            ay: Math.random() * 0.2 - 0.1,
+            ax: Math.random() * 10 - 5,
+            ay: Math.random() * 10 - 5,
             arotation: Math.random() * 0.02 - 0.01,
-            vx: Math.random() * 1,
-            vy: Math.random() * 1,
+            vx: Math.random() * 10 - 5,
+            vy: Math.random() * 10 - 5,
           }));
         } else {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: (k%10) * 50,
-            y: Math.floor(k/10) * 50,
+            x: (k%10) * spacing,
+            y: Math.floor(k/10) * spacing,
             br: 20,
           }));
         }
       }
 
       this.worldDAO.put(this.TestEntity.create({
-        id: 'test'+1000,
-        x: 300,
+        id: 'testbullet',
+        x: 2000,
         y: 300,
-        vy: -10,
         br: 20,
+        ax: -20,
+      }));
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet2',
+        x: 4000,
+        y: 500,
+        br: 20,
+        ax: -20,
+      }));
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet3',
+        x: 6000,
+        y: 400,
+        br: 20,
+        ax: -20,
+      }));
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet4',
+        x: 7000,
+        y: 200,
+        br: 20,
+        ax: -20,
+      }));
+      this.worldDAO.put(this.TestEntity.create({
+        id: 'testbullet5',
+        x: 8000,
+        y: 300,
+        br: 20,
+        ax: -20,
       }));
 
 

@@ -161,6 +161,8 @@ foam.CLASS({
       //isMerged: true,
       //mergeDelay: 500,
       code: function() {
+        if ( Math.random() > 0.33 ) return; // skip out on random checks to save time
+        
         var self = this;
         // TODO: radius check too
         this.overlappingEntities.select({
@@ -177,14 +179,40 @@ foam.CLASS({
       name: 'collideWith',
       code: function(e) {
         if ( this === e ) return;
-		impact.playInstance();
-        var dx = this.x - e.x, dy = this.y - e.y;
-        var len = Math.sqrt(dx*dx+dy*dy) || 1;
-//if ( len > 40 ) console.log("long length", len, this, e);
-        this.vx = -(dx / len) * (this.br - len);
-        this.vy = -(dy / len) * (this.br - len);
-        e.vx = -this.vx;
-        e.vy = -this.vy;
+        
+        // cheat to only check one of each pair of colliders, only check the one with the smaller X
+        // this is not required for things that collide with only certain classes of other things (bullets)
+        // moveRequired indicates that the other entity will have collision checking done
+        if ( this.x > e.x && e.moveRequired ) return;
+        
+        // position based
+        // var dx = this.x - e.x, dy = this.y - e.y;
+        // var len = Math.sqrt(dx*dx+dy*dy) || 1;
+        //
+        // var nx = -(dx / len) * (this.br - len);
+        // var ny = -(dy / len) * (this.br - len);
+        // this.vx += nx;
+        // this.vy += ny;
+        // e.vx -= nx;
+        // e.vy -= ny;
+        
+        impact.playInstance();
+
+        // position angle
+        var ax = this.x - e.x, ay = this.y - e.y;
+        var len = Math.sqrt(ax*ax+ay*ay) || 1;
+        ax = ax / len; // normal vector for direction between the ents
+        ay = ay / len;
+        
+        // velocity based
+        var dx = (this.vx - e.vx),
+            dy = (this.vy - e.vy);
+        var vlen = (Math.sqrt(dx*dx+dy*dy) || 1) / 2;
+
+        this.vx = (ax * vlen);
+        this.vy = (ay * vlen);
+        e.vy = -ax * vlen;
+        e.vy = -ay * vlen;
       }
     }
   ]
