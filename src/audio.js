@@ -15,6 +15,76 @@
  * limitations under the License.
  */
 
+
+/*foam.CLASS({
+  package: 'tabletop',
+  name: 'AudioHolder',
+  requires: [
+    'tabletop.Audio',
+  ],
+  exports: [
+    'audioLib',
+  ],
+  properties: [
+    {
+      name: 'audioLib',
+      factory: function() {
+        return new Object();
+      }
+    },
+  ],
+  methods: [
+    function init() {
+      this.audioLib.impact = (this.Audio.create({
+        ident: 'impact', 
+        instances: 3, 
+        src: 'assets/impact.mp3', 
+        vol: 0.3,
+      });
+    }
+  ],
+  listeners: [
+});*/
+foam.CLASS({
+  package: 'tabletop',
+  name: 'AudioManager',
+  requires: [
+    'tabletop.Audio',
+    'foam.dao.DAO',
+    'foam.dao.ArraySink',
+    'foam.mlang.sink.Map',
+  ],
+  exports: [
+    'audioDAO',
+  ],
+  properties: [
+    {
+      /** The group of managed sounds */
+      name: 'audioDAO',
+      factory: function() {
+        return this.DAO.create();
+      }
+    }
+  ],
+  methods: [
+    function init() {
+      this.AudioDAO.put(this.Audio.create({
+        ident: 'impact', 
+        instances: 3, 
+        src: 'assets/impact.mp3', 
+        vol: 0.3,
+      }));
+    },
+    function play(soundname, soundorigin) {
+      audioDAO.where(EQ(ident, soundname)).select(
+        function(t) {
+          //optionally do something relating to the origin here
+          t.playInstance();
+        }
+      );
+    },
+  ],
+});
 /**
   Base class for audio players.
 */
@@ -40,10 +110,9 @@ foam.CLASS({
       name: 'vol'
     },
   ],
-
   methods: [
     function init() {
-      var sources;
+      var sources = "";
       for (i = 0; i < this.instances; i++) {
         sources = sources + '<audio id="' + this.ident + i + '"><source src="' + this.src + '" type="audio/mpeg"></audio>';
       }
@@ -62,4 +131,3 @@ foam.CLASS({
     }
   ],
 });
-var impact = tabletop.Audio.create({ident: 'impact', instances: 3, src: 'assets/impact.mp3', vol: 0.3,});

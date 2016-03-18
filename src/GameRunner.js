@@ -27,7 +27,6 @@ foam.CLASS({
     'tabletop.Entity',
     'foam.mlang.sink.Map',
     'tabletop.Physics',
-    'tabletop.Audio',
   ],
   exports: [
     'worldDAO',
@@ -141,6 +140,7 @@ foam.CLASS({
       window.onresize = this.windowResize;
 
       this.physicsManager;
+      
     }
   ],
   listeners: [
