@@ -27,7 +27,7 @@ foam.CLASS({
     'tabletop.Entity',
     'foam.mlang.sink.Map',
     'tabletop.Physics',
-	'tabletop.Audio',
+    'tabletop.Audio',
   ],
   exports: [
     'worldDAO',

@@ -23,7 +23,7 @@ foam.CLASS({
   name: 'Entity',
   requires: [
     'foam.mlang.Expressions',
-	'tabletop.Audio',
+    'tabletop.Audio',
   ],
   imports: [
     'worldDAO',
