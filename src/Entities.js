@@ -160,6 +160,8 @@ foam.CLASS({
       //isMerged: true,
       //mergeDelay: 500,
       code: function() {
+        if ( Math.random() > 0.33 ) return; // skip out on random checks to save time
+        
         var self = this;
         // TODO: radius check too
         this.overlappingEntities.select({
