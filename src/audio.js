@@ -29,36 +29,36 @@ foam.CLASS({
       name: 'instances',
       defaultValue: 4,
     },
-	{ /** current instance */
+    { /** current instance */
       name: 'currentInstance',
       defaultValue: 0,
     },
     { /** source file */
       name: 'src'
     },
-	{ /** playback volume */
+    { /** playback volume */
       name: 'vol'
     },
   ],
 
   methods: [
     function init() {
-		var sources;
-		for (i = 0; i < this.instances; i++) {
-		  sources = sources + '<audio id="' + this.ident + i + '"><source src="' + this.src + '" type="audio/mpeg"></audio>';
-		}
-		document.body.innerHTML = document.body.innerHTML + sources;
-	},
-	function playInstance() {
-		var toBePlayed = document.getElementById(this.ident + this.currentInstance);
-		toBePlayed.pause();
-		toBePlayed.currentTime = 0;
-		toBePlayed.volume = this.vol;
-		toBePlayed.play();
-		this.currentInstance++;
-		if (this.currentInstance === this.instances) {
-			this.currentInstance = 0;
-		}
+      var sources;
+      for (i = 0; i < this.instances; i++) {
+        sources = sources + '<audio id="' + this.ident + i + '"><source src="' + this.src + '" type="audio/mpeg"></audio>';
+      }
+      document.body.innerHTML = document.body.innerHTML + sources;
+    },
+    function playInstance() {
+      var toBePlayed = document.getElementById(this.ident + this.currentInstance);
+      toBePlayed.pause();
+      toBePlayed.currentTime = 0;
+      toBePlayed.volume = this.vol;
+      toBePlayed.play();
+      this.currentInstance++;
+      if (this.currentInstance === this.instances) {
+        this.currentInstance = 0;
+      }
     }
   ],
 });
