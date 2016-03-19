@@ -27,6 +27,7 @@ foam.CLASS({
     'tabletop.Entity',
     'foam.mlang.sink.Map',
     'tabletop.Physics',
+    'tabletop.PlayerManager'
   ],
   exports: [
     'worldDAO',
@@ -178,4 +179,3 @@ foam.CLASS({
 });
 var g = tabletop.GameRunner.create();
 setInterval(g.step, 16);
-
