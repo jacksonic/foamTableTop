@@ -460,8 +460,8 @@ foam.CLASS({
         var name = args.arg1.name;
         var r = args.arg2.f();
         // accumulate the bounds (largest minimum, smallest maximum)
-        ranges[name][0] = Math.max( ranges[name][0], r[0] );
-        ranges[name][1] = Math.min( ranges[name][1], r[1] );
+        ranges[name][0] = Math.min( ranges[name][0], r[0] );
+        ranges[name][1] = Math.max( ranges[name][1], r[1] );
       }
 
       // Equals will completely restrict one axis to a zero-width range (one value)
