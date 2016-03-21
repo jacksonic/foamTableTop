@@ -25,7 +25,7 @@ foam.CLASS({
   ],
   imports: [
     'canvas',
-    'AudioManager',
+    'audioManager',
   ],
   constants: {
     SHOT_COOL_DOWN: 2
