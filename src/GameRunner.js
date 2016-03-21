@@ -14,6 +14,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+  Steps through calculations for each frame
+*/
+foam.CLASS({
+  package: 'tabletop',
+  name: 'FrameStepper',
+  requires: [
+    'foam.mlang.Expressions as EXPRS',
+    'foam.dao.ArraySink',
+  ],
+  imports: [
+    'worldDAO',
+    'time',
+  ],
+
+  properties: [
+    [ 'previousTime', -1 ],
+    {
+      /** Queries the world for entities with velocity or acceleration above zero */
+      name: 'entitesToMoveDAO',
+      factory: function() {
+        var m = this.EXPRS.create();
+        return this.worldDAO.get().where(m.EQ(tabletop.Entity.MOVE_REQUIRED, true));
+      }
+    },
+  ],
+
+  methods: [
+    function init() {
+      this.previousTime = this.time.get();
+      this.time.subscribe(this.runFrame);
+    },
+  ],
+
+  listeners: [
+    {
+      name: 'runFrame',
+      code: function() {
+        // time since last frame computed (in seconds)
+        var ft = Math.min((this.time.get() - this.previousTime) / 1000, 0.1);
+        this.previousTime = this.time.get();
+
+        var sink = {
+          put: function(e) {
+            e.moveStep(ft);
+          },
+          remove: function() {},
+          error: function() {},
+          eof: function() {},
+        };
+        this.entitesToMoveDAO.select(sink);
+      }
+    }
+  ]
+
+});
+
+
 
 foam.CLASS({
   package: 'tabletop',
@@ -26,7 +84,7 @@ foam.CLASS({
     'foam.dao.ArraySink',
     'tabletop.Entity',
     'foam.mlang.sink.Map',
-    'tabletop.Physics',
+    'tabletop.FrameStepper',
     'tabletop.AudioManager',
     'tabletop.PlayerManager',
   ],
@@ -44,9 +102,9 @@ foam.CLASS({
       }
     },
     {
-      name: 'physicsManager',
+      name: 'frameStepper',
       factory: function() {
-        return this.Physics.create();
+        return this.FrameStepper.create();
       }
     },
     {
@@ -163,7 +221,7 @@ foam.CLASS({
 
       window.onresize = this.windowResize;
 
-      this.physicsManager;
+      this.frameStepper;
     }
   ],
   listeners: [

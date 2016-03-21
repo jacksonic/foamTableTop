@@ -18,7 +18,10 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'PlayerEntity',
-  implements: ['tabletop.Entity' ],
+  implements: [
+    'tabletop.Entity',
+    'tabletop.Physics'
+  ],
   requires: [
     'tabletop.TestSprite',
     'tabletop.BulletEntity',
@@ -85,9 +88,8 @@ foam.CLASS({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
-          vx: 400,
-          vy: 400,
         });
+        this.aimTowards({ x: Math.random()*0+450, y: Math.random()*0+300 }, b, 400);
         b.sprite;
         this.worldDAO.get().put(b);
         this.audioManager.get().play("impact", this);

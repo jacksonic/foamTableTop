@@ -15,62 +15,26 @@
  * limitations under the License.
  */
 
-/**
-  Base class for entities. Includes world position, rendering information, etc.
-*/
+/** implement this trait to gain some physics functions */
 foam.CLASS({
   package: 'tabletop',
   name: 'Physics',
-  requires: [
-    'foam.mlang.Expressions as EXPRS',
-    'foam.dao.ArraySink',
-  ],
-  imports: [
-    'worldDAO',
-    'time',
-  ],
-
-  properties: [
-    [ 'previousTime', -1 ],
-    {
-      /** Queries the world for entities with velocity or acceleration above zero */
-      name: 'entitesToMoveDAO',
-      factory: function() {
-        var m = this.EXPRS.create();
-        return this.worldDAO.get().where(m.EQ(tabletop.Entity.MOVE_REQUIRED, true));
-      }
-    },
-  ],
 
   methods: [
-    function init() {
-      this.previousTime = this.time.get();
-      this.time.subscribe(this.runFrame);
+
+    function aimTowards(src, dst, velocity) {
+      var dx = src.x - dst.x;
+      var dy = src.y - dst.y;
+      var theta = Math.atan2(dy,dx);
+      var r     = Math.sqrt(dx*dx+dy*dy);
+      r = r < 0 ? Math.max(-velocity, r) : Math.min(velocity, r);
+
+      dst.vx = r*Math.cos(theta);
+      dst.vy = r*Math.sin(theta);
+      dst.rotation = Math.PI/2 - theta;
     },
+
   ],
 
-  listeners: [
-    {
-      name: 'runFrame',
-      code: function() {
-        // time since last frame computed (in seconds)
-        var ft = Math.min((this.time.get() - this.previousTime) / 1000, 0.1);
-        this.previousTime = this.time.get();
-
-        var self = this;
-//         var c = foam.mlang.sink.Count.create();
-//         this.entitesToMoveDAO.select(c);
-//         console.log("Moving ",c.value);
-        this.entitesToMoveDAO.select({
-          put: function(e) {
-            e.moveStep(ft);
-          },
-          remove: function() {},
-          error: function() {},
-          eof: function() {},
-        });
-      }
-    }
-  ]
-
 });
+
