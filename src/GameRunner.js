@@ -27,12 +27,14 @@ foam.CLASS({
     'tabletop.Entity',
     'foam.mlang.sink.Map',
     'tabletop.Physics',
-    'tabletop.PlayerManager'
+    'tabletop.AudioManager',
+    'tabletop.PlayerManager',
   ],
   exports: [
     'worldDAO',
     'canvas',
     'time',
+    'audioManager',
   ],
   properties: [
     {
@@ -47,6 +49,12 @@ foam.CLASS({
         return this.Physics.create();
       }
     },
+    {
+      name: 'audioManager',
+      factory: function() { 
+        return this.AudioManager.create();
+      }
+    }, 
     {
       name: 'canvas',
     },
@@ -78,7 +86,7 @@ foam.CLASS({
       
       this.players;
       
-//
+
 //       // create test entities
 //       var x, y;
 //       var spacing = 80;
@@ -155,7 +163,6 @@ foam.CLASS({
       window.onresize = this.windowResize;
 
       this.physicsManager;
-      
     }
   ],
   listeners: [
@@ -179,3 +186,4 @@ foam.CLASS({
 });
 var g = tabletop.GameRunner.create();
 setInterval(g.step, 16);
+

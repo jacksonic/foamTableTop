@@ -23,10 +23,10 @@ foam.CLASS({
   name: 'Entity',
   requires: [
     'foam.mlang.Expressions',
-    'tabletop.AudioManager',
   ],
   imports: [
     'worldDAO',
+    'audioManager'
   ],
 
   properties: [
@@ -197,7 +197,7 @@ foam.CLASS({
         // e.vy -= ny;
         
         //play impact sound
-        tabletop.AudioManager.play("impact", this);
+        this.audioManager.get().play("impact", this);
 
         // position angle
         var ax = this.x - e.x, ay = this.y - e.y;

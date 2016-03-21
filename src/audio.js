@@ -48,9 +48,10 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'AudioManager',
+  implements: ['foam.mlang.Expressions'],
   requires: [
     'tabletop.Audio',
-    'foam.dao.DAO',
+    'foam.dao.ArrayDAO',
     'foam.dao.ArraySink',
     'foam.mlang.sink.Map',
   ],
@@ -62,13 +63,13 @@ foam.CLASS({
       /** The group of managed sounds */
       name: 'audioDAO',
       factory: function() {
-        return this.DAO.create();
+        return this.ArrayDAO.create();
       }
     }
   ],
   methods: [
     function init() {
-      this.AudioDAO.put(this.Audio.create({
+      this.audioDAO.put(this.Audio.create({
         ident: 'impact', 
         instances: 3, 
         src: 'assets/impact.mp3', 
@@ -76,12 +77,15 @@ foam.CLASS({
       }));
     },
     function play(soundname, soundorigin) {
-      audioDAO.where(EQ(ident, soundname)).select(
-        function(t) {
+      this.audioDAO.where(this.EQ(this.Audio.IDENT, soundname)).select({
+        put: function(t) {
           //optionally do something relating to the origin here
           t.playInstance();
-        }
-      );
+        },
+        remove: function() {},
+        eof: function() {},
+        error: function() {}
+      });
     },
   ],
 });
