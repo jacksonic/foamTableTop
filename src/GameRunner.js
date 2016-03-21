@@ -40,7 +40,7 @@ foam.CLASS({
     {
       name: 'worldDAO',
       factory: function() {
-        return this.SpatialHashDAO.create();
+        return this.SpatialHashDAO.create({ bucketWidths: [20, 20] });
       }
     },
     {

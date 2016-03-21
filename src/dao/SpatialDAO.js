@@ -196,27 +196,23 @@ foam.CLASS({
       var bw = this.bucketWidths;
       var s = this.space;
 
-      var lowerBx = bounds[s[0][0]];
-      var lowerBy = bounds[s[1][0]];
-      var width = bounds[s[0][1]] - lowerBx;
-      var height = bounds[s[1][1]] - lowerBy;
+      var x = bounds[s[0][0]];
+      var y = bounds[s[1][0]];
+      var x2 = bounds[s[0][1]];
+      var y2 = bounds[s[1][1]];
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
-      if ( width !== width || height !== height ||
-           width === Infinity || height === Infinity ) {
+      if ( x !== x || y !== y || x2 !== x2 || y2 !== y2 ||
+           x === Infinity || y === Infinity || x2 === Infinity || y2 === Infinity
+         ) {
         return null;
       }
 
       var ret = [];
-      // Ensure we catch the last buckets of the range by adding the offset
-      // from the first bucket's start to our actual start point (we are
-      // incrementing by bucketWidth each time, so the last increment may fall
-      // outside the actual bounds and would fail the loop test without the offset)
-      var xOffs = lowerBx - Math.floor( lowerBx / bw[0] ) * bw[0];
-      var yOffs = lowerBy - Math.floor( lowerBy / bw[1] ) * bw[1];
-      for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw[0] ) {
-        for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw[1] ) {
-          var key = this.hash2_(lowerBx + w, lowerBy + h);
+
+      for ( var w = Math.floor( x / bw[0] ) * bw[0]; w <= Math.floor( x2 / bw[0] ) * bw[0]; w += bw[0] ) {
+        for ( var h = Math.floor( y / bw[1] ) * bw[1]; h <= Math.floor( y2 / bw[1] ) * bw[1]; h += bw[1] ) {
+          var key = "p" + w + "p" + h;
           var bucket = this.buckets[key];
           if ( ( ! bucket ) && createMode ) {
             bucket = this.buckets[key] = { _hash_: key };
@@ -248,10 +244,7 @@ foam.CLASS({
       }
 
       var ret = [];
-      // Ensure we catch the last buckets of the range by adding the offset
-      // from the first bucket's start to our actual start point (we are
-      // incrementing by bucketWidth each time, so the last increment may fall
-      // outside the actual bounds and would fail the loop test without the offset)
+      // TODO: refactor as per findBuckets2_
       var xOffs = lowerBx - Math.floor( lowerBx / bw[0] ) * bw[0];
       var yOffs = lowerBy - Math.floor( lowerBy / bw[1] ) * bw[1];
       var zOffs = lowerBz - Math.floor( lowerBz / bw[2] ) * bw[2];
@@ -339,7 +332,7 @@ foam.CLASS({
           return Promise.resolve(obj);
         }
         // otherwise remove the old bucket entries and continue to re-insert
-        this.remove(obj);
+        this.remove_(obj);
       }
 
       // add to the buckets the item overlaps
@@ -357,12 +350,22 @@ foam.CLASS({
     },
 
     function remove(obj, sink) {
-      var buckets = this.items[obj.id];
-
-      if (! buckets || ! buckets.length ) {
+      if ( ! this.remove_(obj) ) {
         var err = this.ObjectNotFoundException.create({ id: obj.id });
         sink && sink.error(err);
         return Promise.reject(err);
+      } else {
+        sink && sink.remove(obj);
+        this.on.remove.publish(obj);
+        return Promise.resolve(sink);
+      }
+    },
+    /** Internal version of remove, without DAO notification. @internal */
+    function remove_(obj) {
+      var buckets = this.items[obj.id];
+
+      if (! buckets || ! buckets.length ) {
+        return false;
       } else {
         for (var i = 0; i < buckets.length; ++i) {
           delete buckets[i][obj.id];
@@ -375,12 +378,9 @@ foam.CLASS({
 //           }
         }
         delete this.items[obj.id];
-        sink && sink.remove(obj);
-        this.on.remove.publish(obj);
-        return Promise.resolve(sink);
+        return true;
       }
     },
-
     function select(sink, options) {
       var resultSink = sink || this.ArraySink.create();
 

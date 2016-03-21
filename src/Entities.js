@@ -35,42 +35,42 @@ foam.CLASS({
       factory: function() { return this.$UID; }
     },
     { /** World coords */
+      class: 'Simple',
       name: 'x',
-      defaultValue: 0,
     },
     { /** World coords */
+      class: 'Simple',
       name: 'y',
-      defaultValue: 0,
     },
     { /** World relative */
+      class: 'Simple',
       name: 'rotation',
-      defaultValue: 0,
     },
 
     { /** x velocity, world units/sec */
+      class: 'Simple',
       name: 'vx',
-      defaultValue: 0,
     },
     { /** y velocity, world units/sec */
+      class: 'Simple',
       name: 'vy',
-      defaultValue: 0,
     },
     { /** rotational velocity, radians/sec */
+      class: 'Simple',
       name: 'vrotation',
-      defaultValue: 0,
     },
 
     { /** x acceleration, world units/sec */
+      class: 'Simple',
       name: 'ax',
-      defaultValue: 0,
     },
     { /** y acceleration, world units/sec */
+      class: 'Simple',
       name: 'ay',
-      defaultValue: 0,
     },
     { /** rotational acceleration, radians/sec */
+      class: 'Simple',
       name: 'arotation',
-      defaultValue: 0,
     },
 
     { /** Computed, true if a new moveStep() call is needed */
@@ -83,7 +83,6 @@ foam.CLASS({
 
     { /** Bounding box size (radius from x,y) */
       name: 'br',
-      defaultValue: 10
     },
     { /** Axis aligned bounding box, World coords */
       name: 'bx',
@@ -138,6 +137,21 @@ foam.CLASS({
   ],
 
   methods: [
+    function init() {
+      this.x = this.x || 0;
+      this.y = this.y || 0;
+      this.rotation = this.rotation || 0;
+      this.vx = this.vx || 0;
+      this.vy = this.vy || 0;
+      this.vrotation = this.vrotation || 0;
+      this.ax = this.ax || 0;
+      this.ay = this.ay || 0;
+      this.arotation = this.arotation || 0;
+
+      this.br = this.br || 10;
+
+    },
+
     /** Applies movement and physics calculations required for a frame. */
     function moveStep(/* number // seconds since the last frame */ ft) {
       /** Changes velocity of the given entity. */
@@ -151,6 +165,9 @@ foam.CLASS({
       this.rotation += this.vrotation * ft;
 
       this.collide();
+
+      this.updateSprite();
+      this.worldDAO.get().put(this);
     },
   ],
 
