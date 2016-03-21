@@ -89,7 +89,7 @@ foam.CLASS({
           y: this.y,
           rotation: this.rotation,
         });
-        this.aimTowards({ x: Math.random()*0+450, y: Math.random()*0+300 }, b, 400);
+        this.aimTowards({ x: Math.random()*100+450, y: Math.random()*100+300 }, b, 400);
         b.sprite;
         this.worldDAO.get().put(b);
         this.audioManager.get().play("impact", this);
