@@ -146,34 +146,33 @@ foam.CLASS({
       this.players;
 
 
-//       // create test entities
-//       var x, y;
-//       var spacing = 80;
-//       for (var k = 0; k < 10; ++k) {
-// //        x = Math.random() * this.canvas.width;
-// //        y = Math.random() * this.canvas.height;
-//         if (Math.random() > 0.8) {
-//           this.worldDAO.put(this.TestEntity.create({
-//             id: 'test'+k,
-//             x: (k%10) * spacing,
-//             y: Math.floor(k/10) * spacing,
-//             br: 20,
-//             ax: Math.random() * 10 - 5,
-//             ay: Math.random() * 10 - 5,
-//             arotation: Math.random() * 0.02 - 0.01,
-//             vx: Math.random() * 10 - 5,
-//             vy: Math.random() * 10 - 5,
-//           }));
-//         } else {
-//           this.worldDAO.put(this.TestEntity.create({
-//             id: 'test'+k,
-//             x: (k%10) * spacing,
-//             y: Math.floor(k/10) * spacing,
-//             br: 20,
-//           }));
-//         }
-//       }
-//
+      // create test entities
+      var x, y;
+      var spacing = 80;
+      for (var k = 0; k < 100; ++k) {
+//        x = Math.random() * this.canvas.width;
+//        y = Math.random() * this.canvas.height;
+        if (Math.random() > 0.8) {
+          this.worldDAO.put(this.TestEntity.create({
+            id: 'test'+k,
+            x: (k%10) * spacing + 200,
+            y: Math.floor(k/10) * spacing + 100,
+            br: 20,
+            ax: Math.random() * 10 - 5,
+            ay: Math.random() * 10 - 5,
+            arotation: Math.random() * 0.02 - 0.01,
+            vx: Math.random() * 10 - 5,
+            vy: Math.random() * 10 - 5,
+          }));
+        } else {
+          this.worldDAO.put(this.TestEntity.create({
+            id: 'test'+k,
+            x: (k%10) * spacing,
+            y: Math.floor(k/10) * spacing,
+            br: 20,
+          }));
+        }
+      }
 //       this.worldDAO.put(this.TestEntity.create({
 //         id: 'testbullet',
 //         x: 2000,
@@ -211,10 +210,10 @@ foam.CLASS({
 //       }));
 //
 //
-//       // make views
-//       var views = this.ArraySink.create();
-//       this.worldDAO.select(this.Map.create({ f: this.Entity.SPRITE.f, delegate: views }));
-//       this.canvas.cview.children = views.a;
+      // make views
+      var views = this.ArraySink.create();
+      this.worldDAO.select(this.Map.create({ f: this.Entity.SPRITE.f, delegate: views }));
+      this.canvas.cview.children = views.a;
 
       // insert canvas
       document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;

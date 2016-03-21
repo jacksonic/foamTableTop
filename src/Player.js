@@ -143,10 +143,10 @@ foam.CLASS({
   ],
 
   listeners: [
-    {
-      name: 'collide',
-      code: function() {},
-    },
+//     {
+//       name: 'collide',
+//       code: function() {},
+//     },
     {
       /** This is standing in for buggy direct bindings */
       name: 'updateSprite',
