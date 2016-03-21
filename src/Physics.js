@@ -57,12 +57,13 @@ foam.CLASS({
         var ft = Math.min((this.time.get() - this.previousTime) / 1000, 0.1);
         this.previousTime = this.time.get();
 
-        var wdao = this.worldDAO.get();
         var self = this;
+//         var c = foam.mlang.sink.Count.create();
+//         this.entitesToMoveDAO.select(c);
+//         console.log("Moving ",c.value);
         this.entitesToMoveDAO.select({
           put: function(e) {
             e.moveStep(ft);
-            wdao.put(e);
           },
           remove: function() {},
           error: function() {},

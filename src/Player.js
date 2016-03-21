@@ -28,20 +28,20 @@ foam.CLASS({
     'AudioManager',
   ],
   constants: {
-    SHOT_COOL_DOWN: 2
+    SHOT_COOL_DOWN: 0.1
   },
   properties: [
     {
       name: 'sprite',
       factory: function() {
-        this.propertyChange.subscribe(this.updateSprite);
+        //this.propertyChange.subscribe(this.updateSprite);
         var s = this.TestSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation
         });
         this.canvas.get().cview.children.push(s);
-        this.canvas.get().cview.addChild_(s);
+        //this.canvas.get().cview.addChild_(s);
         return s;
       }
     },
@@ -55,6 +55,8 @@ foam.CLASS({
   methods: [
     /** Applies movement and physics calculations required for a frame. */
     function moveStep(/* number // seconds since the last frame */ ft) {
+      this.updateSprite();
+
       // Doesn't move
       this.coolDown -= ft;
       if ( this.coolDown < 0 ) {
@@ -93,6 +95,70 @@ foam.CLASS({
     }
   ]
 });
+
+
+foam.CLASS({
+  package: 'tabletop',
+  name: 'BulletEntity',
+  implements: ['tabletop.Entity' ],
+  requires: [ 'tabletop.TestSprite' ],
+  imports: ['canvas'],
+  properties: [
+    [ 'br', 3 ],
+    {
+      name: 'sprite',
+      factory: function() {
+        this.propertyChange.subscribe(this.updateSprite);
+        var s = this.TestSprite.create({
+          x: this.x,
+          y: this.y,
+          rotation: this.rotation,
+          imageIndex: 2,
+        });
+        this.canvas.get().cview.children.push(s);
+        //this.canvas.get().cview.addChild_(s);
+        return s;
+      }
+    }
+  ],
+
+  methods: [
+    /** Also check for out of bounds and destroy self */
+    function moveStep(/* number // seconds since the last frame */ ft) {
+      this.SUPER(ft);
+
+      if ( this.x > 1100 || this.y > 800 || this.x < -100 || this.y < -100 ) {
+        this.worldDAO.get().remove(this);
+
+        var childs = this.canvas.get().cview.children;
+        var idx = childs.indexOf(this.sprite);
+        if ( idx >= 0 ) { childs.splice(idx, 1); }
+        //this.canvas.get().cview.removeChild_(this.sprite);
+
+        //this.propertyChange.unsubscribe(this.updateSprite);
+      }
+    },
+  ],
+
+  listeners: [
+    {
+      name: 'collide',
+      code: function() {},
+    },
+    {
+      /** This is standing in for buggy direct bindings */
+      name: 'updateSprite',
+      //isFramed: true, // ends up taking too much time
+      code: function() {
+        var s = this.sprite;
+        s.x = this.x;
+        s.y = this.y;
+        s.rotation = this.rotation;
+      }
+    }
+  ]
+});
+
 
 
 foam.CLASS({
