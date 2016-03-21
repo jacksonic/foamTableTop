@@ -143,10 +143,41 @@ foam.CLASS({
   ],
 
   listeners: [
-//     {
-//       name: 'collide',
-//       code: function() {},
-//     },
+    {
+      name: 'collideWith',
+      code: function(e) {
+        if ( this === e ) return;
+
+        // don't collide with other bullets
+        if ( this.cls_.isInstance(e) ) return;
+
+        // cheat to only check one of each pair of colliders, only check the one with the smaller X
+        // this is not required for things that collide with only certain classes of other things (bullets)
+        // moveRequired indicates that the other entity will have collision checking done
+        if ( this.x > e.x && e.moveRequired ) return;
+
+        //TODO: hurt e
+
+        //play impact sound
+        this.audioManager.get().play("impact", this);
+
+        // position angle
+        var ax = this.x - e.x, ay = this.y - e.y;
+        var len = Math.sqrt(ax*ax+ay*ay) || 1;
+        ax = ax / len; // normal vector for direction between the ents
+        ay = ay / len;
+
+        // velocity based
+        var dx = (this.vx - e.vx),
+            dy = (this.vy - e.vy);
+        var vlen = (Math.sqrt(dx*dx+dy*dy) || 1) / 2;
+
+        this.x = 9999999; // remove self
+
+        e.vy = -ax * vlen;
+        e.vy = -ay * vlen;
+      }
+    },
     {
       /** This is standing in for buggy direct bindings */
       name: 'updateSprite',
