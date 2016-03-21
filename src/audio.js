@@ -74,6 +74,7 @@ foam.CLASS({
         instances: 3, 
         src: 'assets/impact.mp3', 
         vol: 0.3,
+        cooldown: 75,
       }));
     },
     function play(soundname, soundorigin) {
@@ -108,29 +109,40 @@ foam.CLASS({
       defaultValue: 0,
     },
     { /** source file */
-      name: 'src'
+      name: 'src',
     },
     { /** playback volume */
-      name: 'vol'
+      name: 'vol',
+      defaultValue: 0.5,
+    },
+    { /** cooldown between plays of the sound */
+      name: 'cooldown',
+      defaultValue: 100,
+    },
+    { /** time the sound was last played */
+      name: 'lastplayed',
     },
   ],
   methods: [
-    function init() {
+    function init() { /** adds the required number of audio sources to the HTML */
       var sources = "";
       for (i = 0; i < this.instances; i++) {
         sources = sources + '<audio id="' + this.ident + i + '"><source src="' + this.src + '" type="audio/mpeg"></audio>';
       }
       document.body.innerHTML = document.body.innerHTML + sources;
     },
-    function playInstance() {
-      var toBePlayed = document.getElementById(this.ident + this.currentInstance);
-      toBePlayed.pause();
-      toBePlayed.currentTime = 0;
-      toBePlayed.volume = this.vol;
-      toBePlayed.play();
-      this.currentInstance++;
-      if (this.currentInstance === this.instances) {
-        this.currentInstance = 0;
+    function playInstance() { /** reset the next instance in order and play it, if the sound is off cooldown */
+      if (this.lastplayed + cooldown < Date.now()) {
+        var toBePlayed = document.getElementById(this.ident + this.currentInstance);
+        toBePlayed.pause();
+        toBePlayed.currentTime = 0;
+        toBePlayed.volume = this.vol;
+        toBePlayed.play();
+        this.currentInstance++;
+        if (this.currentInstance === this.instances) {
+          this.currentInstance = 0;
+        }
+        this.lastplayed = Date.now();
       }
     }
   ],
