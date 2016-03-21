@@ -121,6 +121,7 @@ foam.CLASS({
     },
     { /** time the sound was last played */
       name: 'lastplayed',
+      defaultValue: 0,
     },
   ],
   methods: [
@@ -132,7 +133,7 @@ foam.CLASS({
       document.body.innerHTML = document.body.innerHTML + sources;
     },
     function playInstance() { /** reset the next instance in order and play it, if the sound is off cooldown */
-      if (this.lastplayed + cooldown < Date.now()) {
+      if (this.lastplayed + this.cooldown < Date.now()) {
         var toBePlayed = document.getElementById(this.ident + this.currentInstance);
         toBePlayed.pause();
         toBePlayed.currentTime = 0;

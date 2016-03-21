@@ -24,7 +24,8 @@ foam.CLASS({
     'tabletop.BulletEntity',
   ],
   imports: [
-    'canvas'
+    'canvas',
+    'AudioManager',
   ],
   constants: {
     SHOT_COOL_DOWN: 2
@@ -87,6 +88,7 @@ foam.CLASS({
         });
         b.sprite;
         this.worldDAO.get().put(b);
+        this.audioManager.get().play("impact", this);
       }
     }
   ]
