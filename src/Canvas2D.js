@@ -54,6 +54,9 @@ foam.CLASS({
   name: 'TestEntity',
   implements: ['tabletop.Entity' ],
   requires: [ 'tabletop.TestSprite' ],
+  imports: [
+    'canvas'
+  ],
   properties: [
     {
       name: 'sprite',
@@ -68,7 +71,25 @@ foam.CLASS({
       }
     }
   ],
+  methods: [
+    /** Also check for out of bounds and destroy self */
+    function moveStep(/* number // seconds since the last frame */ ft) {
+      this.SUPER(ft);
+
+      if ( this.x > 1100 || this.y > 800 || this.x < -100 || this.y < -100 ) {
+        this.worldDAO.get().remove(this);
+
+        var childs = this.canvas.get().cview.children;
+        var idx = childs.indexOf(this.sprite);
+        if ( idx >= 0 ) { childs.splice(idx, 1); }
+        //this.canvas.get().cview.removeChild_(this.sprite);
+
+        //this.propertyChange.unsubscribe(this.updateSprite);
+      }
+    },
+  ],
   listeners: [
+
     {
       /** This is standing in for buggy direct bindings */
       name: 'updateSprite',
