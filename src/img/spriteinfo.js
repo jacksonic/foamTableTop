@@ -1,4 +1,4 @@
-var spritesheetplot = [{
+spritesheetplot = [{
 "name" : "enemy",
 "left" : 0,
 "top" : 0,
@@ -71,8 +71,8 @@ var spritesheetplot = [{
 "centerY" : 158
 },
 {
-	"name" : "explosion",
-	"sequence" : 
+  "name" : "explosion",
+  "sequence" :
 [{
 "name" : "explosion0",
 "left" : 1372,

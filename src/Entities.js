@@ -162,7 +162,7 @@ foam.CLASS({
       //mergeDelay: 500,
       code: function() {
         if ( Math.random() > 0.33 ) return; // skip out on random checks to save time
-        
+
         var self = this;
         // TODO: radius check too
         this.overlappingEntities.select({
@@ -179,12 +179,12 @@ foam.CLASS({
       name: 'collideWith',
       code: function(e) {
         if ( this === e ) return;
-        
+
         // cheat to only check one of each pair of colliders, only check the one with the smaller X
         // this is not required for things that collide with only certain classes of other things (bullets)
         // moveRequired indicates that the other entity will have collision checking done
         if ( this.x > e.x && e.moveRequired ) return;
-        
+
         // position based
         // var dx = this.x - e.x, dy = this.y - e.y;
         // var len = Math.sqrt(dx*dx+dy*dy) || 1;
@@ -195,7 +195,7 @@ foam.CLASS({
         // this.vy += ny;
         // e.vx -= nx;
         // e.vy -= ny;
-        
+
         //play impact sound
         this.audioManager.get().play("impact", this);
 
@@ -204,7 +204,7 @@ foam.CLASS({
         var len = Math.sqrt(ax*ax+ay*ay) || 1;
         ax = ax / len; // normal vector for direction between the ents
         ay = ay / len;
-        
+
         // velocity based
         var dx = (this.vx - e.vx),
             dy = (this.vy - e.vy);

@@ -51,10 +51,10 @@ foam.CLASS({
     },
     {
       name: 'audioManager',
-      factory: function() { 
+      factory: function() {
         return this.AudioManager.create();
       }
-    }, 
+    },
     {
       name: 'canvas',
     },
@@ -83,9 +83,10 @@ foam.CLASS({
         id: 'game-runner'
       }, foam.X);
       this.canvas.cview = this.CView.create();
-      
+      this.time$.subscribe(this.canvas.paint);
+
       this.players;
-      
+
 
 //       // create test entities
 //       var x, y;

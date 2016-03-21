@@ -370,9 +370,9 @@ foam.CLASS({
           // check for empty bucket
           // TODO: maybe batch this on the next frame to avoid churn when removing
           // and re-adding immediately
-          if ( Object.keys( buckets[i] ).length == 1 ) {
-            delete this.buckets[buckets[i]._hash_];
-          }
+//           if ( Object.keys( buckets[i] ).length == 1 ) {
+//             delete this.buckets[buckets[i]._hash_];
+//           }
         }
         delete this.items[obj.id];
         sink && sink.remove(obj);

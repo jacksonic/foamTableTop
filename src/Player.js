@@ -19,8 +19,16 @@ foam.CLASS({
   package: 'tabletop',
   name: 'PlayerEntity',
   implements: ['tabletop.Entity' ],
-  requires: [ 'tabletop.TestSprite' ],
-  imports: ['canvas'],
+  requires: [
+    'tabletop.TestSprite',
+    'tabletop.BulletEntity',
+  ],
+  imports: [
+    'canvas'
+  ],
+  constants: {
+    SHOT_COOL_DOWN: 2
+  },
   properties: [
     {
       name: 'sprite',
@@ -38,17 +46,23 @@ foam.CLASS({
     },
     {
       name: 'moveRequired',
-      getter: function() { return false; }
-    }
+      getter: function() { return true; }
+    },
+    [ 'coolDown', 2 ],
   ],
-  
+
   methods: [
     /** Applies movement and physics calculations required for a frame. */
     function moveStep(/* number // seconds since the last frame */ ft) {
       // Doesn't move
+      this.coolDown -= ft;
+      if ( this.coolDown < 0 ) {
+        this.coolDown = this.SHOT_COOL_DOWN;
+        this.shoot();
+      }
     },
   ],
-  
+
   listeners: [
     {
       /** This is standing in for buggy direct bindings, though being framed is handy */
@@ -59,6 +73,20 @@ foam.CLASS({
         s.x = this.x;
         s.y = this.y;
         s.rotation = this.rotation;
+      }
+    },
+    {
+      name: 'shoot',
+      code: function() {
+        var b = this.BulletEntity.create({
+          x: this.x,
+          y: this.y,
+          rotation: this.rotation,
+          vx: 400,
+          vy: 400,
+        });
+        b.sprite;
+        this.worldDAO.get().put(b);
       }
     }
   ]
@@ -80,7 +108,7 @@ foam.CLASS({
       name: 'main',
       factory: function() {
         return this.PlayerEntity.create();
-      }  
+      }
     },
     {
       name: 'corner',
@@ -91,7 +119,7 @@ foam.CLASS({
         this.main.rotation = Math.PI * ( nu[0] ? 1 : -1 ) * ( nu[1] ? 1/4 : 3/4 );
       }
     }
-    
+
   ],
   methods: [
     function init() {
@@ -99,6 +127,5 @@ foam.CLASS({
       this.corner = this.corner;
       this.main.sprite;
     }
-  ],  
+  ],
 });
-   
