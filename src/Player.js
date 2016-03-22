@@ -53,6 +53,10 @@ foam.CLASS({
       getter: function() { return true; }
     },
     [ 'coolDown', 1 ],
+    {
+      name: 'bulletPool',
+      factory: function() { return []; }
+    },
   ],
 
   methods: [
@@ -67,6 +71,22 @@ foam.CLASS({
         this.shoot();
       }
     },
+    function returnToPool(e) {
+      this.bulletPool.push(e);
+      e.x = 9999999;
+      this.worldDAO.get().remove(e);
+    },
+    function grabFromPool(args) {
+      if (this.bulletPool.length) {
+        var b = this.bulletPool.splice(-1, 1)[0];
+        for (var key in args) {
+          b[key] = args[key];
+        }
+        return b;
+      } else {
+        return this.BulletEntity.create(args);
+      }
+    }
   ],
 
   listeners: [
@@ -84,11 +104,12 @@ foam.CLASS({
     {
       name: 'shoot',
       code: function() {
-        var b = this.BulletEntity.create({
-          x: this.x,
-          y: this.y,
-          rotation: this.rotation,
-        });
+        var b = this.grabFromPool({
+            x: this.x,
+            y: this.y,
+            rotation: this.rotation,
+            manager: this,
+          });
         this.aimTowards({ x: Math.random()*200+400, y: Math.random()*200+250 }, b, 400);
         b.sprite;
         this.worldDAO.get().put(b);
@@ -130,7 +151,8 @@ foam.CLASS({
       this.SUPER(ft);
 
       if ( this.x > 1100 || this.y > 800 || this.x < -100 || this.y < -100 ) {
-        this.destroy();
+        //this.destroy();
+        this.manager.returnToPool(this);
       }
     },
   ],

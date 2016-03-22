@@ -218,7 +218,9 @@ foam.CLASS({
       name: 'step',
       isFramed: true,
       code: function() {
-        this.time = Date.now();
+        var t = Date.now();
+        //if ( ( t - this.time ) < 32 ) return;
+        this.time = t;
       }
     },
     {
