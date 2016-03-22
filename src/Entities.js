@@ -129,7 +129,10 @@ foam.CLASS({
 //           m.GTE(this.cls_.BX2, bx), m.LTE(this.cls_.BX, bx2),
 //           m.GTE(this.cls_.BY2, by), m.LTE(this.cls_.BY, by2)
 //         ));
-        return this.worldDAO.get().where(m.INTERSECTS(this.worldDAO.get().space, this));
+        return this.worldDAO.get().where(m.INTERSECTS(
+          this.worldDAO.get().space,
+          m.BY_REF(this)
+        ));
       }
     }
   ],

@@ -90,15 +90,31 @@ foam.CLASS({
   ]
 });
 
+/** Creates a constant reference to a value that will not be copied. The live
+  value will be used each time the predicate is evaluated. */
+foam.CLASS({
+  package: 'foam.mlang.predicate',
+  name: 'ByRefConstant',
+  extends: 'foam.mlang.predicate.Constant',
+  methods: [
+    function clone() {
+      return this.cls_.create({ value: this.value });
+    }
+  ]
+});
+
 foam.CLASS({
   refines: 'foam.mlang.Expressions',
   requires: [
     'foam.mlang.predicate.Intersects',
     'foam.mlang.predicate.ContainedBy',
+    'foam.mlang.predicate.ByRefConstant',
   ],
   methods: [
     function INTERSECTS(space, o) { return this._binary_("Intersects", space, o); },
     function CONTAINED_BY(space, o) { return this._binary_("ContainedBy", space, o); },
+    function BY_REF(o) { return this.ByRefConstant.create({ value: o }); },
+    function BY_VAL(o) { return this.Constant.create({ value: ( o && o.f && o.f() ) || o }); },
   ],
 });
 
