@@ -304,6 +304,49 @@ foam.CLASS({
       return ret;
     },
 
+    function findBuckets3_(bounds, createMode /* array */) {
+      var bw = this.bucketWidths;
+      var s = this.space;
+
+      var x =  s[0][0].f(bounds);
+      var y =  s[1][0].f(bounds);
+      var z =  s[2][0].f(bounds);
+      var x2 = s[0][1].f(bounds);
+      var y2 = s[1][1].f(bounds);
+      var z2 = s[2][1].f(bounds);
+      // if infinite area, don't try to filter (not optimal: we might only
+      // want half, but this data structure is not equipped for space partitioning)
+      if ( x !== x || y !== y || z !== z || x2 !== x2 || y2 !== y2 || z2 !== z2 ||
+           x === Infinity || y === Infinity || z === Infinity || x2 === Infinity || y2 === Infinity || z2 === Infinity ||
+           x === -Infinity || y === -Infinity || z === -Infinity || x2 === -Infinity || y2 === -Infinity ||  z2 === -Infinity
+         ) {
+        return null;
+      }
+
+      var ret = [];
+
+      for ( var w = Math.floor( x / bw[0] ) * bw[0]; w <= Math.floor( x2 / bw[0] ) * bw[0]; w += bw[0] ) {
+        for ( var h = Math.floor( y / bw[1] ) * bw[1]; h <= Math.floor( y2 / bw[1] ) * bw[1]; h += bw[1] ) {
+          for ( var d = Math.floor( z / bw[2] ) * bw[2]; d <= Math.floor( z2 / bw[2] ) * bw[2]; d += bw[2] ) {
+            var key = "p" + w + "p" + h + "p" + d;
+            var bucket = this.buckets[key];
+            if ( ( ! bucket ) && createMode ) {
+              bucket = this.buckets[key] = { _hash_: key };
+            }
+            if ( bucket ) {
+              ret.push(bucket);
+            }
+          }
+        }
+      }
+      ret.object = bounds;
+      return ret;
+    },
+
+    function findBuckets4_(bounds, createMode /* array */) {
+      throw new Error("SpatialHashDAO.findBuckets3_() not implemented!");
+    },
+
     function listen(sink, options) {
     },
 

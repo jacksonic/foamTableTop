@@ -174,7 +174,7 @@ foam.CLASS({
 
         this.x = 9999999; // remove self
 
-        e.vy = -ax * vlen;
+        e.vx = -ax * vlen;
         e.vy = -ay * vlen;
       }
     },
