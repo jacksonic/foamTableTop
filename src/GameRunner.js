@@ -149,7 +149,7 @@ foam.CLASS({
       // create test entities
       var x, y;
       var spacing = 80;
-      for (var k = 0; k < 100; ++k) {
+      for (var k = 0; k < 20; ++k) {
 //        x = Math.random() * this.canvas.width;
 //        y = Math.random() * this.canvas.height;
         if (Math.random() > 0.8) {

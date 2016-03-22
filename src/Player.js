@@ -31,7 +31,7 @@ foam.CLASS({
     'audioManager',
   ],
   constants: {
-    SHOT_COOL_DOWN: 0.1
+    SHOT_COOL_DOWN: 0.2
   },
   properties: [
     {
@@ -52,7 +52,7 @@ foam.CLASS({
       name: 'moveRequired',
       getter: function() { return true; }
     },
-    [ 'coolDown', 2 ],
+    [ 'coolDown', 1 ],
   ],
 
   methods: [
@@ -130,14 +130,7 @@ foam.CLASS({
       this.SUPER(ft);
 
       if ( this.x > 1100 || this.y > 800 || this.x < -100 || this.y < -100 ) {
-        this.worldDAO.get().remove(this);
-
-        var childs = this.canvas.get().cview.children;
-        var idx = childs.indexOf(this.sprite);
-        if ( idx >= 0 ) { childs.splice(idx, 1); }
-        //this.canvas.get().cview.removeChild_(this.sprite);
-
-        //this.propertyChange.unsubscribe(this.updateSprite);
+        this.destroy();
       }
     },
   ],
@@ -154,7 +147,7 @@ foam.CLASS({
         // cheat to only check one of each pair of colliders, only check the one with the smaller X
         // this is not required for things that collide with only certain classes of other things (bullets)
         // moveRequired indicates that the other entity will have collision checking done
-        if ( this.x > e.x && e.moveRequired ) return;
+        //if ( this.x > e.x && e.moveRequired ) return;
 
         //TODO: hurt e
 

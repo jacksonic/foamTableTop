@@ -26,7 +26,8 @@ foam.CLASS({
   ],
   imports: [
     'worldDAO',
-    'audioManager'
+    'audioManager',
+    'canvas',
   ],
 
   properties: [
@@ -170,6 +171,17 @@ foam.CLASS({
       this.updateSprite();
       this.worldDAO.get().put(this);
     },
+
+    function destroy() {
+      this.worldDAO.get().remove(this);
+
+      var childs = this.canvas.get().cview.children;
+      var idx = childs.indexOf(this.sprite);
+      if ( idx >= 0 ) { childs.splice(idx, 1); }
+      //this.canvas.get().cview.removeChild_(this.sprite);
+
+      //this.propertyChange.unsubscribe(this.updateSprite);
+    }
   ],
 
   listeners: [
@@ -230,7 +242,7 @@ foam.CLASS({
 
         this.vx = (ax * vlen);
         this.vy = (ay * vlen);
-        e.vy = -ax * vlen;
+        e.vx = -ax * vlen;
         e.vy = -ay * vlen;
       }
     }

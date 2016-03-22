@@ -77,14 +77,11 @@ foam.CLASS({
       this.SUPER(ft);
 
       if ( this.x > 1100 || this.y > 800 || this.x < -100 || this.y < -100 ) {
-        this.worldDAO.get().remove(this);
-
-        var childs = this.canvas.get().cview.children;
-        var idx = childs.indexOf(this.sprite);
-        if ( idx >= 0 ) { childs.splice(idx, 1); }
-        //this.canvas.get().cview.removeChild_(this.sprite);
-
-        //this.propertyChange.unsubscribe(this.updateSprite);
+        //this.destroy();
+        this.x = 500;
+        this.y = 350;
+        this.vx = 0;
+        this.vy = 0;
       }
     },
   ],
