@@ -15,30 +15,37 @@
  * limitations under the License.
  */
 
-
-/** Binary expression for bounds check of the first argument within the
- range given by the second argument (an array of [min, max]). */
+/** Tests intersection with the given object. */
 foam.CLASS({
   package: 'foam.mlang.predicate',
-  name: 'Bounded',
-  extends: 'foam.mlang.predicate.Binary',
+  name: 'Intersects',
+  extends: 'foam.mlang.predicate.Unary',
   properties: [
     {
-      name: 'arg2',
-      adapt: function(old,nu) {
-        if ( Array.isArray(nu) ) {
-          return foam.mlang.predicate.Constant.create({ value: nu });
-        } else {
-          return nu;
-        }
-      }
-    }
+      /** The set of properties that define a bounding box for each axis. */
+      name: 'space',
+      factory: function() {
+        /** Default to 2D bounding box */
+        return [
+          [ { f: function(o) { return o['bx']; }, name: 'bx' }, 
+            { f: function(o) { return o['bx2']; }, name: 'bx2' } ],
+          [ { f: function(o) { return o['by']; }, name: 'by' }, 
+            { f: function(o) { return o['by2']; }, name: 'by2' } ]
+        ];
+      },
+    },
   ],
   methods: [
     function f(o) {
-      return !!
-        ( foam.util.compare(this.arg1.f(o), this.arg2.f(o)[0]) >= 0 ) &&
-        ( foam.util.compare(this.arg1.f(o), this.arg2.f(o)[1]) <= 0 );
+      for (var axis = 0; axis < this.space.length; ++axis) {
+        if (
+          ( space[axis][0].f(o) > space[axis][0].f(this.arg.f(o)) ) ||
+          ( space[axis][1].f(o) < space[axis][1].f(this.arg.f(o)) )
+        ) {
+          return false;
+        }
+      }
+      return true;
     }
   ]
 });
@@ -90,6 +97,7 @@ foam.CLASS({
     'foam.dao.ArraySink',
     'foam.mlang.predicate.True',
     'foam.mlang.predicate.Bounded',
+    'foam.mlang.predicate.Intersects',
     'foam.mlang.predicate.Eq',
     'foam.mlang.predicate.Lt',
     'foam.mlang.predicate.Gt',
@@ -127,8 +135,10 @@ foam.CLASS({
       name: 'space',
       factory: function() {
         return [
-          [ 'bx', 'bx2' ],
-          [ 'by', 'by2' ]
+          [ { f: function(o) { return o['bx']; }, name: 'bx' }, 
+            { f: function(o) { return o['bx2']; }, name: 'bx2' } ],
+          [ { f: function(o) { return o['by']; }, name: 'by' }, 
+            { f: function(o) { return o['by2']; }, name: 'by2' } ]
         ];
       },
       postSet: function(old, nu) {
@@ -186,7 +196,7 @@ foam.CLASS({
       var minmax = max ? 1 : 0;
       var ret = "";
       for (var axis = 0; axis < s.length; ++axis) {
-        ret += "p" + Math.floor( bounds[s[axis][minmax]] / bw[axis] ) * bw[axis];
+        ret += "p" + Math.floor( s[axis][minmax].f(bounds) / bw[axis] ) * bw[axis];
       }
       return ret;
     },
@@ -196,10 +206,10 @@ foam.CLASS({
       var bw = this.bucketWidths;
       var s = this.space;
 
-      var x = bounds[s[0][0]];
-      var y = bounds[s[1][0]];
-      var x2 = bounds[s[0][1]];
-      var y2 = bounds[s[1][1]];
+      var x =  s[0][0].f(bounds);
+      var y =  s[1][0].f(bounds);
+      var x2 = s[0][1].f(bounds);
+      var y2 = s[1][1].f(bounds);
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
       if ( x !== x || y !== y || x2 !== x2 || y2 !== y2 ||
@@ -219,94 +229,6 @@ foam.CLASS({
           }
           if ( bucket ) {
             ret.push(bucket);
-          }
-        }
-      }
-      ret.object = bounds;
-      return ret;
-    },
-
-    function findBuckets3_(bounds, createMode /* array */) {
-      var bw = this.bucketWidths;
-      var s = this.space;
-
-      var lowerBx = bounds[s[0][0]];
-      var lowerBy = bounds[s[1][0]];
-      var lowerBz = bounds[s[2][0]];
-      var width = bounds[s[0][1]] - lowerBx;
-      var height = bounds[s[1][1]] - lowerBy;
-      var depth = bounds[s[2][1]] - lowerBz;
-      // if infinite area, don't try to filter (not optimal: we might only
-      // want half, but this data structure is not equipped for space partitioning)
-      if ( width !== width || height !== height || depth !== depth ||
-           width === Infinity || height === Infinity || depth === Infinity ) {
-        return null;
-      }
-
-      var ret = [];
-      // TODO: refactor as per findBuckets2_
-      var xOffs = lowerBx - Math.floor( lowerBx / bw[0] ) * bw[0];
-      var yOffs = lowerBy - Math.floor( lowerBy / bw[1] ) * bw[1];
-      var zOffs = lowerBz - Math.floor( lowerBz / bw[2] ) * bw[2];
-      for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw[0] ) {
-        for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw[1] ) {
-          for ( var d = 0; d < ( depth+zOffs || 0.000001 ); d += bw[2] ) {
-            var key = this.hash3_(lowerBx + w, lowerBy + h, lowerBz + d);
-            var bucket = this.buckets[key];
-            if ( ( ! bucket ) && createMode ) {
-              bucket = this.buckets[key] = { _hash_: key };
-            }
-            if ( bucket ) {
-              ret.push(bucket);
-            }
-          }
-        }
-      }
-      ret.object = bounds;
-      return ret;
-    },
-
-    function findBuckets4_(bounds, createMode /* array */) {
-      var bw = this.bucketWidths;
-      var s = this.space;
-
-      var lowerBx = bounds[s[0][0]];
-      var lowerBy = bounds[s[1][0]];
-      var lowerBz = bounds[s[2][0]];
-      var lowerBw = bounds[s[3][0]];
-      var width = bounds[s[0][1]] - lowerBx;
-      var height = bounds[s[1][1]] - lowerBy;
-      var depth = bounds[s[2][1]] - lowerBz;
-      var wert = bounds[s[3][1]] - lowerBw;
-      // if infinite area, don't try to filter (not optimal: we might only
-      // want half, but this data structure is not equipped for space partitioning)
-      if ( width !== width || height !== height || depth !== depth || wert !== wert ||
-          width === Infinity || height === Infinity || depth == Infinity || wert == Infinity ) {
-        return null;
-      }
-
-      var ret = [];
-      // Ensure we catch the last buckets of the range by adding the offset
-      // from the first bucket's start to our actual start point (we are
-      // incrementing by bucketWidth each time, so the last increment may fall
-      // outside the actual bounds and would fail the loop test without the offset)
-      var xOffs = lowerBx - Math.floor( lowerBx / bw[0] ) * bw[0];
-      var yOffs = lowerBy - Math.floor( lowerBy / bw[1] ) * bw[1];
-      var zOffs = lowerBz - Math.floor( lowerBz / bw[2] ) * bw[2];
-      var wOffs = lowerBw - Math.floor( lowerBw / bw[3] ) * bw[3];
-      for ( var w = 0; w < ( width+xOffs || 0.000001 ); w += bw[0] ) {
-        for ( var h = 0; h < ( height+yOffs || 0.000001 ); h += bw[1] ) {
-          for ( var d = 0; d < ( depth+zOffs || 0.000001 ); d += bw[2] ) {
-            for ( var t = 0; t < ( wert+wOffs || 0.000001 ); t += bw[3] ) {
-              var key = this.hash3_(lowerBx + w, lowerBy + h, lowerBz + d, lowerBw + t);
-              var bucket = this.buckets[key];
-              if ( ( ! bucket ) && createMode ) {
-                bucket = this.buckets[key] = { _hash_: key };
-              }
-              if ( bucket ) {
-                ret.push(bucket);
-              }
-            }
           }
         }
       }
@@ -394,7 +316,7 @@ foam.CLASS({
       var isIndexed = function(mlangArg) {
         var n = mlangArg.name;
         for (var ax = 0; ax < space.length; ++ax) {
-          if ( space[ax][0] == n || space[ax][1] == n ) {
+          if ( space[ax][0].name == n || space[ax][1].name == n ) {
             return true;
           }
         }
@@ -418,8 +340,7 @@ foam.CLASS({
             query = undefined;
             return arg2;
           }
-
-          // in the AND or OR case, cycle through each arg, removing them as they are processed
+          
           if ( foam.mlang.predicate.And.isInstance(query) ||
                foam.mlang.predicate.Or.isInstance(query) ) {
             for ( var i = 0 ; i < query.args.length ; i++ ) {
@@ -447,8 +368,8 @@ foam.CLASS({
       // accumulate range limits so we can make as specific query as possible
       var ranges = {};
       for (var ax = 0; ax < space.length; ++ax) {
-        ranges[space[ax][0]] = [Infinity, -Infinity];
-        ranges[space[ax][1]] = [Infinity, -Infinity];
+        ranges[space[ax][0].name] = Infinity;
+        ranges[space[ax][1].name] = -Infinity;
       }
 
       var args;
@@ -456,21 +377,13 @@ foam.CLASS({
       // level. Since all these bounds apply at once, keep shrinking the
       // search bounds.
       // TODO: use compare instead of Math.min, to allow for non-number ranges
-      while ( args = isExprMatch(this.Bounded) ) {
-        var name = args.arg1.name;
-        var r = args.arg2.f();
-        // accumulate the bounds (largest minimum, smallest maximum)
-        ranges[name][0] = Math.min( ranges[name][0], r[0] );
-        ranges[name][1] = Math.max( ranges[name][1], r[1] );
-      }
 
       // Equals will completely restrict one axis to a zero-width range (one value)
       while ( args = isExprMatch(this.Eq) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
         // accumulate the bounds (largest minimum, smallest maximum)
-        ranges[name][0] = r;
-        ranges[name][1] = r;
+        ranges[name] = r;
       }
 
       // Less than restricts the maximum for an axis
@@ -478,13 +391,13 @@ foam.CLASS({
         var name = args.arg1.name;
         var r = args.arg2.f();
         // accumulate the bounds(biggest maximum)
-        ranges[name][1] = Math.max( ranges[name][1], r );
+        ranges[name] = Math.max( ranges[name], r );
       }
       while ( args = isExprMatch(this.Lt) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
         // accumulate the bounds(biggest maximum)
-        ranges[name][1] = Math.max( ranges[name][1], r );
+        ranges[name] = Math.max( ranges[name], r );
       }
 
       // Greater than restricts the minimum for an axis
@@ -492,13 +405,13 @@ foam.CLASS({
         var name = args.arg1.name;
         var r = args.arg2.f();
         // accumulate the bounds(smallest minimum)
-        ranges[name][0] = Math.min( ranges[name][0], r );
+        ranges[name] = Math.min( ranges[name], r );
       }
       while ( args = isExprMatch(this.Gt) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
         // accumulate the bounds(smallest maximum)
-        ranges[name][0] = Math.min( ranges[name][0], r );
+        ranges[name] = Math.min( ranges[name], r );
       }
 
       var fc = this.FlowControl.create();
@@ -507,14 +420,23 @@ foam.CLASS({
       // items through the predicatedSink by default.
       var bounds = {};
       for (var ax = 0; ax < space.length; ++ax) {
-        var a = ranges[space[ax][0]][1];
-        var b = ranges[space[ax][1]][0];
-        bounds[space[ax][0]] = Math.min(a,b);
-        bounds[space[ax][1]] = Math.max(a,b);
+        var a = ranges[space[ax][0].name];
+        var b = ranges[space[ax][1].name];
+        bounds[space[ax][0].name] = Math.min(a,b);
+        bounds[space[ax][1].name] = Math.max(a,b);
+      }
+
+      // check for buckets with the bounds found so far
+      var buckets = this.findBucketsFn(bounds);
+
+      // TODO: multiple ANDed intersects should reduce the search area,
+      // ORed should cause multiple searches
+      while ( args = isExprMatch(this.Intersects) ) {
+        if ( ! buckets ) { buckets = []; }
+        buckets = buckets.concat(this.findBucketsFn(args.arg.f()));
       }
 
       var duplicates = {};
-      var buckets = this.findBucketsFn(bounds);
       if ( buckets ) {
         for ( var i = 0; ( i < buckets.length ) && ! fc.stopped; ++i ) {
           for ( var key in buckets[i] ) {
