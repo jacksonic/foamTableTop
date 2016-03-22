@@ -58,8 +58,8 @@ foam.CLASS({
       var s = this.arg1.f(o);
       for (var axis = 0; axis < s.length; ++axis) {
         if (
-          ( s[axis][0].f(o) > s[axis][0].f(this.arg2.f(o)) ) ||
-          ( s[axis][1].f(o) < s[axis][1].f(this.arg2.f(o)) )
+          ( s[axis][0].f(o) > s[axis][1].f(this.arg2.f(o)) ) ||
+          ( s[axis][1].f(o) < s[axis][0].f(this.arg2.f(o)) )
         ) {
           return false;
         }

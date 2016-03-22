@@ -76,12 +76,40 @@ foam.CLASS({
     function moveStep(/* number // seconds since the last frame */ ft) {
       this.SUPER(ft);
 
-      if ( this.x > 1100 || this.y > 800 || this.x < -100 || this.y < -100 ) {
+      if ( this.x > 1101 || this.y > 801 || this.x < -101 || this.y < -101 ) {
         //this.destroy();
-        this.x = 500;
-        this.y = 350;
         this.vx = 0;
         this.vy = 0;
+        switch (Math.floor(Math.random() * 4)) {
+        case 0:
+          this.x = -100;
+          this.y = 350 + Math.random() * 50;
+          this.ax = 40 + Math.random()*50;
+          this.ay = 0;
+          this.rotation = Math.PI*1.5;
+          break;
+        case 1:
+          this.x = 1100;
+          this.y = 350 + Math.random() * 50;
+          this.ax = -(40 + Math.random()*50);
+          this.ay = 0;
+          this.rotation = Math.PI*0.5;
+          break;
+        case 2:
+          this.y = -80;
+          this.x = 500 + Math.random() * 50;
+          this.ax = 0;
+          this.ay = 40 + Math.random()*50;
+          this.rotation = Math.PI;
+          break;
+        case 3:
+          this.y = 800;
+          this.x = 500 + Math.random() * 50;
+          this.ax = 0;
+          this.ay = -(40 + Math.random()*50);
+          this.rotation = 0;
+          break;
+        };
       }
     },
   ],

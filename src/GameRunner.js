@@ -152,26 +152,16 @@ foam.CLASS({
       for (var k = 0; k < 20; ++k) {
 //        x = Math.random() * this.canvas.width;
 //        y = Math.random() * this.canvas.height;
-        if (Math.random() > 0.8) {
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: (k%10) * spacing + 200,
-            y: Math.floor(k/10) * spacing + 100,
-            br: 20,
-            ax: Math.random() * 10 - 5,
-            ay: Math.random() * 10 - 5,
-            arotation: Math.random() * 0.02 - 0.01,
+            x: (k%10) * spacing + 100,
+            y: Math.floor(k/10) * spacing + 200,
+            br: 10,
+//            ax: Math.random() * 20 - 10,
+//            ay: Math.random() * 20 - 10,
             vx: Math.random() * 10 - 5,
             vy: Math.random() * 10 - 5,
           }));
-        } else {
-          this.worldDAO.put(this.TestEntity.create({
-            id: 'test'+k,
-            x: (k%10) * spacing,
-            y: Math.floor(k/10) * spacing,
-            br: 20,
-          }));
-        }
       }
 //       this.worldDAO.put(this.TestEntity.create({
 //         id: 'testbullet',

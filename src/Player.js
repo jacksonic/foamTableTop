@@ -31,7 +31,7 @@ foam.CLASS({
     'audioManager',
   ],
   constants: {
-    SHOT_COOL_DOWN: 0.2
+    SHOT_COOL_DOWN: 0.3
   },
   properties: [
     {
@@ -142,7 +142,7 @@ foam.CLASS({
         if ( this === e ) return;
 
         // don't collide with other bullets
-        if ( this.cls_.isInstance(e) ) return;
+        if ( this.cls_.isInstance(e) || tabletop.PlayerEntity.isInstance(e) ) return;
 
         // cheat to only check one of each pair of colliders, only check the one with the smaller X
         // this is not required for things that collide with only certain classes of other things (bullets)
