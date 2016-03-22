@@ -19,28 +19,47 @@
 foam.CLASS({
   package: 'foam.mlang.predicate',
   name: 'Intersects',
-  extends: 'foam.mlang.predicate.Unary',
+  extends: 'foam.mlang.predicate.Binary',
+  requires: [
+    'foam.mlang.predicate.Constant',
+  ],
   properties: [
     {
       /** The set of properties that define a bounding box for each axis. */
-      name: 'space',
+      name: 'arg1',
+      adapt: function(old,nu) {
+        if ( Array.isArray( nu ) ) {
+          return this.Constant.create({ value: nu });
+        }
+        return nu;
+      },
       factory: function() {
         /** Default to 2D bounding box */
         return [
-          [ { f: function(o) { return o['bx']; }, name: 'bx' }, 
+          [ { f: function(o) { return o['bx']; }, name: 'bx' },
             { f: function(o) { return o['bx2']; }, name: 'bx2' } ],
-          [ { f: function(o) { return o['by']; }, name: 'by' }, 
+          [ { f: function(o) { return o['by']; }, name: 'by' },
             { f: function(o) { return o['by2']; }, name: 'by2' } ]
         ];
       },
     },
+    {
+      name: 'arg2',
+      adapt: function(old,nu) {
+        if ( ! nu.f || typeof nu.f !== 'function' ) {
+          return this.Constant.create({ value: nu });
+        }
+        return nu;
+      }
+    },
   ],
   methods: [
     function f(o) {
-      for (var axis = 0; axis < this.space.length; ++axis) {
+      var s = this.arg1.f(o);
+      for (var axis = 0; axis < s.length; ++axis) {
         if (
-          ( space[axis][0].f(o) > space[axis][0].f(this.arg.f(o)) ) ||
-          ( space[axis][1].f(o) < space[axis][1].f(this.arg.f(o)) )
+          ( s[axis][0].f(o) > s[axis][0].f(this.arg2.f(o)) ) ||
+          ( s[axis][1].f(o) < s[axis][1].f(this.arg2.f(o)) )
         ) {
           return false;
         }
@@ -50,6 +69,38 @@ foam.CLASS({
   ]
 });
 
+/** Tests containment within the given object. */
+foam.CLASS({
+  package: 'foam.mlang.predicate',
+  name: 'ContainedBy',
+  extends: 'foam.mlang.predicate.Intersects',
+  methods: [
+    function f(o) {
+      var s = this.arg1.f(o);
+      for (var axis = 0; axis < s.length; ++axis) {
+        if (
+          ( s[axis][0].f(o) < s[axis][0].f(this.arg2.f(o)) ) ||
+          ( s[axis][1].f(o) > s[axis][1].f(this.arg2.f(o)) )
+        ) {
+          return false;
+        }
+      }
+      return true;
+    }
+  ]
+});
+
+foam.CLASS({
+  refines: 'foam.mlang.Expressions',
+  requires: [
+    'foam.mlang.predicate.Intersects',
+    'foam.mlang.predicate.ContainedBy',
+  ],
+  methods: [
+    function INTERSECTS(space, o) { return this._binary_("Intersects", space, o); },
+    function CONTAINED_BY(space, o) { return this._binary_("ContainedBy", space, o); },
+  ],
+});
 
 /** Binary expression for bounds check of the first argument within the
  range given by the second argument (an array of [min, max]). */
@@ -96,8 +147,8 @@ foam.CLASS({
   requires: [
     'foam.dao.ArraySink',
     'foam.mlang.predicate.True',
-    'foam.mlang.predicate.Bounded',
     'foam.mlang.predicate.Intersects',
+    'foam.mlang.predicate.ContainedBy',
     'foam.mlang.predicate.Eq',
     'foam.mlang.predicate.Lt',
     'foam.mlang.predicate.Gt',
@@ -135,9 +186,9 @@ foam.CLASS({
       name: 'space',
       factory: function() {
         return [
-          [ { f: function(o) { return o['bx']; }, name: 'bx' }, 
+          [ { f: function(o) { return o['bx']; }, name: 'bx' },
             { f: function(o) { return o['bx2']; }, name: 'bx2' } ],
-          [ { f: function(o) { return o['by']; }, name: 'by' }, 
+          [ { f: function(o) { return o['by']; }, name: 'by' },
             { f: function(o) { return o['by2']; }, name: 'by2' } ]
         ];
       },
@@ -213,7 +264,8 @@ foam.CLASS({
       // if infinite area, don't try to filter (not optimal: we might only
       // want half, but this data structure is not equipped for space partitioning)
       if ( x !== x || y !== y || x2 !== x2 || y2 !== y2 ||
-           x === Infinity || y === Infinity || x2 === Infinity || y2 === Infinity
+           x === Infinity || y === Infinity || x2 === Infinity || y2 === Infinity ||
+           x === -Infinity || y === -Infinity || x2 === -Infinity || y2 === -Infinity
          ) {
         return null;
       }
@@ -315,6 +367,8 @@ foam.CLASS({
       var space = this.space;
       var isIndexed = function(mlangArg) {
         var n = mlangArg.name;
+        // It's not a predicate that takes a property as arg1, we can't judge
+        if ( ! n ) { return true; }
         for (var ax = 0; ax < space.length; ++ax) {
           if ( space[ax][0].name == n || space[ax][1].name == n ) {
             return true;
@@ -336,11 +390,10 @@ foam.CLASS({
         if ( query ) {
 
           if ( model.isInstance(query) && isIndexed(query.arg1)  ) {
-            var arg2 = query.arg2;
-            query = undefined;
-            return arg2;
+            whereQuery = null;
+            return query;
           }
-          
+
           if ( foam.mlang.predicate.And.isInstance(query) ||
                foam.mlang.predicate.Or.isInstance(query) ) {
             for ( var i = 0 ; i < query.args.length ; i++ ) {
@@ -368,11 +421,22 @@ foam.CLASS({
       // accumulate range limits so we can make as specific query as possible
       var ranges = {};
       for (var ax = 0; ax < space.length; ++ax) {
-        ranges[space[ax][0].name] = Infinity;
-        ranges[space[ax][1].name] = -Infinity;
+        ranges[space[ax][0].name] = -Infinity;
+        ranges[space[ax][1].name] = Infinity;
+      }
+
+      function findAxis(name) {
+        for (var ax = 0; ax < space.length; ++ax) {
+          var a = space[ax];
+          if ( a[0].name == name ||  a[1].name == name ) {
+            return a;
+          }
+        }
+        return null;
       }
 
       var args;
+      var axis;
       // Each hit of isExprMatch will pick off one thing ANDed at the top
       // level. Since all these bounds apply at once, keep shrinking the
       // search bounds.
@@ -387,53 +451,35 @@ foam.CLASS({
       }
 
       // Less than restricts the maximum for an axis
-      while ( args = isExprMatch(this.Lte) ) {
+      while ( args = ( isExprMatch(this.Lte) || isExprMatch(this.Lt) ) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
-        // accumulate the bounds(biggest maximum)
-        ranges[name] = Math.max( ranges[name], r );
-      }
-      while ( args = isExprMatch(this.Lt) ) {
-        var name = args.arg1.name;
-        var r = args.arg2.f();
-        // accumulate the bounds(biggest maximum)
-        ranges[name] = Math.max( ranges[name], r );
+        axis = findAxis(name);
+        if ( axis ) {
+          ranges[axis[1].name] = Math.min( ranges[axis[1].name], r );
+        }
       }
 
       // Greater than restricts the minimum for an axis
-      while ( args = isExprMatch(this.Gte) ) {
+      while ( args = ( isExprMatch(this.Gte) || isExprMatch(this.Gt) ) ) {
         var name = args.arg1.name;
         var r = args.arg2.f();
-        // accumulate the bounds(smallest minimum)
-        ranges[name] = Math.min( ranges[name], r );
-      }
-      while ( args = isExprMatch(this.Gt) ) {
-        var name = args.arg1.name;
-        var r = args.arg2.f();
-        // accumulate the bounds(smallest maximum)
-        ranges[name] = Math.min( ranges[name], r );
+        axis = findAxis(name);
+        if ( axis ) {
+          ranges[axis[0].name] = Math.max( ranges[axis[0].name], r );
+        }
       }
 
       var fc = this.FlowControl.create();
 
-      // if bounds end up infinite, hash will return null, forcing all
-      // items through the predicatedSink by default.
-      var bounds = {};
-      for (var ax = 0; ax < space.length; ++ax) {
-        var a = ranges[space[ax][0].name];
-        var b = ranges[space[ax][1].name];
-        bounds[space[ax][0].name] = Math.min(a,b);
-        bounds[space[ax][1].name] = Math.max(a,b);
-      }
-
       // check for buckets with the bounds found so far
-      var buckets = this.findBucketsFn(bounds);
+      var buckets = this.findBucketsFn(ranges);
 
       // TODO: multiple ANDed intersects should reduce the search area,
       // ORed should cause multiple searches
-      while ( args = isExprMatch(this.Intersects) ) {
+      while ( args = ( isExprMatch(this.Intersects) || isExprMatch(this.ContainedBy) ) ) {
         if ( ! buckets ) { buckets = []; }
-        buckets = buckets.concat(this.findBucketsFn(args.arg.f()));
+        buckets = buckets.concat(this.findBucketsFn(args.arg2.f()));
       }
 
       var duplicates = {};

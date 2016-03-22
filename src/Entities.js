@@ -122,16 +122,14 @@ foam.CLASS({
       factory: function() {
         var m = this.Expressions.create();
         var self = this;
-        var bx =  { f: function() { return self.bx;  } };
-        var by =  { f: function() { return self.by;  } };
-        var bx2 = { f: function() { return self.bx2; } };
-        var by2 = { f: function() { return self.by2; } };
+
         // TODO: this should be an intersect mlang
         // TODO: radius check too
-        return this.worldDAO.get().where(m.AND(
-          m.GTE(this.cls_.BX2, bx), m.LTE(this.cls_.BX, bx2),
-          m.GTE(this.cls_.BY2, by), m.LTE(this.cls_.BY, by2)
-        ));
+//         return this.worldDAO.get().where(m.AND(
+//           m.GTE(this.cls_.BX2, bx), m.LTE(this.cls_.BX, bx2),
+//           m.GTE(this.cls_.BY2, by), m.LTE(this.cls_.BY, by2)
+//         ));
+        return this.worldDAO.get().where(m.INTERSECTS(this.worldDAO.get().space, this));
       }
     }
   ],

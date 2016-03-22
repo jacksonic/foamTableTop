@@ -41,7 +41,8 @@ function logArraySink(sink) {
 }
 var sd = foam.dao.SpatialHashDAO.create({
   of: ItemXY,
-  space: [ ['x', 'x2'], ['y', 'y2']]
+  space: [ [ ItemXY.X, ItemXY.X2 ],
+           [ ItemXY.Y, ItemXY.Y2 ] ]
 });
 sd.describe();
 var asyncs = [];
@@ -137,22 +138,21 @@ console.log("Time to insert "+COUNT+":", end25 - start25, "ms");
 
 // select some items
 var EXPRS = foam.mlang.Expressions.create();
-var OR = EXPRS.OR.bind(EXPRS);
-var AND = EXPRS.AND.bind(EXPRS);
-var EQ = EXPRS.EQ.bind(EXPRS);
-var LT = EXPRS.LT.bind(EXPRS);
-var GT = EXPRS.GT.bind(EXPRS);
-var GTE = EXPRS.GTE.bind(EXPRS);
-var LTE = EXPRS.LTE.bind(EXPRS);
-var BOUNDED = function(a, b) {
-  return foam.mlang.predicate.Bounded.create({ arg1: a, arg2: b});
-};
+var OR =            EXPRS.OR.bind(EXPRS);
+var AND =           EXPRS.AND.bind(EXPRS);
+var EQ =            EXPRS.EQ.bind(EXPRS);
+var LT =            EXPRS.LT.bind(EXPRS);
+var GT =            EXPRS.GT.bind(EXPRS);
+var GTE =           EXPRS.GTE.bind(EXPRS);
+var LTE =           EXPRS.LTE.bind(EXPRS);
+var INTERSECTS =    EXPRS.INTERSECTS.bind(EXPRS);
+var CONTAINED_BY =  EXPRS.CONTAINED_BY.bind(EXPRS);
 var result = foam.dao.ArraySink.create();
 function doASelect() {
   var start44 = Date.now();
   sd.where(AND(
-    BOUNDED(ItemXY.X, [20, 40]),
-    BOUNDED(ItemXY.Y, [30, 50])
+    GTE(ItemXY.X, 20), LTE(ItemXY.X, 40),
+    GTE(ItemXY.Y, 30), LTE(ItemXY.Y, 50)
   )).select(result).then(
     function(sink) {
       var end44 = Date.now();
@@ -175,16 +175,21 @@ function selectAgain() {
   result = foam.dao.ArraySink.create();
   var x = Math.round(Math.random() * 1000);
   var y = Math.round(Math.random() * 1000);
-  var x2 = x + Math.round(Math.random() * 30);
-  var y2 = y + Math.round(Math.random() * 30);
+  var bounds = {
+    x: x,
+    y: y,
+    x2: x + Math.round(Math.random() * 30),
+    y2: y + Math.round(Math.random() * 30)
+  };
   sd.where(AND(
-    BOUNDED(ItemXY.X, [x, x2]),
-    BOUNDED(ItemXY.Y, [y, y2]),
-    BOUNDED(ItemXY.X2, [x, x2]),
-    BOUNDED(ItemXY.Y2, [y, y2])
+//    GTE(ItemXY.X2, x), LTE(ItemXY.X, x2), // intersection
+//    GTE(ItemXY.Y2, y), LTE(ItemXY.Y, y2)
+//    GTE(ItemXY.X, x), LTE(ItemXY.X2, x2), // containment
+//    GTE(ItemXY.Y, y), LTE(ItemXY.Y2, y2)
+    CONTAINED_BY(sd.space, bounds)
   )).select(result).then(
     function(sink) {
-      console.log("Result", countDown, "found", sink.a.length, "inside", x,y,x2-x,y2-y);
+      console.log("Result", countDown, "found", sink.a.length, "inside", bounds);
       if (--countDown < 0) {
         var end34 = Date.now();
         console.log("1000 searches done in:", end34 - start34, "ms");
