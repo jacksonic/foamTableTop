@@ -14,45 +14,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- foam.CLASS({
-   package: 'foam.core.buffer'
-   name: 'BufferManager',
-   
-   properties: [
-     {
-       name: 'type',
-       defaultValue: Float64Array
-     },
-     {
-       name: 'buffer',
-       factory: function() {
-         return new (this.type)(this.maxSize);
-       }
-     },
-     {
-       name: 'maxSize',
-       defaultValue: 1000,
-     },
-     {
-       name: 'lastFreeIndex',
-       defaultValue: 0
-     }
-   ],
-   methods: [
-     function allocate() {
-       if (this.lastFreeIndex > this.maxSize) { throw new Error("BufferManager buffer size exeeded");
-       return this.lastFreeIndex++;
-     },
-     function set(idx, val) {
-       this.buffer[idx] = val;
-     },
-     function get(idx) {
-       return this.buffer[idx];
-     }
-   ]
-   
- })
+ /** Manages a swappable TypeArray buffer of values for quick transfer to/from web workers.
+  foam.core.buffer.Property directly stores/gets its values from an allocated space in a buffer. */
+foam.CLASS({
+  package: 'foam.core.buffer'
+  name: 'BufferManager',
+  
+  properties: [
+    {
+      name: 'type',
+      defaultValue: Float64Array
+    },
+    {
+      name: 'buffer',
+      factory: function() {
+        return new (this.type)(this.maxSize);
+      }
+    },
+    {
+      name: 'maxSize',
+      defaultValue: 1000,
+    },
+    {
+      name: 'lastFreeIndex',
+      defaultValue: 0
+    }
+  ],
+  methods: [
+    function allocate() {
+      if (this.lastFreeIndex > this.maxSize) { throw new Error("BufferManager buffer size exeeded");
+      return this.lastFreeIndex++;
+    },
+    // TODO: deallocation... weakmap?
+    function set(idx, val) {
+      this.buffer[idx] = val;
+    },
+    function get(idx) {
+      return this.buffer[idx];
+    }
+  ]
+
+})
  
 
 foam.CLASS({
@@ -76,6 +78,7 @@ foam.CLASS({
       var factory = this.factory;
       var defVal = this.defaultValue;
 
+      // getter and setter pull/insert the value to/from a buffer
       var getter = function() {
         var idx = this.instance_[name];
         if ( ! idx ) { 
