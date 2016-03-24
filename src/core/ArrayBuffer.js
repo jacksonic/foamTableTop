@@ -17,7 +17,7 @@
  /** Manages a swappable TypeArray buffer of values for quick transfer to/from web workers.
   foam.core.buffer.Property directly stores/gets its values from an allocated space in a buffer. */
 foam.CLASS({
-  package: 'foam.core.buffer'
+  package: 'foam.core.buffer',
   name: 'BufferManager',
   
   properties: [
@@ -42,7 +42,7 @@ foam.CLASS({
   ],
   methods: [
     function allocate() {
-      if (this.lastFreeIndex > this.maxSize) { throw new Error("BufferManager buffer size exeeded");
+      if (this.lastFreeIndex > this.maxSize) { throw new Error("BufferManager buffer size exeeded"); }
       return this.lastFreeIndex++;
     },
     // TODO: deallocation... weakmap?
@@ -65,35 +65,38 @@ foam.CLASS({
 
   properties: [
     {
+      /** The name of the sibling property (or import) to use as the buffer. */
+      class: 'String',
       name: 'buffer',
     }
   ],
   methods: [
-    function insubo(proto) {
+    function installInProto(proto) {
       var buffer = this.buffer;
       var name = this.name;
       var factory = this.factory;
       var defVal = this.defaultValue;
 
-      // getter and setter pullsub value to/from a buffer
-      varsubunction() {
+      // getter and setter pull/push value to/from a buffer
+      var getter = function() {
         var idx = this.instance_[name];
         if ( ! idx ) { 
           if ( factory ) {
             setter.call(this, factory());
+            idx = this.instance_[name];
           } else if ( defVal ) {
             return defVal;
           }
         }
-        return buffer.get(idx);
+        return this[buffer].get(idx);
       }
 
       var setter = function(val) {
         var idx = this.instance_[name];
         if ( ! idx ) {
-          idx = this.instance_[name] = buffer.allocate();
+          idx = this.instance_[name] = this[buffer].allocate();
         }
-        buffer.set(idx, val);
+        this[buffer].set(idx, val);
       }
 
       this.getter = getter; // TODO: better way to inject these?

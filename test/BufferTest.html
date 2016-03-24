@@ -16,12 +16,43 @@
  <body style="font-family:monospace;">
 
 <script id="demo" language="xjavascript">
-
-
-
-
-
-
+   // Create a buffer and a model that uses it
+   var bufferF64 = foam.core.buffer.BufferManager.create();
+   foam.CLASS({
+     name: 'BufUser',
+     properties: [
+       [ 'buffer', bufferF64 ], // could alternatively be imported
+       {
+         class: 'foam.core.buffer.Property',
+         name: 'a',
+         buffer: 'buffer'
+       },
+       {
+         class: 'foam.core.buffer.Property',
+         name: 'b',
+         buffer: 'buffer',
+         defaultValue: 99.8
+       },
+       {
+         class: 'foam.core.buffer.Property',
+         name: 'c',
+         buffer: 'buffer',
+         factory: function() { return Date.now() / 1000; }
+       }
+     ]
+   });
+   var bufUser1 = BufUser.create();
+   var bufUser2 = BufUser.create();
+   bufUser1.describe();
+   bufUser2.describe();
+   console.log(bufferF64.buffer);
+   
+   // do some setting
+   bufUser1.a = 1;
+   bufUser1.b = 2;
+   bufUser1.c = 3;
+   bufUser1.describe();
+   console.log(bufferF64.buffer);
 </script>
   <div id='output'></div>
 
