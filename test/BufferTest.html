@@ -53,6 +53,11 @@
    bufUser1.c = 3;
    bufUser1.describe();
    console.log(bufferF64.buffer);
+   
+   //make worker
+   var worker = new Worker('testworker.js');
+   worker.postMessage(bufUser1.toJSON());
+   worker.postMessage(bufUser2.toJSON());
 </script>
   <div id='output'></div>
 
