@@ -44,7 +44,7 @@ foam.CLASS({
   methods: [
     function init() {
       this.previousTime = this.time.get();
-      this.time.subscribe(this.runFrame);
+      this.time.sub(this.runFrame);
     },
   ],
 
@@ -141,7 +141,7 @@ foam.CLASS({
         id: 'game-runner'
       }, foam.X);
       this.canvas.cview = this.CView.create();
-      this.time$.subscribe(this.canvas.paint);
+      this.time$.sub(this.canvas.paint);
 
       this.players;
 
@@ -149,7 +149,7 @@ foam.CLASS({
       // create test entities
       var x, y;
       var spacing = 80;
-      for (var k = 0; k < 20; ++k) {
+      for (var k = 0; k < 40; ++k) {
 //        x = Math.random() * this.canvas.width;
 //        y = Math.random() * this.canvas.height;
           this.worldDAO.put(this.TestEntity.create({

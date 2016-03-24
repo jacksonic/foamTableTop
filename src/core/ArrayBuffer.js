@@ -66,20 +66,17 @@ foam.CLASS({
   properties: [
     {
       name: 'buffer',
-      factory: function() {
-        return this.BufferManager.create();
-      }
     }
   ],
   methods: [
-    function installInProto(proto) {
+    function insubo(proto) {
       var buffer = this.buffer;
       var name = this.name;
       var factory = this.factory;
       var defVal = this.defaultValue;
 
-      // getter and setter pull/insert the value to/from a buffer
-      var getter = function() {
+      // getter and setter pullsub value to/from a buffer
+      varsubunction() {
         var idx = this.instance_[name];
         if ( ! idx ) { 
           if ( factory ) {

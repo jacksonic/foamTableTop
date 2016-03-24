@@ -361,7 +361,7 @@ foam.CLASS({
         if ( min == prev.min && max == prev.max ) {
           // hashes match, no change in buckets
           sink && sink.put(obj);
-          this.on.put.publish(obj);
+          this.on.put.pub(obj);
           return Promise.resolve(obj);
         }
         // otherwise remove the old bucket entries and continue to re-insert
@@ -378,7 +378,7 @@ foam.CLASS({
       }
 
       sink && sink.put(obj);
-      this.on.put.publish(obj);
+      this.on.put.pub(obj);
       return Promise.resolve(obj);
     },
 
@@ -389,7 +389,7 @@ foam.CLASS({
         return Promise.reject(err);
       } else {
         sink && sink.remove(obj);
-        this.on.remove.publish(obj);
+        this.on.remove.pub(obj);
         return Promise.resolve(sink);
       }
     },
@@ -584,7 +584,7 @@ foam.CLASS({
         if ( predicate.f(obj) ) {
           this.remove(obj);
           sink && sink.remove(obj);
-          this.on.remove.publish(obj);
+          this.on.remove.pub(obj);
         }
       }
 

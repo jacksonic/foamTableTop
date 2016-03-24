@@ -61,7 +61,7 @@ foam.CLASS({
     {
       name: 'sprite',
       factory: function() {
-        this.propertyChange.subscribe(this.updateSprite);
+        this.propertyChange.sub(this.updateSprite);
         return this.TestSprite.create({
           x: this.x,
           y: this.y,
