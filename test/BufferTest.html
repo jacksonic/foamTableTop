@@ -14,82 +14,9 @@
  </head>
 
  <body style="font-family:monospace;">
-
-<script id="demo" language="xjavascript">
-   // Create a buffer and a model that uses it
-   var bufferF64 = foam.core.buffer.BufferManager.create();
-   foam.CLASS({
-     name: 'BufUser',
-     properties: [
-       [ 'buffer', bufferF64 ], // could alternatively be imported
-       {
-         class: 'foam.core.buffer.Property',
-         name: 'a',
-         buffer: 'buffer'
-       },
-       {
-         class: 'foam.core.buffer.Property',
-         name: 'b',
-         buffer: 'buffer',
-         defaultValue: 99.8
-       },
-       {
-         class: 'foam.core.buffer.Property',
-         name: 'c',
-         buffer: 'buffer',
-         factory: function() { return Date.now() / 1000; }
-       }
-     ]
-   });
-   var bufUser1 = BufUser.create();
-   var bufUser2 = BufUser.create();
-   bufUser1.describe();
-   bufUser2.describe();
-   console.log(bufferF64.buffer);
+<pre id="outputElement">
+</pre>   
    
-   // do some setting
-   bufUser1.a = 1;
-   bufUser1.b = 2;
-   bufUser1.c = 3;
-   bufUser1.describe();
-   console.log(bufferF64.buffer);
-   
-   //make worker
-   var worker = new Worker('testworker.js');
-   worker.postMessage(bufUser1.toJSON());
-   worker.postMessage(bufUser2.toJSON());
-</script>
-  <div id='output'></div>
-
-  <script language="javascript">
-    var demo = document.getElementById('demo');
-    var out  = document.getElementById('output');
-    var log_ = function(o) {
-    document.body.insertAdjacentHTML('beforeend', o + '<br/>');
-    }
-    var oldLog = console.log;
-    console.assert = function(b, e) { if ( ! b ) { log('Assertion failed:', e); throw 'assert'; } };
-    console.log = function() { log_([].join.call(arguments, ' ')); };
-    console.log.put = console.log.bind(console);
-    console.log.str = oldLog.str;
-    console.log.json = oldLog.json;
-    var log = function() { log_(' <b>&gt;</b> ' + [].join.call(arguments, ' ')); }
-
-    var s_ = demo.textContent.split('\n\n');
-    for ( var i_ = 0 ; i_ < s_.length ; i_++ ) {
-      var line = s_[i_];
-      log_(' <h3>Example ' + (i_+1) + '</h3><code>' + line + '</code><br>');
-      log_.output = "";
-      try {
-        eval(line);
-      } catch (x) {
-        log('Exception: ', x);
-      }
-      log_.capture = false;
-
-      log_('');
-    }
-
-    </script>
+<script language="javascript" src="bufferTest.js"></script>
  </body>
 </html>

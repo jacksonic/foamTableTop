@@ -30,6 +30,7 @@ var copies = [];
 foam.CLASS({
   name: 'BufUser',
   properties: [
+    'id',
     [ 'buffer', bufferF64 ], // could alternatively be imported
     {
       class: 'foam.core.buffer.Property',
@@ -52,14 +53,33 @@ foam.CLASS({
 });
 
 onmessage = function(ev) {
-  var json = foam.json.parseString(ev.data);
-  json.buffer = bufferF64;
-  var e = foam.json.parse(json);
-  console.log('Message received from main script', e);
-  e.describe();
+  if ( ev.data.puts ) { ev.data.puts.forEach(function(o) {  
+    var json = foam.json.parseString(o);
+    json.buffer = bufferF64;
+    var e = foam.json.parse(json);
   
-  copies.push(e);
-  
-  console.log(bufferF64.buffer);
+    copies.push(e);
 
+    //console.log('Message received from main script', e);
+  }); }
+  if ( ev.data.bufXfer ) {
+    //console.log('backbuffer xfer');
+    backBuffer = ev.data.bufXfer;
+  }
+  if ( ev.data.bufferRequest ) {
+    //console.log('buffer request');
+    var backBuffer = new Float64Array(bufferF64.buffer.length);
+    backBuffer.set(bufferF64.buffer); // copy buffer contents
+    postMessage({ bufXfer: backBuffer.buffer }, [backBuffer.buffer]); // transfer copy
+  }
 }
+
+setInterval(function() {
+  for(var i = 0; i < copies.length; ++i) {
+    var o = copies[i];
+    o.a += 1;
+    o.b *= 0.99;
+    o.c -=1;
+  }
+}, 16);
+
