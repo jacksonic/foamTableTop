@@ -36,15 +36,15 @@ foam.CLASS({
       name: 'entitesToMoveDAO',
       factory: function() {
         var m = this.EXPRS.create();
-        return this.worldDAO.get().where(m.EQ(tabletop.Entity.MOVE_REQUIRED, true));
+        return this.worldDAO.where(m.EQ(tabletop.Entity.MOVE_REQUIRED, true));
       }
     },
   ],
 
   methods: [
     function init() {
-      this.previousTime = this.time.get();
-      this.time.sub(this.runFrame);
+      this.previousTime = this.time;
+      this.time$.sub(this.runFrame);
     },
   ],
 
@@ -53,8 +53,8 @@ foam.CLASS({
       name: 'runFrame',
       code: function() {
         // time since last frame computed (in seconds)
-        var ft = Math.min((this.time.get() - this.previousTime) / 1000, 0.1);
-        this.previousTime = this.time.get();
+        var ft = Math.min((this.time - this.previousTime) / 1000, 0.1);
+        this.previousTime = this.time;
 
         var sink = {
           put: function(e) {

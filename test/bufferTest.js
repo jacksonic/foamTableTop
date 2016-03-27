@@ -16,7 +16,7 @@
  */
 
  // Create a buffer and a model that uses it
- var bufferF64 = foam.core.buffer.BufferManager.create();
+ var bufferF64 = foam.core.buffer.BufferManager.create({ maxSize: 3000 });
  foam.CLASS({
    name: 'BufUser',
    properties: [
@@ -64,7 +64,7 @@
  
  var copies = [];
  var copiesJSON = [];
- for (var i = 0; i < 300; ++i) {
+ for (var i = 0; i < 999; ++i) {
    copies.push(BufUser.create({
      buffer: bufferF64,
      id: i,
@@ -79,7 +79,7 @@
  var outEl = document.getElementById('outputElement');
  var renderFn = function() {
    var text = "Some Values:\n";
-   for (var i = 0; i < copies.length; ++i) {
+   for (var i = 0; i < 10; ++i) {
      var o = copies[i];
      text += o.id + ": " + o.a + ", " + o.b + ", " + o.c + "\n";
    }

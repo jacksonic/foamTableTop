@@ -126,12 +126,12 @@ foam.CLASS({
 
         // TODO: this should be an intersect mlang
         // TODO: radius check too
-//         return this.worldDAO.get().where(m.AND(
+//         return this.worldDAO.where(m.AND(
 //           m.GTE(this.cls_.BX2, bx), m.LTE(this.cls_.BX, bx2),
 //           m.GTE(this.cls_.BY2, by), m.LTE(this.cls_.BY, by2)
 //         ));
-        return this.worldDAO.get().where(m.INTERSECTS(
-          this.worldDAO.get().space,
+        return this.worldDAO.where(m.INTERSECTS(
+          this.worldDAO.space,
           m.BY_REF(this)
         ));
       }
@@ -169,16 +169,16 @@ foam.CLASS({
       this.collide();
 
       this.updateSprite();
-      this.worldDAO.get().put(this);
+      this.worldDAO.put(this);
     },
 
     function destroy() {
-      this.worldDAO.get().remove(this);
+      this.worldDAO.remove(this);
 
-      var childs = this.canvas.get().cview.children;
+      var childs = this.canvas.cview.children;
       var idx = childs.indexOf(this.sprite);
       if ( idx >= 0 ) { childs.splice(idx, 1); }
-      //this.canvas.get().cview.removeChild_(this.sprite);
+      //this.canvas.cview.removeChild_(this.sprite);
 
       //this.propertyChange.unsubscribe(this.updateSprite);
     }
@@ -227,7 +227,7 @@ foam.CLASS({
         // e.vy -= ny;
 
         //play impact sound
-        this.audioManager.get().play("impact", this);
+        this.audioManager.play("impact", this);
 
         // position angle
         var ax = this.x - e.x, ay = this.y - e.y;

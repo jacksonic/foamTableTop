@@ -126,11 +126,18 @@ foam.CLASS({
   ],
   methods: [
     function init() { /** adds the required number of audio sources to the HTML */
-      var sources = "";
+      //var sources = "";
       for (i = 0; i < this.instances; i++) {
-        sources = sources + '<audio id="' + this.ident + i + '"><source src="' + this.src + '" type="audio/mpeg"></audio>';
+        //sources = sources + '<audio id="' + this.ident + i + '"><source src="' + this.src + '" type="audio/mpeg"></audio>';
+        var el = document.createElement('audio');
+        el.id = this.ident + i;
+        var src = document.createElement('source');
+        src.src = this.src;
+        src.type = "audio/mpeg";
+        el.appendChild(src);
+        document.body.appendChild(el);
       }
-      document.body.innerHTML = document.body.innerHTML + sources;
+      //document.body.innerHTML = document.body.innerHTML + sources;
     },
     function playInstance() { /** reset the next instance in order and play it, if the sound is off cooldown */
       if (this.lastplayed + this.cooldown < Date.now()) {

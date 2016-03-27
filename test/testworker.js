@@ -24,7 +24,7 @@ importScripts(
   "../src/core/ArrayBuffer.js"
 );
 
-var bufferF64 = foam.core.buffer.BufferManager.create();
+var bufferF64 = foam.core.buffer.BufferManager.create({ maxSize: 3000 });
 var copies = [];
 
 foam.CLASS({

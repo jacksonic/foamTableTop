@@ -43,8 +43,8 @@ foam.CLASS({
           y: this.y,
           rotation: this.rotation
         });
-        this.canvas.get().cview.children.push(s);
-        //this.canvas.get().cview.addChild_(s);
+        this.canvas.cview.children.push(s);
+        //this.canvas.cview.addChild_(s);
         return s;
       }
     },
@@ -74,7 +74,7 @@ foam.CLASS({
     function returnToPool(e) {
       this.bulletPool.push(e);
       e.x = 9999999;
-      this.worldDAO.get().remove(e);
+      this.worldDAO.remove(e);
     },
     function grabFromPool(args) {
       if (this.bulletPool.length) {
@@ -112,8 +112,8 @@ foam.CLASS({
           });
         this.aimTowards({ x: Math.random()*200+400, y: Math.random()*200+250 }, b, 400);
         b.sprite;
-        this.worldDAO.get().put(b);
-        this.audioManager.get().play("impact", this);
+        this.worldDAO.put(b);
+        this.audioManager.play("impact", this);
       }
     }
   ]
@@ -138,8 +138,8 @@ foam.CLASS({
           rotation: this.rotation,
           imageIndex: 2,
         });
-        this.canvas.get().cview.children.push(s);
-        //this.canvas.get().cview.addChild_(s);
+        this.canvas.cview.children.push(s);
+        //this.canvas.cview.addChild_(s);
         return s;
       }
     }
@@ -174,7 +174,7 @@ foam.CLASS({
         //TODO: hurt e
 
         //play impact sound
-        this.audioManager.get().play("impact", this);
+        this.audioManager.play("impact", this);
 
         // position angle
         var ax = this.x - e.x, ay = this.y - e.y;
@@ -239,7 +239,7 @@ foam.CLASS({
   ],
   methods: [
     function init() {
-      this.worldDAO.get().put(this.main);
+      this.worldDAO.put(this.main);
       this.corner = this.corner;
       this.main.sprite;
     }
