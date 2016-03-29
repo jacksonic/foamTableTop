@@ -139,18 +139,11 @@ foam.CLASS({
 //         proxy.bplane = this.collisionPlane;
 //         proxy.bplane2 = this.collisionPlane;
 //         return proxy;
-        return this;
+        //return this;
 //         var self = this;
-//         var obj = { owner_: this };
-//         Object.defineProperty(obj, 'bx', { get: function() { return this.owner_.bx; } });
-//         Object.defineProperty(obj, 'by', { get: function() { return this.owner_.by; } });
-
-//         Object.defineProperty(obj, 'bx2', { get: function() { return this.owner_.bx2; } });
-//         Object.defineProperty(obj, 'by2', { get: function() { return this.owner_.by2; } });
-
-//         Object.defineProperty(obj, 'bplane', { get: function() { return this.owner_.collisionPlane; } });
-//         Object.defineProperty(obj, 'bplane2', { get: function() { return this.owner_.collisionPlane; } });
-//         return obj;
+        var obj = Object.create(this.BOUNDS_WRAPPER);
+        obj.owner_ = this;
+        return obj;
       }
     },
     {
@@ -163,6 +156,21 @@ foam.CLASS({
       }
     }
   ],
+
+  constants: {
+    BOUNDS_WRAPPER: (function() {
+        var obj = {};
+        Object.defineProperty(obj, 'bx', { get: function() { return this.owner_.bx; } });
+        Object.defineProperty(obj, 'by', { get: function() { return this.owner_.by; } });
+
+        Object.defineProperty(obj, 'bx2', { get: function() { return this.owner_.bx2; } });
+        Object.defineProperty(obj, 'by2', { get: function() { return this.owner_.by2; } });
+        // redirect collisionPlane's value into bplane for colliding
+        Object.defineProperty(obj, 'bplane', { get: function() { return this.owner_.collisionPlane; } });
+        Object.defineProperty(obj, 'bplane2', { get: function() { return this.owner_.collisionPlane; } });
+        return obj;
+      })()
+  },
 
   methods: [
     function init() {
