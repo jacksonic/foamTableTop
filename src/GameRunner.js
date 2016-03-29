@@ -223,8 +223,13 @@ foam.CLASS({
       document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;
 
       window.onresize = this.windowResize;
+      
+      
 
       this.frameStepper;
+    },
+    function audioStart() {
+      this.audioManager.play("impact", "startup");
     }
   ],
   listeners: [
@@ -249,5 +254,15 @@ foam.CLASS({
   ]
 });
 var g = tabletop.GameRunner.create();
-setInterval(g.step, 16);
+window.onload = function() {
+  var introbox = document.createElement("DIV");
+  introbox.id = "intro";
+  document.body.appendChild(introbox);
+  introbox.addEventListener("click", function() {
+    g.audioStart();
+    introbox.style.display = "none";
+    setInterval(g.step, 16);
+  });
+};
+
 

@@ -80,8 +80,11 @@ foam.CLASS({
     function play(soundname, soundorigin) {
       this.audioDAO.where(this.EQ(this.Audio.IDENT, soundname)).select({
         put: function(t) {
-          //optionally do something relating to the origin here
-          t.playInstance();
+          if (soundorigin === "startup") {
+            t.playInstance(true);
+          } else {
+            t.playInstance(false);
+          }
         },
         remove: function() {},
         eof: function() {},
@@ -139,18 +142,27 @@ foam.CLASS({
       }
       //document.body.innerHTML = document.body.innerHTML + sources;
     },
-    function playInstance() { /** reset the next instance in order and play it, if the sound is off cooldown */
-      if (this.lastplayed + this.cooldown < Date.now()) {
-        var toBePlayed = document.getElementById(this.ident + this.currentInstance);
-        toBePlayed.pause();
-        toBePlayed.currentTime = 0;
-        toBePlayed.volume = this.vol;
-        toBePlayed.play();
-        this.currentInstance++;
-        if (this.currentInstance === this.instances) {
-          this.currentInstance = 0;
+    function playInstance(cmnd) { /** reset the next instance in order and play it, if the sound is off cooldown */
+      if (cmnd) {
+        for (i = 0; i < this.instances; i++) {
+          var startPlay = document.getElementById(this.ident + i);
+          startPlay.volume = 0;
+          startPlay.play();
         }
-        this.lastplayed = Date.now();
+      }
+      else {
+        if (this.lastplayed + this.cooldown < Date.now()) {
+          var toBePlayed = document.getElementById(this.ident + this.currentInstance);
+          toBePlayed.pause();
+          toBePlayed.currentTime = 0;
+          toBePlayed.volume = this.vol;
+          toBePlayed.play();
+          this.currentInstance++;
+          if (this.currentInstance === this.instances) {
+            this.currentInstance = 0;
+          }
+          this.lastplayed = Date.now();
+        }
       }
     }
   ],
