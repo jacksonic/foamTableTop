@@ -62,7 +62,7 @@ foam.CLASS({
       var imageInfo = this.bitblt[this.imageIndex];
       if (Object.prototype.toString.apply(imageInfo.sequence) === '[object Array]') {
         if (this.lastDrawn + this.framerate < this.time) {
-          if (this.nextFrame === imageInfo.sequence.length) {
+          if (this.nextFrame + 1 === imageInfo.sequence.length) {
             if (this.loop) {
               this.nextFrame = -1;
             } else {
@@ -213,20 +213,11 @@ foam.CLASS({
           framerate: 200,
         });
       }
-    }
+    },
   ],
   listeners: [
-
     {
-      /** This is standing in for buggy direct bindings */
-      name: 'updateSprite',
-      //isFramed: true, // ends up taking too much time
-      code: function() {
-        var s = this.sprite;
-        /*s.x = this.x;
-        s.y = this.y;
-        s.rotation = this.rotation;*/
-      }
+      name: 'updateSprite', code: function(){},
     }
   ]
 });

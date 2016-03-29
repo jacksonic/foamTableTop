@@ -166,6 +166,7 @@ foam.CLASS({
       }
       this.worldDAO.put(this.TestBoom.create({
         id: 'blast',
+        br: 11,
         x: 300,
         y: 200,
       }));
