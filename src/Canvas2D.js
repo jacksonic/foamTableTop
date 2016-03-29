@@ -66,7 +66,7 @@ foam.CLASS({
             if (this.loop) {
               this.nextFrame = -1;
             } else {
-             //this.destroy() //code for terminating upon animation completion
+             this.x = 99999; //code for terminating upon animation completion // TODO destroy properly
              return;
             }
           }
@@ -194,7 +194,7 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'TestBoom',
-  implements: ['tabletop.Entity' ],
+  extends: 'tabletop.Entity',
   requires: [ 'tabletop.ImageSprite' ],
   imports: [
     'canvas'
@@ -209,7 +209,7 @@ foam.CLASS({
           y: this.y,
           rotation: this.rotation,
           imageIndex: 8,
-          loop: true,
+          //loop: true,
           framerate: 200,
         });
       }
