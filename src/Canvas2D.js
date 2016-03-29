@@ -23,6 +23,10 @@ foam.CLASS({
     'time'
   ],
   properties: [
+    {
+      name: 'transform',
+      expression: function() { return null; }
+    },
     { /** image to display */
       name: 'imageIndex'
     },
@@ -57,6 +61,12 @@ foam.CLASS({
     }
   ],
   methods: [
+    function doTransform(x) {
+      // quick path to skip caluclating the matrix
+      x.translate(this.x, this.y);
+      x.rotate(-this.rotation);
+      x.scale(this.scaleX, this.scaleY);
+    },
     function paintSelf(x) {
       var hw = window.innerWidth / 3840 / 2;
       var imageInfo = this.bitblt[this.imageIndex];
@@ -66,8 +76,8 @@ foam.CLASS({
             if (this.loop) {
               this.nextFrame = -1;
             } else {
-             this.x = 99999; //code for terminating upon animation completion // TODO destroy properly
-             return;
+              this.x = 99999; //code for terminating upon animation completion // TODO destroy properly
+              return;
             }
           }
           this.nextFrame++;
@@ -177,7 +187,11 @@ foam.CLASS({
     },
   ],
   listeners: [
-
+    {
+      /** Checks for collisions with nearby entities */
+      name: 'collide',
+      code: function() {}
+    },
     {
       /** This is standing in for buggy direct bindings */
       name: 'updateSprite',

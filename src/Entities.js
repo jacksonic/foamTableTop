@@ -126,7 +126,7 @@ foam.CLASS({
       name: 'sprite'
     },
     {
-      /** The plane to check for collisions against */
+      /** The single plane to check for collisions against // TODO: allow multiple? */
       class: 'Simple',
       name: 'collisionPlane',
     },
@@ -135,12 +135,6 @@ foam.CLASS({
         for entities in this box when colliding) */
       name: 'targetBounds_',
       factory: function() {
-//         var proxy = Object.create(this);
-//         proxy.bplane = this.collisionPlane;
-//         proxy.bplane2 = this.collisionPlane;
-//         return proxy;
-        //return this;
-//         var self = this;
         var obj = Object.create(this.BOUNDS_WRAPPER);
         obj.owner_ = this;
         return obj;
@@ -226,7 +220,7 @@ foam.CLASS({
       //isMerged: true,
       //mergeDelay: 500,
       code: function() {
-        if ( Math.random() > 0.33 ) return; // skip out on random checks to save time
+        //if ( Math.random() > 0.33 ) return; // skip out on random checks to save time
 
         var self = this;
         // TODO: radius check too
@@ -248,7 +242,7 @@ foam.CLASS({
         // cheat to only check one of each pair of colliders, only check the one with the smaller X
         // this is not required for things that collide with only certain classes of other things (bullets)
         // moveRequired indicates that the other entity will have collision checking done
-        if ( this.x > e.x && e.moveRequired ) return;
+        //if ( this.x > e.x && e.moveRequired ) return;
 
         // position based
         // var dx = this.x - e.x, dy = this.y - e.y;
