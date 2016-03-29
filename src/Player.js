@@ -18,8 +18,8 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'PlayerEntity',
+  extends: 'tabletop.Entity',
   implements: [
-    'tabletop.Entity',
     'tabletop.Physics'
   ],
   requires: [
@@ -123,7 +123,7 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'BulletEntity',
-  implements: ['tabletop.Entity' ],
+  extends: 'tabletop.Entity',
   requires: [ 'tabletop.TestSprite' ],
   imports: ['canvas'],
   properties: [

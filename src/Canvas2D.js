@@ -52,7 +52,7 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'TestEntity',
-  implements: ['tabletop.Entity' ],
+  extends: 'tabletop.Entity',
   requires: [ 'tabletop.TestSprite' ],
   imports: [
     'canvas'
