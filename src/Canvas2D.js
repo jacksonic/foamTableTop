@@ -33,7 +33,9 @@ foam.CLASS({
     },
     { /** framerate of animation, in milliseconds per frame */
       name: 'framerate',
-      defaultValue: 33,
+      factory: function() {
+        return this.time;
+      }
     },
     { /** last time the animation was updated */
       name: 'lastDrawn',
@@ -64,7 +66,7 @@ foam.CLASS({
         if (this.lastDrawn + this.framerate < this.time) {
           if (this.nextFrame === imageInfo.sequence.length) {
             if (this.loop) {
-              this.nextFrame = 0;
+              this.nextFrame = -1;
             } else {
              //this.destroy() //code for terminating upon animation completion
             }
