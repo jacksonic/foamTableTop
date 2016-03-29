@@ -16,7 +16,7 @@
  */
 foam.CLASS({
   package: 'tabletop',
-  name: 'imageSprite',
+  name: 'ImageSprite',
   extends: 'foam.graphics.CView',
   implements: ['tabletop.Sprite'],
   imports: [
@@ -96,7 +96,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'TestSprite',
   extends: 'foam.graphics.CView',
-  implements: ['tabletop.imageSprite'],
+  implements: ['tabletop.ImageSprite'],
   properties: [
     [ 'imageIndex', 0 ],
   ]
@@ -106,7 +106,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'TestExplosion',
   extends: 'foam.graphics.CView',
-  implements: ['tabletop.imageSprite'],
+  implements: ['tabletop.ImageSprite'],
   properties: [
     [ 'imageIndex', 8 ],
   ]
@@ -115,8 +115,8 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'TestEntity',
-  implements: ['tabletop.Entity' ],
-  requires: [ 'tabletop.imageSprite' ],
+  requires: [ 'tabletop.ImageSprite' ],
+  extends: 'tabletop.Entity',
   imports: [
     'canvas'
   ],
@@ -125,7 +125,7 @@ foam.CLASS({
       name: 'sprite',
       factory: function() {
         this.propertyChange.sub(this.updateSprite);
-        return this.imageSprite.create({
+        return this.ImageSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
@@ -195,7 +195,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'TestBoom',
   implements: ['tabletop.Entity' ],
-  requires: [ 'tabletop.imageSprite' ],
+  requires: [ 'tabletop.ImageSprite' ],
   imports: [
     'canvas'
   ],
@@ -204,7 +204,7 @@ foam.CLASS({
       name: 'sprite',
       factory: function() {
         this.propertyChange.sub(this.updateSprite);
-        return this.imageSprite.create({
+        return this.ImageSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation,

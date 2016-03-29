@@ -18,12 +18,12 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'PlayerEntity',
+  extends: 'tabletop.Entity',
   implements: [
-    'tabletop.Entity',
     'tabletop.Physics'
   ],
   requires: [
-    'tabletop.imageSprite',
+    'tabletop.ImageSprite',
     'tabletop.BulletEntity',
   ],
   imports: [
@@ -38,7 +38,7 @@ foam.CLASS({
       name: 'sprite',
       factory: function() {
         //this.propertyChange.sub(this.updateSprite);
-        var s = this.imageSprite.create({
+        var s = this.ImageSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
@@ -124,8 +124,8 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'BulletEntity',
-  implements: ['tabletop.Entity' ],
-  requires: [ 'tabletop.imageSprite' ],
+  requires: [ 'tabletop.ImageSprite' ],
+  extends: 'tabletop.Entity',
   imports: ['canvas'],
   properties: [
     [ 'br', 3 ],
@@ -133,7 +133,7 @@ foam.CLASS({
       name: 'sprite',
       factory: function() {
         this.propertyChange.sub(this.updateSprite);
-        var s = this.imageSprite.create({
+        var s = this.ImageSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation,

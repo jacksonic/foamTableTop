@@ -414,139 +414,146 @@ foam.CLASS({
         return true;
       }
     },
+    /** Attempts to optimize the query and find all buckets that contain
+      potential matches. */
+    function queryBuckets_(options) {
+      var buckets;
+      var whereQuery = options ? options.where.clone() : null;
+
+      var space = this.space;
+      var isIndexed = function(mlangArg) {
+        var n = mlangArg.name;
+        // It's not a predicate that takes a property as arg1, we can't judge
+        if ( ! n ) { return true; }
+        for (var ax = 0; ax < space.length; ++ax) {
+          if ( space[ax][0].name == n || space[ax][1].name == n ) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // Actually want to grab all nested bounds and filter buckets based
+      // on all of them... the intersection for AND, and the
+      // union for OR.
+      // In the AND/intersection case, we want to know all the bounds together and
+      // do the search once, since any unspecified bound will catch lots of
+      // buckets.
+      var isExprMatch = function(model, opt_query) {
+        if ( ! model ) return undefined;
+        var query = opt_query || whereQuery;
+
+        if ( query ) {
+
+          if ( model.isInstance(query) && isIndexed(query.arg1)  ) {
+            whereQuery = null;
+            return query;
+          }
+
+          if ( foam.mlang.predicate.And.isInstance(query) ||
+               foam.mlang.predicate.Or.isInstance(query) ) {
+            for ( var i = 0 ; i < query.args.length ; i++ ) {
+              var q = query.args[i];
+
+              // recurse into nested OR
+              if ( foam.mlang.predicate.Or.isInstance(q) ) {
+                q = isExprMatch(model, q);
+                if ( q ) return q;
+                continue;
+              }
+
+              if ( model.isInstance(q) && isIndexed(q.arg1) ) {
+                query.args[i] = this.True;
+                query = query.partialEval();
+                if ( query === this.True ) query = null;
+                return q;
+              }
+            }
+          }
+        }
+        return undefined;
+      };
+
+      // accumulate range limits so we can make as specific query as possible
+      var ranges = {};
+      for (var ax = 0; ax < space.length; ++ax) {
+        ranges[space[ax][0].name] = -Infinity;
+        ranges[space[ax][1].name] = Infinity;
+      }
+
+      function findAxis(name) {
+        for (var ax = 0; ax < space.length; ++ax) {
+          var a = space[ax];
+          if ( a[0].name == name ||  a[1].name == name ) {
+            return a;
+          }
+        }
+        return null;
+      }
+
+      var args;
+      var axis;
+      // Each hit of isExprMatch will pick off one thing ANDed at the top
+      // level. Since all these bounds apply at once, keep shrinking the
+      // search bounds.
+      // TODO: use compare instead of Math.min, to allow for non-number ranges
+      var buckets;
+      if ( whereQuery )
+
+      // Equals will completely restrict one axis to a zero-width range (one value)
+      while ( args = isExprMatch(this.Eq) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
+        // accumulate the bounds (largest minimum, smallest maximum)
+        ranges[name] = r;
+      }
+
+      // Less than restricts the maximum for an axis
+      while ( args = ( isExprMatch(this.Lte) || isExprMatch(this.Lt) ) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
+        axis = findAxis(name);
+        if ( axis ) {
+          ranges[axis[1].name] = Math.min( ranges[axis[1].name], r );
+        }
+      }
+
+      // Greater than restricts the minimum for an axis
+      while ( args = ( isExprMatch(this.Gte) || isExprMatch(this.Gt) ) ) {
+        var name = args.arg1.name;
+        var r = args.arg2.f();
+        axis = findAxis(name);
+        if ( axis ) {
+          ranges[axis[0].name] = Math.max( ranges[axis[0].name], r );
+        }
+      }
+
+      // check for buckets with the bounds found so far
+      buckets = this.findBucketsFn(ranges);
+
+      // TODO: multiple ANDed intersects should reduce the search area,
+      // ORed should cause multiple searches
+      while ( args = ( isExprMatch(this.Intersects) || isExprMatch(this.ContainedBy) ) ) {
+        if ( ! buckets ) { buckets = []; }
+        buckets = buckets.concat(this.findBucketsFn(args.arg2.f()));
+      }
+
+      return buckets;
+    },
+
     function select(isink, options) {
       var resultSink = isink || this.ArraySink.create();
 
       var sink = this.decorateSink_(resultSink, options);
       var buckets;
-      // TODO: fast bucket lookup for ranges and comparisons to hashed axes
-      // in 2d case, x, y: BOUNDED comparisons should be fast
 
-      if ( options && options.where && 
+      if ( options && options.where &&
        ( this.Intersects.isInstance(options.where) || this.ContainedBy.isInstance(options.where))) {
          buckets = this.findBucketsFn(options.where.arg2.f());
-       } else {
-        var whereQuery = options ? options.where.clone() : null;
-  
-        var space = this.space;
-        var isIndexed = function(mlangArg) {
-          var n = mlangArg.name;
-          // It's not a predicate that takes a property as arg1, we can't judge
-          if ( ! n ) { return true; }
-          for (var ax = 0; ax < space.length; ++ax) {
-            if ( space[ax][0].name == n || space[ax][1].name == n ) {
-              return true;
-            }
-          }
-          return false;
-        }
-  
-        // Actually want to grab all nested bounds and filter buckets based
-        // on all of them... the intersection for AND, and the
-        // union for OR.
-        // In the AND/intersection case, we want to know all the bounds together and
-        // do the search once, since any unspecified bound will catch lots of
-        // buckets.
-        var isExprMatch = function(model, opt_query) {
-          if ( ! model ) return undefined;
-          var query = opt_query || whereQuery;
-  
-          if ( query ) {
-  
-            if ( model.isInstance(query) && isIndexed(query.arg1)  ) {
-              whereQuery = null;
-              return query;
-            }
-  
-            if ( foam.mlang.predicate.And.isInstance(query) ||
-                 foam.mlang.predicate.Or.isInstance(query) ) {
-              for ( var i = 0 ; i < query.args.length ; i++ ) {
-                var q = query.args[i];
-  
-                // recurse into nested OR
-                if ( foam.mlang.predicate.Or.isInstance(q) ) {
-                  q = isExprMatch(model, q);
-                  if ( q ) return q;
-                  continue;
-                }
-  
-                if ( model.isInstance(q) && isIndexed(q.arg1) ) {
-                  query.args[i] = this.True;
-                  query = query.partialEval();
-                  if ( query === this.True ) query = null;
-                  return q;
-                }
-              }
-            }
-          }
-          return undefined;
-        };
-  
-        // accumulate range limits so we can make as specific query as possible
-        var ranges = {};
-        for (var ax = 0; ax < space.length; ++ax) {
-          ranges[space[ax][0].name] = -Infinity;
-          ranges[space[ax][1].name] = Infinity;
-        }
-  
-        function findAxis(name) {
-          for (var ax = 0; ax < space.length; ++ax) {
-            var a = space[ax];
-            if ( a[0].name == name ||  a[1].name == name ) {
-              return a;
-            }
-          }
-          return null;
-        }
-  
-        var args;
-        var axis;
-        // Each hit of isExprMatch will pick off one thing ANDed at the top
-        // level. Since all these bounds apply at once, keep shrinking the
-        // search bounds.
-        // TODO: use compare instead of Math.min, to allow for non-number ranges
-        var buckets;
-        if ( whereQuery )
-  
-        // Equals will completely restrict one axis to a zero-width range (one value)
-        while ( args = isExprMatch(this.Eq) ) {
-          var name = args.arg1.name;
-          var r = args.arg2.f();
-          // accumulate the bounds (largest minimum, smallest maximum)
-          ranges[name] = r;
-        }
-  
-        // Less than restricts the maximum for an axis
-        while ( args = ( isExprMatch(this.Lte) || isExprMatch(this.Lt) ) ) {
-          var name = args.arg1.name;
-          var r = args.arg2.f();
-          axis = findAxis(name);
-          if ( axis ) {
-            ranges[axis[1].name] = Math.min( ranges[axis[1].name], r );
-          }
-        }
-  
-        // Greater than restricts the minimum for an axis
-        while ( args = ( isExprMatch(this.Gte) || isExprMatch(this.Gt) ) ) {
-          var name = args.arg1.name;
-          var r = args.arg2.f();
-          axis = findAxis(name);
-          if ( axis ) {
-            ranges[axis[0].name] = Math.max( ranges[axis[0].name], r );
-          }
-        }
-    
-        // check for buckets with the bounds found so far
-        buckets = this.findBucketsFn(ranges);
-  
-        // TODO: multiple ANDed intersects should reduce the search area,
-        // ORed should cause multiple searches
-        while ( args = ( isExprMatch(this.Intersects) || isExprMatch(this.ContainedBy) ) ) {
-          if ( ! buckets ) { buckets = []; }
-          buckets = buckets.concat(this.findBucketsFn(args.arg2.f()));
-        }
+      } else {
+        buckets = this.queryBuckets_(options);
       }
-      
+
       var fc = this.FlowControl.create();
       var duplicates = {};
       if ( buckets ) {

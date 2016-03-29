@@ -21,9 +21,7 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'Entity',
-  requires: [
-    'foam.mlang.Expressions',
-  ],
+  extends: 'foam.mlang.Expressions',
   imports: [
     'worldDAO',
     'audioManager',
@@ -110,6 +108,16 @@ foam.CLASS({
       }
     },
     {
+      /** AABB, third dimension: player, bullet, enemy, etc. */
+      class: 'Simple',
+      name: 'bplane',
+    },
+    {
+      /** AABB, by default objects occupy a single plane */
+      name: 'bplane2',
+      getter: function() { return this.bplane; }
+    },
+    {
       /** The EntityManager that owns this entity. */
       name: 'manager'
     },
@@ -117,22 +125,40 @@ foam.CLASS({
       /** The renderable Sprite for this entity. */
       name: 'sprite'
     },
+    {
+      /** The plane to check for collisions against */
+      class: 'Simple',
+      name: 'collisionPlane',
+    },
+    {
+      /** The bounding box of the collision target area. (search
+        for entities in this box when colliding) */
+      name: 'targetBounds_',
+      factory: function() {
+//         var proxy = Object.create(this);
+//         proxy.bplane = this.collisionPlane;
+//         proxy.bplane2 = this.collisionPlane;
+//         return proxy;
+        return this;
+//         var self = this;
+//         var obj = { owner_: this };
+//         Object.defineProperty(obj, 'bx', { get: function() { return this.owner_.bx; } });
+//         Object.defineProperty(obj, 'by', { get: function() { return this.owner_.by; } });
 
+//         Object.defineProperty(obj, 'bx2', { get: function() { return this.owner_.bx2; } });
+//         Object.defineProperty(obj, 'by2', { get: function() { return this.owner_.by2; } });
+
+//         Object.defineProperty(obj, 'bplane', { get: function() { return this.owner_.collisionPlane; } });
+//         Object.defineProperty(obj, 'bplane2', { get: function() { return this.owner_.collisionPlane; } });
+//         return obj;
+      }
+    },
     {
       name: 'overlappingEntities',
       factory: function() {
-        var m = this.Expressions.create();
-        var self = this;
-
-        // TODO: this should be an intersect mlang
-        // TODO: radius check too
-//         return this.worldDAO.where(m.AND(
-//           m.GTE(this.cls_.BX2, bx), m.LTE(this.cls_.BX, bx2),
-//           m.GTE(this.cls_.BY2, by), m.LTE(this.cls_.BY, by2)
-//         ));
-        return this.worldDAO.where(m.INTERSECTS(
+        return this.worldDAO.where(this.INTERSECTS(
           this.worldDAO.space,
-          m.BY_REF(this)
+          this.BY_REF(this.targetBounds_)
         ));
       }
     }
@@ -151,7 +177,8 @@ foam.CLASS({
       this.arotation = this.arotation || 0;
 
       this.br = this.br || 10;
-
+      this.bplane = this.bplane || 0;
+      this.collisionPlane = this.collisionPlane || 0;
     },
 
     /** Applies movement and physics calculations required for a frame. */
