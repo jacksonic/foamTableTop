@@ -79,6 +79,7 @@ foam.CLASS({
   requires: [
     'foam.graphics.Canvas',
     'tabletop.TestEntity',
+    'tabletop.TestBoom',
     'foam.dao.SpatialHashDAO',
     'foam.graphics.CView',
     'foam.dao.ArraySink',
@@ -163,6 +164,11 @@ foam.CLASS({
             vy: Math.random() * 10 - 5,
           }));
       }
+      this.worldDAO.put(this.TestBoom.create({
+        id: 'blast',
+        x: 300,
+        y: 200,
+      }));
 //       this.worldDAO.put(this.TestEntity.create({
 //         id: 'testbullet',
 //         x: 2000,

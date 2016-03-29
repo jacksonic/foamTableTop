@@ -14,14 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 foam.CLASS({
   package: 'tabletop',
-  name: 'TestSprite',
+  name: 'imageSprite',
   extends: 'foam.graphics.CView',
   implements: ['tabletop.Sprite'],
+  imports: [
+    'time'
+  ],
   properties: [
-    [ 'imageIndex', 0 ],
+    { /** image to display */
+      name: 'imageIndex'
+    },
+    { /** loop or terminating animation */
+      name: 'loop',
+      class: 'Boolean',
+      defaultValue: false,
+    },
+    { /** framerate of animation, in milliseconds per frame */
+      name: 'framerate',
+      defaultValue: 33,
+    },
+    { /** last time the animation was updated */
+      name: 'lastDrawn',
+      defaultValue: 0,
+    },
+    { /** next frame in the animation to draw */
+      name: 'nextFrame',
+      defaultValue: 0,
+    },
     {
       name: 'imageElement',
       factory: function() {
@@ -39,21 +60,62 @@ foam.CLASS({
     function paintSelf(x) {
       var hw = window.innerWidth / 3840 / 2;
       var imageInfo = this.bitblt[this.imageIndex];
-      x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
-        -(imageInfo.centerX - imageInfo.left) * hw,
-        -(imageInfo.centerY - imageInfo.top) * hw,
-        imageInfo.width*hw*2,
-        imageInfo.height*hw*2
-      );
+      if (Object.prototype.toString.apply(imageInfo.sequence) === '[object Array]') {
+        if (this.lastDrawn + this.framerate < this.time) {
+          if (this.nextFrame === imageInfo.sequence.length) {
+            if (this.loop) {
+              this.nextFrame = 0;
+            } else {
+             //this.destroy() //code for terminating upon animation completion
+            }
+          }
+          this.nextFrame++;
+          this.lastDrawn = this.time;
+        }
+        x.drawImage(this.imageElement,imageInfo.sequence[this.nextFrame].left,imageInfo.sequence[this.nextFrame].top,imageInfo.sequence[this.nextFrame].width,imageInfo.sequence[this.nextFrame].height,
+          -(imageInfo.sequence[this.nextFrame].centerX - imageInfo.sequence[this.nextFrame].left) * hw,
+          -(imageInfo.sequence[this.nextFrame].centerY - imageInfo.sequence[this.nextFrame].top) * hw,
+          imageInfo.sequence[this.nextFrame].width*hw*2,
+          imageInfo.sequence[this.nextFrame].height*hw*2
+        );
+      }
+      else {
+        x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
+          -(imageInfo.centerX - imageInfo.left) * hw,
+          -(imageInfo.centerY - imageInfo.top) * hw,
+          imageInfo.width*hw*2,
+          imageInfo.height*hw*2
+        );
+      }
     }
+  ]
+});
+
+/*foam.CLASS({
+  package: 'tabletop',
+  name: 'TestSprite',
+  extends: 'foam.graphics.CView',
+  implements: ['tabletop.imageSprite'],
+  properties: [
+    [ 'imageIndex', 0 ],
   ]
 });
 
 foam.CLASS({
   package: 'tabletop',
+  name: 'TestExplosion',
+  extends: 'foam.graphics.CView',
+  implements: ['tabletop.imageSprite'],
+  properties: [
+    [ 'imageIndex', 8 ],
+  ]
+});*/
+
+foam.CLASS({
+  package: 'tabletop',
   name: 'TestEntity',
   implements: ['tabletop.Entity' ],
-  requires: [ 'tabletop.TestSprite' ],
+  requires: [ 'tabletop.imageSprite' ],
   imports: [
     'canvas'
   ],
@@ -62,7 +124,7 @@ foam.CLASS({
       name: 'sprite',
       factory: function() {
         this.propertyChange.sub(this.updateSprite);
-        return this.TestSprite.create({
+        return this.imageSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
@@ -128,5 +190,43 @@ foam.CLASS({
     }
   ]
 });
+foam.CLASS({
+  package: 'tabletop',
+  name: 'TestBoom',
+  implements: ['tabletop.Entity' ],
+  requires: [ 'tabletop.imageSprite' ],
+  imports: [
+    'canvas'
+  ],
+  properties: [
+    {
+      name: 'sprite',
+      factory: function() {
+        this.propertyChange.sub(this.updateSprite);
+        return this.imageSprite.create({
+          x: this.x,
+          y: this.y,
+          rotation: this.rotation,
+          imageIndex: 8,
+          loop: true,
+          framerate: 100,
+        });
+      }
+    }
+  ],
+  listeners: [
 
+    {
+      /** This is standing in for buggy direct bindings */
+      name: 'updateSprite',
+      //isFramed: true, // ends up taking too much time
+      code: function() {
+        var s = this.sprite;
+        /*s.x = this.x;
+        s.y = this.y;
+        s.rotation = this.rotation;*/
+      }
+    }
+  ]
+});
 

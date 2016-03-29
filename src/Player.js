@@ -23,7 +23,7 @@ foam.CLASS({
     'tabletop.Physics'
   ],
   requires: [
-    'tabletop.TestSprite',
+    'tabletop.imageSprite',
     'tabletop.BulletEntity',
   ],
   imports: [
@@ -38,10 +38,11 @@ foam.CLASS({
       name: 'sprite',
       factory: function() {
         //this.propertyChange.sub(this.updateSprite);
-        var s = this.TestSprite.create({
+        var s = this.imageSprite.create({
           x: this.x,
           y: this.y,
-          rotation: this.rotation
+          rotation: this.rotation,
+          imageIndex: 0,
         });
         this.canvas.cview.children.push(s);
         //this.canvas.cview.addChild_(s);
@@ -124,7 +125,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'BulletEntity',
   implements: ['tabletop.Entity' ],
-  requires: [ 'tabletop.TestSprite' ],
+  requires: [ 'tabletop.imageSprite' ],
   imports: ['canvas'],
   properties: [
     [ 'br', 3 ],
@@ -132,7 +133,7 @@ foam.CLASS({
       name: 'sprite',
       factory: function() {
         this.propertyChange.sub(this.updateSprite);
-        var s = this.TestSprite.create({
+        var s = this.imageSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
