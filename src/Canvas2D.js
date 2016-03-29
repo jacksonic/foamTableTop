@@ -33,9 +33,7 @@ foam.CLASS({
     },
     { /** framerate of animation, in milliseconds per frame */
       name: 'framerate',
-      factory: function() {
-        return this.time;
-      }
+      defaultValue: 33,
     },
     { /** last time the animation was updated */
       name: 'lastDrawn',
@@ -69,6 +67,7 @@ foam.CLASS({
               this.nextFrame = -1;
             } else {
              //this.destroy() //code for terminating upon animation completion
+             return;
             }
           }
           this.nextFrame++;
@@ -211,7 +210,7 @@ foam.CLASS({
           rotation: this.rotation,
           imageIndex: 8,
           loop: true,
-          framerate: 100,
+          framerate: 200,
         });
       }
     }
