@@ -14,13 +14,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+foam.CLASS({
+  refines: 'foam.graphics.CView',
+
+  methods: [
+    function addChild(c) {
+      cs = this.children;
+      for (var i = 0; i < cs.length; ++i) {
+        if ( cs[i] == c ) {
+          return false;
+        }
+      }
+      cs.push(c);
+      this.addChild_(c);
+      return true;
+    },
+    function removeChild(c) {
+      cs = this.children;
+      for (var i = 0; i < cs.length; ++i) {
+        if ( cs[i] == c ) {
+          this.removeChild_(c);
+          cs.splice(i, 1);
+          return true;
+        }
+      }
+      return false;
+    },
+  ]
+});
+
+
 foam.CLASS({
   package: 'tabletop',
   name: 'ImageSprite',
   extends: 'foam.graphics.CView',
-  implements: ['tabletop.Sprite'],
+  implements: [
+    'tabletop.Sprite'
+  ],
   imports: [
-    'time'
+    'time',
+    'canvas',
   ],
   properties: [
     {
@@ -61,6 +95,14 @@ foam.CLASS({
     }
   ],
   methods: [
+    function install() {
+      this.canvas.cview.addChild(this);
+    },
+
+    function uninstall() {
+      this.canvas.cview.removeChild(this);
+    },
+
     function doTransform(x) {
       // quick path to skip caluclating the matrix
       x.translate(this.x, this.y);

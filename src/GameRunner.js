@@ -166,7 +166,7 @@ foam.CLASS({
       for (var k = 0; k < 40; ++k) {
 //        x = Math.random() * this.canvas.width;
 //        y = Math.random() * this.canvas.height;
-          this.worldDAO.put(this.TestEntity.create({
+          this.TestEntity.create({
             id: 'test'+k,
             x: (k%10) * spacing + cx,
             y: Math.floor(k/10) * spacing + cy,
@@ -175,55 +175,14 @@ foam.CLASS({
 //            ay: Math.random() * 20 - 10,
             vx: Math.random() * 10 - 5,
             vy: Math.random() * 10 - 5,
-          }));
+          }).install();
       }
-      this.worldDAO.put(this.TestBoom.create({
+      this.TestBoom.create({
         id: 'blast',
         br: 11,
         x: 300,
         y: 200,
-      }));
-//       this.worldDAO.put(this.TestEntity.create({
-//         id: 'testbullet',
-//         x: 2000,
-//         y: 300,
-//         br: 20,
-//         ax: -20,
-//       }));
-//       this.worldDAO.put(this.TestEntity.create({
-//         id: 'testbullet2',
-//         x: 4000,
-//         y: 500,
-//         br: 20,
-//         ax: -20,
-//       }));
-//       this.worldDAO.put(this.TestEntity.create({
-//         id: 'testbullet3',
-//         x: 6000,
-//         y: 400,
-//         br: 20,
-//         ax: -20,
-//       }));
-//       this.worldDAO.put(this.TestEntity.create({
-//         id: 'testbullet4',
-//         x: 7000,
-//         y: 200,
-//         br: 20,
-//         ax: -20,
-//       }));
-//       this.worldDAO.put(this.TestEntity.create({
-//         id: 'testbullet5',
-//         x: 8000,
-//         y: 300,
-//         br: 20,
-//         ax: -20,
-//       }));
-//
-//
-      // make views
-      var views = this.ArraySink.create();
-      this.worldDAO.select(this.Map.create({ f: this.Entity.SPRITE.f, delegate: views }));
-      this.canvas.cview.children = views.a;
+      }).install();
 
       // insert canvas
       document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;

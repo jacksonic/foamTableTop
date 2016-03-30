@@ -38,16 +38,12 @@ foam.CLASS({
     {
       name: 'sprite',
       factory: function() {
-        //this.propertyChange.sub(this.updateSprite);
-        var s = this.ImageSprite.create({
+        return this.ImageSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
           imageIndex: 0,
         });
-        this.canvas.cview.children.push(s);
-        //this.canvas.cview.addChild_(s);
-        return s;
       }
     },
     {
@@ -81,7 +77,7 @@ foam.CLASS({
       }
     },
     function returnToPool(e) {
-      this.worldDAO.remove(e);
+      e.uninstall();
       this.bulletPool.push(e);
     },
   ],
@@ -99,8 +95,7 @@ foam.CLASS({
         this.aimTowards({ x: this.worldWidth/2 + Math.random()*200-100,
           y: this.worldHeight/2 + Math.random()*200-100 }, b, 400);
         this.rotation = b.rotation + Math.PI; // TODO: off by 180?
-        b.sprite;
-        this.worldDAO.put(b);
+        b.install();
         this.audioManager.play("impact", this);
       }
     }
@@ -122,8 +117,7 @@ foam.CLASS({
     {
       name: 'sprite',
       factory: function() {
-        //this.propertyChange.sub(this.updateSprite);
-        var s = this.ImageSprite.create({
+        return this.ImageSprite.create({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
@@ -131,9 +125,6 @@ foam.CLASS({
           scaleX: 0.2,
           scaleY: 0.2
         });
-        this.canvas.cview.children.push(s);
-        //this.canvas.cview.addChild_(s);
-        return s;
       }
     },
     {
@@ -178,9 +169,8 @@ foam.CLASS({
   ],
   methods: [
     function init() {
-      this.worldDAO.put(this.main);
+      this.main.install();
       this.corner = this.corner;
-      this.main.sprite;
     }
   ],
 });

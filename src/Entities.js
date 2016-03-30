@@ -197,15 +197,14 @@ foam.CLASS({
       this.controller && this.controller.frameStep(this, ft);
     },
 
-    function cleanup() {
+    function install() {
+      this.worldDAO.put(this);
+      this.sprite.install();
+    },
+
+    function uninstall() {
       this.worldDAO.remove(this);
-
-      var childs = this.canvas.cview.children;
-      var idx = childs.indexOf(this.sprite);
-      if ( idx >= 0 ) { childs.splice(idx, 1); }
-      //this.canvas.cview.removeChild_(this.sprite);
-
-      //this.propertyChange.unsubscribe(this.updateSprite);
+      this.sprite.uninstall();
     }
   ],
   listeners: [
@@ -304,7 +303,7 @@ foam.CLASS({
 
 
 /**
-  Base class for entity Sprites. Sprites can form trees, so a single
+  Interface for entity Sprites. Sprites can form trees, so a single
   Sprite for an Entity may have many sub-sprites inside, which the entity
   may control (turrets, for instance)
 */
@@ -326,6 +325,16 @@ foam.CLASS({
 //       name: 'entity'
 //     },
     // TODO: image, offset....
+  ],
+  methods: [
+    /** Adds the sprite to the scene */
+    function install() {
+
+    },
+    /** Removes the sprite from the scene */
+    function uninstall() {
+
+    }
   ],
 });
 
