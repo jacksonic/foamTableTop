@@ -25,13 +25,14 @@ foam.CLASS({
   requires: [
     'tabletop.ImageSprite',
     'tabletop.BulletEntity',
+    'foam.core.ObjectPool',
   ],
   imports: [
     'canvas',
     'audioManager',
   ],
   constants: {
-    SHOT_COOL_DOWN: 0.3
+    SHOT_COOL_DOWN: 0.1
   },
   properties: [
     {
@@ -56,7 +57,12 @@ foam.CLASS({
     [ 'coolDown', 1 ],
     {
       name: 'bulletPool',
-      factory: function() { return []; }
+      factory: function() { return this.ObjectPool.create({
+        of: this.BulletEntity,
+        resetArgs: {
+          x: 99999
+        }
+      }); }
     },
   ],
 
@@ -73,21 +79,9 @@ foam.CLASS({
       }
     },
     function returnToPool(e) {
-      this.bulletPool.push(e);
-      e.x = 9999999;
       this.worldDAO.remove(e);
+      this.bulletPool.push(e);
     },
-    function grabFromPool(args) {
-      if (this.bulletPool.length) {
-        var b = this.bulletPool.splice(-1, 1)[0];
-        for (var key in args) {
-          b[key] = args[key];
-        }
-        return b;
-      } else {
-        return this.BulletEntity.create(args);
-      }
-    }
   ],
 
   listeners: [
@@ -105,7 +99,7 @@ foam.CLASS({
     {
       name: 'shoot',
       code: function() {
-        var b = this.grabFromPool({
+        var b = this.bulletPool.pop({
             x: this.x,
             y: this.y,
             rotation: this.rotation,
