@@ -22,6 +22,9 @@ foam.CLASS({
   package: 'tabletop',
   name: 'Entity',
   extends: 'foam.mlang.Expressions',
+  requires: [
+    'tabletop.EntityController',
+  ],
   imports: [
     'worldDAO',
     'audioManager',
@@ -126,6 +129,10 @@ foam.CLASS({
       name: 'sprite'
     },
     {
+      /** The controller responsible to moving/targetting the entity */
+      name: 'controller',
+    },
+    {
       /** The single plane to check for collisions against // TODO: allow multiple? */
       class: 'Simple',
       name: 'collisionPlane',
@@ -185,23 +192,10 @@ foam.CLASS({
 
     /** Applies movement and physics calculations required for a frame. */
     function moveStep(/* number // seconds since the last frame */ ft) {
-      /** Changes velocity of the given entity. */
-      this.vx += this.ax * ft;
-      this.vy += this.ay * ft;
-      this.vrotation += this.arotation * ft;
-
-      /** Changes position of the given entity. */
-      this.x += this.vx * ft;
-      this.y += this.vy * ft;
-      this.rotation += this.vrotation * ft;
-
-      this.collide();
-
-      this.updateSprite();
-      this.worldDAO.put(this);
+      this.controller && this.controller.frameStep(this, ft);
     },
 
-    function destroy() {
+    function cleanup() {
       this.worldDAO.remove(this);
 
       var childs = this.canvas.cview.children;
@@ -212,71 +206,100 @@ foam.CLASS({
       //this.propertyChange.unsubscribe(this.updateSprite);
     }
   ],
-
   listeners: [
-    /** Checks for collisions with nearby entities */
     {
-      name: 'collide',
-      //isMerged: true,
-      //mergeDelay: 500,
+      /** This is standing in for buggy direct bindings */
+      name: 'updateSprite',
+      //isFramed: true, // ends up taking too much time
       code: function() {
-        //if ( Math.random() > 0.33 ) return; // skip out on random checks to save time
-
-        var self = this;
-        // TODO: radius check too
-        this.overlappingEntities.select({
-          put: function(e) {
-            self.collideWith(e)
-          },
-          remove: function() {},
-          error: function() {},
-          eof: function() {},
-        });
-      }
-    },
-    {
-      name: 'collideWith',
-      code: function(e) {
-        if ( this === e ) return;
-
-        // cheat to only check one of each pair of colliders, only check the one with the smaller X
-        // this is not required for things that collide with only certain classes of other things (bullets)
-        // moveRequired indicates that the other entity will have collision checking done
-        //if ( this.x > e.x && e.moveRequired ) return;
-
-        // position based
-        // var dx = this.x - e.x, dy = this.y - e.y;
-        // var len = Math.sqrt(dx*dx+dy*dy) || 1;
-        //
-        // var nx = -(dx / len) * (this.br - len);
-        // var ny = -(dy / len) * (this.br - len);
-        // this.vx += nx;
-        // this.vy += ny;
-        // e.vx -= nx;
-        // e.vy -= ny;
-
-        //play impact sound
-        this.audioManager.play("impact", this);
-
-        // position angle
-        var ax = this.x - e.x, ay = this.y - e.y;
-        var len = Math.sqrt(ax*ax+ay*ay) || 1;
-        ax = ax / len; // normal vector for direction between the ents
-        ay = ay / len;
-
-        // velocity based
-        var dx = (this.vx - e.vx),
-            dy = (this.vy - e.vy);
-        var vlen = (Math.sqrt(dx*dx+dy*dy) || 1) / 2;
-
-        this.vx = (ax * vlen);
-        this.vy = (ay * vlen);
-        e.vx = -ax * vlen;
-        e.vy = -ay * vlen;
+        var s = this.sprite;
+        s.x = this.x;
+        s.y = this.y;
+        s.rotation = this.rotation;
       }
     }
   ]
 });
+
+foam.CLASS({
+  package: 'tabletop',
+  name: 'EntityController',
+  imports: [ 'worldDAO' ],
+  axioms: [ foam.pattern.Singleton ],
+
+  constants: {
+    ENTITY_SINK: {
+      put: null,
+      remove: function() {},
+      error: function() {},
+      eof: function() {},
+    },
+  },
+
+  methods: [
+    function frameStep(
+      /* tabletop.Entity // the entity to adjust */ e,
+      /* number // seconds since the last frame  */ ft) {
+      this.move(e, ft);
+      this.collide(e, ft);
+      e.updateSprite();
+      this.worldUpdate(e);
+    },
+
+    /** Applies movement and physics calculations required for a frame. */
+    function move(e, ft) {
+      /** Changes velocity of the given entity. */
+      e.vx += e.ax * ft;
+      e.vy += e.ay * ft;
+      e.vrotation += e.arotation * ft;
+
+      /** Changes position of the given entity. */
+      e.x += e.vx * ft;
+      e.y += e.vy * ft;
+      e.rotation += e.vrotation * ft;
+    },
+
+    function collide(e, ft) {
+      var collideWith = this.collideWith;
+      // TODO: radius check too
+      var s = Object.create(this.ENTITY_SINK);
+      s.put = function(o) {
+        collideWith(e, o, ft);
+      }
+      e.overlappingEntities.select(s);
+    },
+
+    function collideWith(e, o, ft) {
+      if ( e === o ) return;
+
+      //play impact sound
+      e.audioManager.play("impact", e);
+
+      // position angle
+      var ax = e.x - o.x, ay = e.y - o.y;
+      var len = Math.sqrt(ax*ax+ay*ay) || 1;
+      ax = ax / len; // normal vector for direction between the ents
+      ay = ay / len;
+
+      // velocity based
+      var dx = (e.vx - o.vx),
+          dy = (e.vy - o.vy);
+      var vlen = (Math.sqrt(dx*dx+dy*dy) || 1) / 2;
+
+      e.vx = (ax * vlen);
+      e.vy = (ay * vlen);
+      o.vx = -ax * vlen;
+      o.vy = -ay * vlen;
+    },
+
+    function worldUpdate(e) {
+      this.worldDAO.put(e);
+    }
+  ]
+});
+
+
+
 
 /**
   Base class for entity Sprites. Sprites can form trees, so a single

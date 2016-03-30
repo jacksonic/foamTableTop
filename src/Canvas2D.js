@@ -68,7 +68,7 @@ foam.CLASS({
       x.scale(this.scaleX, this.scaleY);
     },
     function paintSelf(x) {
-      var hw = window.innerWidth / 3840 / 2;
+      var hw = 0.2;
       var imageInfo = this.bitblt[this.imageIndex];
       if (Object.prototype.toString.apply(imageInfo.sequence) === '[object Array]') {
         if (this.lastDrawn + this.framerate < this.time) {
@@ -125,7 +125,10 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'TestEntity',
-  requires: [ 'tabletop.ImageSprite' ],
+  requires: [
+    'tabletop.ImageSprite',
+    'tabletop.BasicController',
+  ],
   extends: 'tabletop.Entity',
   imports: [
     'canvas'
@@ -142,69 +145,16 @@ foam.CLASS({
           imageIndex: 0,
         });
       }
-    }
-  ],
-  methods: [
-    /** Also check for out of bounds and destroy self */
-    function moveStep(/* number // seconds since the last frame */ ft) {
-      this.SUPER(ft);
-
-      if ( this.x > 1101 || this.y > 801 || this.x < -101 || this.y < -101 ) {
-        //this.destroy();
-        this.vx = 0;
-        this.vy = 0;
-        switch (Math.floor(Math.random() * 4)) {
-        case 0:
-          this.x = -100;
-          this.y = 350 + Math.random() * 50;
-          this.ax = 40 + Math.random()*50;
-          this.ay = 0;
-          this.rotation = Math.PI*1.5;
-          break;
-        case 1:
-          this.x = 1100;
-          this.y = 350 + Math.random() * 50;
-          this.ax = -(40 + Math.random()*50);
-          this.ay = 0;
-          this.rotation = Math.PI*0.5;
-          break;
-        case 2:
-          this.y = -80;
-          this.x = 500 + Math.random() * 50;
-          this.ax = 0;
-          this.ay = 40 + Math.random()*50;
-          this.rotation = Math.PI;
-          break;
-        case 3:
-          this.y = 800;
-          this.x = 500 + Math.random() * 50;
-          this.ax = 0;
-          this.ay = -(40 + Math.random()*50);
-          this.rotation = 0;
-          break;
-        };
-      }
-    },
-  ],
-  listeners: [
-    {
-      /** Checks for collisions with nearby entities */
-      name: 'collide',
-      code: function() {}
     },
     {
-      /** This is standing in for buggy direct bindings */
-      name: 'updateSprite',
-      //isFramed: true, // ends up taking too much time
-      code: function() {
-        var s = this.sprite;
-        s.x = this.x;
-        s.y = this.y;
-        s.rotation = this.rotation;
+      name: 'controller',
+      factory: function() {
+        return this.BasicController.create();
       }
     }
-  ]
+  ],
 });
+
 foam.CLASS({
   package: 'tabletop',
   name: 'TestBoom',
@@ -229,10 +179,5 @@ foam.CLASS({
       }
     },
   ],
-  listeners: [
-    {
-      name: 'updateSprite', code: function(){},
-    }
-  ]
 });
 

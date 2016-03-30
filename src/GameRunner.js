@@ -223,8 +223,6 @@ foam.CLASS({
       document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;
 
       window.onresize = this.windowResize;
-      
-      
 
       this.frameStepper;
     },
