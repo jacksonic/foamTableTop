@@ -94,6 +94,8 @@ foam.CLASS({
     'canvas',
     'time',
     'audioManager',
+    'worldWidth',
+    'worldHeight',
   ],
   properties: [
     {
@@ -138,7 +140,9 @@ foam.CLASS({
           this.PlayerManager.create({ corner: [1,1] })
         ];
       }
-    }
+    },
+    [ 'worldWidth', 1600 ],
+    [ 'worldHeight', 900 ],
   ],
   methods: [
     function init() {
@@ -157,13 +161,15 @@ foam.CLASS({
       // create test entities
       var x, y;
       var spacing = 80;
+      var cx = this.worldWidth / 2 - (5 * spacing);
+      var cy = this.worldHeight / 2 - (2 * spacing);
       for (var k = 0; k < 40; ++k) {
 //        x = Math.random() * this.canvas.width;
 //        y = Math.random() * this.canvas.height;
           this.worldDAO.put(this.TestEntity.create({
             id: 'test'+k,
-            x: (k%10) * spacing + 100,
-            y: Math.floor(k/10) * spacing + 200,
+            x: (k%10) * spacing + cx,
+            y: Math.floor(k/10) * spacing + cy,
             br: 10,
 //            ax: Math.random() * 20 - 10,
 //            ay: Math.random() * 20 - 10,
@@ -223,6 +229,7 @@ foam.CLASS({
       document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;
 
       window.onresize = this.windowResize;
+      this.windowResize();
 
       this.frameStepper;
     },
@@ -247,6 +254,11 @@ foam.CLASS({
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
         this.canvas.element = this.canvas.element;
+
+        var scale = Math.min(this.canvas.width / this.worldWidth,
+                             this.canvas.height / this.worldHeight);
+        this.canvas.cview.scaleX = scale;
+        this.canvas.cview.scaleY = scale;
       }
     }
   ]

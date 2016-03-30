@@ -19,8 +19,12 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'EntityController',
-  imports: [ 'worldDAO' ],
   axioms: [ foam.pattern.Singleton ],
+  imports: [
+    'worldDAO',
+    'worldWidth',
+    'worldHeight',
+  ],
 
   constants: {
     ENTITY_SINK: {
@@ -101,7 +105,8 @@ foam.CLASS({
   methods: [
     /** Also check for out of bounds and destroy self */
     function worldUpdate(e) {
-      if ( e.x > 1100 || e.y > 800 || e.x < -100 || e.y < -100 ) {
+      if ( e.x > this.worldWidth+100 || e.y > this.worldHeight+100 ||
+           e.x < -100 || e.y < -100 ) {
         //e.destroy();
         e.manager && e.manager.returnToPool(e);
       } else {
@@ -149,36 +154,39 @@ foam.CLASS({
     function move(e, ft) {
       this.SUPER(e, ft);
 
-      if ( e.x > 1100 || e.y > 800 || e.x < -100 || e.y < -100 ) {
+      if ( e.x > this.worldWidth+100 || e.y > this.worldHeight+100 ||
+           e.x < -100 || e.y < -100 ) {
         //e.destroy();
         //e.manager.returnToPool(e);
+        var cx = this.worldWidth / 2 - 25;
+        var cy = this.worldHeight / 2 - 25;
         e.vx = 0;
         e.vy = 0;
         switch (Math.floor(Math.random() * 4)) {
         case 0:
           e.x = -100;
-          e.y = 350 + Math.random() * 50;
+          e.y = cy + Math.random() * 50;
           e.ax = 40 + Math.random()*50;
           e.ay = 0;
           e.rotation = Math.PI*1.5;
           break;
         case 1:
-          e.x = 1100;
-          e.y = 350 + Math.random() * 50;
+          e.x = this.worldWidth + 100;
+          e.y = cy + Math.random() * 50;
           e.ax = -(40 + Math.random()*50);
           e.ay = 0;
           e.rotation = Math.PI*0.5;
           break;
         case 2:
           e.y = -80;
-          e.x = 500 + Math.random() * 50;
+          e.x = cx + Math.random() * 50;
           e.ax = 0;
           e.ay = 40 + Math.random()*50;
           e.rotation = Math.PI;
           break;
         case 3:
-          e.y = 800;
-          e.x = 500 + Math.random() * 50;
+          e.y = this.worldHeight + 100;
+          e.x = cx + Math.random() * 50;
           e.ax = 0;
           e.ay = -(40 + Math.random()*50);
           e.rotation = 0;

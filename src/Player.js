@@ -71,6 +71,8 @@ foam.CLASS({
     function moveStep(/* number // seconds since the last frame */ ft) {
       this.SUPER(ft);
 
+      this.updateSprite();
+
       // Doesn't move
       this.coolDown -= ft;
       if ( this.coolDown < 0 ) {
@@ -86,17 +88,6 @@ foam.CLASS({
 
   listeners: [
     {
-      /** This is standing in for buggy direct bindings, though being framed is handy */
-      name: 'updateSprite',
-      //isFramed: true, // ends up taking too much time
-      code: function() {
-        var s = this.sprite;
-        s.x = this.x;
-        s.y = this.y;
-        s.rotation = this.rotation;
-      }
-    },
-    {
       name: 'shoot',
       code: function() {
         var b = this.bulletPool.pop({
@@ -105,7 +96,9 @@ foam.CLASS({
             rotation: this.rotation,
             manager: this,
           });
-        this.aimTowards({ x: Math.random()*200+400, y: Math.random()*200+250 }, b, 400);
+        this.aimTowards({ x: this.worldWidth/2 + Math.random()*200-100,
+          y: this.worldHeight/2 + Math.random()*200-100 }, b, 400);
+        this.rotation = b.rotation + Math.PI; // TODO: off by 180?
         b.sprite;
         this.worldDAO.put(b);
         this.audioManager.play("impact", this);
@@ -163,6 +156,8 @@ foam.CLASS({
   ],
   imports: [
     'worldDAO',
+    'worldWidth',
+    'worldHeight',
   ],
   properties: [
     {
@@ -175,8 +170,8 @@ foam.CLASS({
       name: 'corner',
       factory: function() { return [0,0]; },
       postSet: function(old,nu) {
-        this.main.x = nu[0] ? 1000 - 20 : 20;
-        this.main.y = nu[1] ? 700 - 20 : 20;
+        this.main.x = nu[0] ? this.worldWidth - 20 : 20;
+        this.main.y = nu[1] ? this.worldHeight - 20 : 20;
         this.main.rotation = Math.PI * ( nu[0] ? 1 : -1 ) * ( nu[1] ? 1/4 : 3/4 );
       }
     }

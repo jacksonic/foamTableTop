@@ -29,6 +29,8 @@ foam.CLASS({
     'worldDAO',
     'audioManager',
     'canvas',
+    'worldWidth',
+    'worldHeight',
   ],
 
   properties: [
