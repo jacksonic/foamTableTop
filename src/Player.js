@@ -146,7 +146,6 @@ foam.CLASS({
 });
 
 
-
 foam.CLASS({
   package: 'tabletop',
   name: 'PlayerManager',

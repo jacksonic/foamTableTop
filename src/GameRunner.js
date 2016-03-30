@@ -253,12 +253,21 @@ foam.CLASS({
       code: function() {
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
-        this.canvas.element = this.canvas.element;
+
+        var ratio = this.worldWidth / this.worldHeight;
+        if ( this.canvas.height * ratio > this.canvas.width ) {
+          this.canvas.height = this.canvas.width / ratio;
+        } else if ( this.canvas.width / ratio > this.canvas.height ) {
+          this.canvas.width = this.canvas.height * ratio;
+        }
 
         var scale = Math.min(this.canvas.width / this.worldWidth,
                              this.canvas.height / this.worldHeight);
         this.canvas.cview.scaleX = scale;
         this.canvas.cview.scaleY = scale;
+
+        // reset DOM canvas element
+        this.canvas.element = this.canvas.element;
       }
     }
   ]
