@@ -202,11 +202,21 @@ foam.CLASS({
   package: 'tabletop',
   name: 'TestBoom',
   extends: 'tabletop.Entity',
-  requires: [ 'tabletop.ImageSprite' ],
+  requires: [
+    'tabletop.ImageSprite',
+    'tabletop.BasicController',
+  ],
   imports: [
     'canvas'
   ],
   properties: [
+    [ 'ax', 100 ],
+    {
+      name: 'controller',
+      factory: function() {
+        return this.BasicController.create();
+      }
+    },
     {
       name: 'sprite',
       factory: function() {
@@ -216,10 +226,10 @@ foam.CLASS({
           y: this.y,
           rotation: this.rotation,
           imageIndex: 8,
-          //loop: true,
+          loop: true,
           framerate:33,
-          scaleX: 0.5,
-          scaleY: 0.5
+          scaleX: 0.2,
+          scaleY: 0.2
         });
       }
     },

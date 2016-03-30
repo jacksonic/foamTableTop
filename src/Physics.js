@@ -22,12 +22,15 @@ foam.CLASS({
 
   methods: [
 
-    function aimTowards(src, dst, velocity) {
+    function aimTowards(src, dst, velocity, opt_angleAdjust) {
       var dx = src.x - dst.x;
       var dy = src.y - dst.y;
       var theta = Math.atan2(dy,dx);
-      var r     = Math.sqrt(dx*dx+dy*dy);
-      r = r < 0 ? Math.max(-velocity, r) : Math.min(velocity, r);
+      //var r     = Math.sqrt(dx*dx+dy*dy);
+      //r = r < 0 ? Math.max(-velocity, r) : Math.min(velocity, r);
+      var r = velocity;
+
+      theta = theta + (opt_angleAdjust || 0);
 
       dst.vx = r*Math.cos(theta);
       dst.vy = r*Math.sin(theta);

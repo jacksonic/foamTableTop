@@ -189,6 +189,7 @@ foam.CLASS({
 
       window.onresize = this.windowResize;
       this.windowResize();
+      this.canvas.element.addEventListener("mousedown", this.mouseDownEvent, false);
 
       this.frameStepper;
     },
@@ -228,7 +229,27 @@ foam.CLASS({
         // reset DOM canvas element
         this.canvas.element = this.canvas.element;
       }
-    }
+    },
+    {
+      name: 'mouseDownEvent',
+      code: function(e) {
+        // find event location in world coords
+        var scale = Math.min(this.canvas.width / this.worldWidth,
+                             this.canvas.height / this.worldHeight);
+        var x = (e.clientX - this.canvas.element.offsetLeft) / scale;
+        var y = (e.clientY - this.canvas.element.offsetTop) / scale;
+
+        // deliver to player based on quadrant
+        var corner = [ x > this.worldWidth/2, y > this.worldHeight/2 ];
+        for (var i = 0; i < this.players.length; ++i) {
+          if ( ( ( !!this.players[i].corner[0] ) == corner[0] ) &&
+               ( ( !!this.players[i].corner[1] ) == corner[1] )) {
+            this.players[i].clickEvent(x, y);
+            break;
+          }
+        }
+      }
+    },
   ]
 });
 var g = tabletop.GameRunner.create();

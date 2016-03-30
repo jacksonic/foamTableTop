@@ -60,6 +60,10 @@ foam.CLASS({
         }
       }); }
     },
+    {
+      name: 'target',
+      factory: function() { return { x: 500, y: 350 }; }
+    },
   ],
 
   methods: [
@@ -92,8 +96,7 @@ foam.CLASS({
             rotation: this.rotation,
             manager: this,
           });
-        this.aimTowards({ x: this.worldWidth/2 + Math.random()*200-100,
-          y: this.worldHeight/2 + Math.random()*200-100 }, b, 400);
+        this.aimTowards({ x: this.target.x, y: this.target.y }, b, 400, Math.random() * 0.2 - 0.1);
         this.rotation = b.rotation + Math.PI; // TODO: off by 180?
         b.install();
         this.audioManager.play("impact", this);
@@ -171,6 +174,12 @@ foam.CLASS({
     function init() {
       this.main.install();
       this.corner = this.corner;
+    },
+    /** Click/tap from user, in world coordinates */
+    function clickEvent(x,y) {
+      console.log('player click', this.corner, x, y);
+
+      this.main.target = { x: x, y: y };
     }
   ],
 });
