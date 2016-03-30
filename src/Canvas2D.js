@@ -68,7 +68,6 @@ foam.CLASS({
       x.scale(this.scaleX, this.scaleY);
     },
     function paintSelf(x) {
-      var hw = 0.2;
       var imageInfo = this.bitblt[this.imageIndex];
       if (Object.prototype.toString.apply(imageInfo.sequence) === '[object Array]') {
         if (this.lastDrawn + this.framerate < this.time) {
@@ -84,18 +83,18 @@ foam.CLASS({
           this.lastDrawn = this.time;
         }
         x.drawImage(this.imageElement,imageInfo.sequence[this.nextFrame].left,imageInfo.sequence[this.nextFrame].top,imageInfo.sequence[this.nextFrame].width,imageInfo.sequence[this.nextFrame].height,
-          -(imageInfo.sequence[this.nextFrame].centerX - imageInfo.sequence[this.nextFrame].left) * hw,
-          -(imageInfo.sequence[this.nextFrame].centerY - imageInfo.sequence[this.nextFrame].top) * hw,
-          imageInfo.sequence[this.nextFrame].width*hw*2,
-          imageInfo.sequence[this.nextFrame].height*hw*2
+          -(imageInfo.sequence[this.nextFrame].centerX - imageInfo.sequence[this.nextFrame].left),
+          -(imageInfo.sequence[this.nextFrame].centerY - imageInfo.sequence[this.nextFrame].top),
+          imageInfo.sequence[this.nextFrame].width,
+          imageInfo.sequence[this.nextFrame].height
         );
       }
       else {
         x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
-          -(imageInfo.centerX - imageInfo.left) * hw,
-          -(imageInfo.centerY - imageInfo.top) * hw,
-          imageInfo.width*hw*2,
-          imageInfo.height*hw*2
+          -(imageInfo.centerX - imageInfo.left),
+          -(imageInfo.centerY - imageInfo.top),
+          imageInfo.width,
+          imageInfo.height
         );
       }
     }
@@ -143,6 +142,8 @@ foam.CLASS({
           y: this.y,
           rotation: this.rotation,
           imageIndex: 0,
+          scaleX: 0.4,
+          scaleY: 0.4
         });
       }
     },
@@ -174,7 +175,9 @@ foam.CLASS({
           rotation: this.rotation,
           imageIndex: 8,
           //loop: true,
-          framerate: 200,
+          framerate:33,
+          scaleX: 0.5,
+          scaleY: 0.5
         });
       }
     },

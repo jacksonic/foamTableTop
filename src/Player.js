@@ -135,6 +135,8 @@ foam.CLASS({
           y: this.y,
           rotation: this.rotation,
           imageIndex: 2,
+          scaleX: 0.2,
+          scaleY: 0.2
         });
         this.canvas.cview.children.push(s);
         //this.canvas.cview.addChild_(s);
