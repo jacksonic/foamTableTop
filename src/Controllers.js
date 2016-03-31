@@ -70,12 +70,11 @@ foam.CLASS({
     },
 
     function collide(e, ft) {
+      if ( Math.random() < 0.8 ) { return; }
+
       var collideWith = this.collideWith;
       // TODO: radius check too
       var s = Object.create(this.collideSink);
-//       s.put = function(o) {
-//         collideWith(e, o, ft);
-//       }
       s.baseEnt = e;
       s.ft = ft;
       e.overlappingEntities.select(s);
@@ -122,7 +121,7 @@ foam.CLASS({
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
       } else {
-        this.worldDAO.put(e);
+        //this.worldDAO.put(e);
       }
     },
 

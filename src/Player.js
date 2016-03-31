@@ -32,7 +32,7 @@ foam.CLASS({
     'audioManager',
   ],
   constants: {
-    SHOT_COOL_DOWN: 0.2
+    SHOT_COOL_DOWN: 0.1
   },
   properties: [
     {
