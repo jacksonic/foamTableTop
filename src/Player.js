@@ -32,7 +32,7 @@ foam.CLASS({
     'audioManager',
   ],
   constants: {
-    SHOT_COOL_DOWN: 0.1
+    SHOT_COOL_DOWN: 0.2
   },
   properties: [
     {
@@ -163,8 +163,8 @@ foam.CLASS({
       name: 'corner',
       factory: function() { return [0,0]; },
       postSet: function(old,nu) {
-        this.main.x = nu[0] ? this.worldWidth - 20 : 20;
-        this.main.y = nu[1] ? this.worldHeight - 20 : 20;
+        this.main.x = nu[0] ? 1600 - 20 : 20;
+        this.main.y = nu[1] ? 900 - 20 : 20;
         this.main.rotation = Math.PI * ( nu[0] ? 1 : -1 ) * ( nu[1] ? 1/4 : 3/4 );
       }
     }

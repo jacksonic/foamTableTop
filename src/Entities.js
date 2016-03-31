@@ -157,6 +157,15 @@ foam.CLASS({
           this.BY_REF(this.targetBounds_)
         ));
       }
+    },
+    {
+      name: 'overlappingEntitiesOptions_',
+      factory: function() {
+        return foam.dao.DAOOptions.create({ where: this.INTERSECTS(
+          this.worldDAO.space,
+          this.BY_REF(this.targetBounds_)
+        )});
+      }
     }
   ],
 
@@ -267,7 +276,9 @@ foam.CLASS({
       s.put = function(o) {
         collideWith(e, o, ft);
       }
-      e.overlappingEntities.select(s);
+
+      //e.overlappingEntities.select(s);
+      e.worldDAO.select(s, e.overlappingEntitiesOptions);
     },
 
     function collideWith(e, o, ft) {
