@@ -24,12 +24,12 @@ foam.CLASS({
   ],
   requires: [
     'tabletop.ImageSprite',
-    'tabletop.BulletEntity',
-    'foam.core.ObjectPool',
+    'tabletop.BulletController',
   ],
   imports: [
     'canvas',
     'audioManager',
+    'entityPool',
   ],
   constants: {
     SHOT_COOL_DOWN: 0.1
@@ -52,15 +52,6 @@ foam.CLASS({
     },
     [ 'coolDown', 1 ],
     {
-      name: 'bulletPool',
-      factory: function() { return this.ObjectPool.create({
-        of: this.BulletEntity,
-        resetArgs: {
-          x: 99999
-        }
-      }); }
-    },
-    {
       name: 'target',
       factory: function() { return { x: 500, y: 350 }; }
     },
@@ -80,22 +71,31 @@ foam.CLASS({
         this.shoot();
       }
     },
-    function returnToPool(e) {
-      e.uninstall();
-      this.bulletPool.push(e);
-    },
   ],
 
   listeners: [
     {
       name: 'shoot',
       code: function() {
-        var b = this.bulletPool.pop({
-            x: this.x,
-            y: this.y,
-            rotation: this.rotation,
-            manager: this,
-          });
+        var b = this.entityPool.pop({
+          x: this.x,
+          y: this.y,
+          br: 3,
+          bplane: 1,
+          collisionPlane: 0,
+          rotation: this.rotation,
+          manager: this,
+          controller: this.BulletController.create(),
+        });
+        
+        // TODO: clean up sprite init
+        b.sprite.x = this.x;
+        b.sprite.y = this.y;
+        b.sprite.rotation = this.rotation;
+        b.sprite.imageIndex = 2;
+        b.sprite.scaleX = 0.2;
+        b.sprite.scaleY = 0.2;
+        
         this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
         this.rotation = b.rotation + Math.PI; // TODO: off by 180?
         b.install();
@@ -103,42 +103,6 @@ foam.CLASS({
       }
     }
   ]
-});
-
-
-foam.CLASS({
-  package: 'tabletop',
-  name: 'BulletEntity',
-  extends: 'tabletop.Entity',
-  requires: [
-    'tabletop.ImageSprite',
-    'tabletop.BulletController',
-  ],
-  imports: ['canvas'],
-  properties: [
-    [ 'br', 3 ],
-    {
-      name: 'sprite',
-      factory: function() {
-        return this.ImageSprite.create({
-          x: this.x,
-          y: this.y,
-          rotation: this.rotation,
-          imageIndex: 2,
-          scaleX: 0.2,
-          scaleY: 0.2,
-          bplane: 1,
-          collisionPlane: 0,
-        });
-      }
-    },
-    {
-      name: 'controller',
-      factory: function() {
-        return this.BulletController.create();
-      },
-    }
-  ],
 });
 
 

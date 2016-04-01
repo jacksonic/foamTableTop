@@ -24,6 +24,7 @@ foam.CLASS({
   extends: 'foam.mlang.Expressions',
   requires: [
     'tabletop.EntityController',
+    'tabletop.ImageSprite',
   ],
   imports: [
     'worldDAO',
@@ -156,11 +157,18 @@ foam.CLASS({
     },
     {
       /** The renderable Sprite for this entity. */
-      name: 'sprite'
+      name: 'sprite',
+      factory: function() {
+        return this.ImageSprite.create();
+      }
     },
     {
       /** The controller responsible to moving/targetting the entity */
       name: 'controller',
+    },
+    {
+      /** the object pool this entity should be returned to */
+      name: 'objectPool'
     },
     {
       /** The single plane to check for collisions against // TODO: allow multiple? */
@@ -243,6 +251,7 @@ foam.CLASS({
     function uninstall() {
       this.worldDAO.remove(this);
       this.sprite.uninstall();
+      this.objectPool && this.objectPool.push(this);
     }
   ],
   listeners: [

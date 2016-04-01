@@ -26,7 +26,6 @@ foam.CLASS({
     'worldHeight',
   ],
 
-
   properties: [
     {
       name: 'collideSink',
@@ -139,7 +138,7 @@ foam.CLASS({
       if ( e === o ) return;
 
       // don't collide with other bullets // TODO: select specific world planes
-      if ( e.cls_.isInstance(o) || tabletop.PlayerEntity.isInstance(o) ) return;
+      //if ( e.cls_.isInstance(o) || tabletop.PlayerEntity.isInstance(o) ) return;
 
       //TODO: hurt o
 
@@ -186,8 +185,6 @@ foam.CLASS({
 
       if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
-        //e.destroy();
-        //e.manager.returnToPool(e);
         var cx = 1600 / 2 - 25;
         var cy = 900 / 2 - 25;
         e.vx = 0;

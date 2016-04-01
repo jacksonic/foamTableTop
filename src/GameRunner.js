@@ -89,6 +89,7 @@ foam.CLASS({
     'tabletop.FrameStepper',
     'tabletop.AudioManager',
     'tabletop.PlayerManager',
+    'foam.core.ObjectPool',
   ],
   exports: [
     'worldDAO',
@@ -97,6 +98,7 @@ foam.CLASS({
     'audioManager',
     'worldWidth',
     'worldHeight',
+    'entityPool',
   ],
   properties: [
     {
@@ -144,6 +146,20 @@ foam.CLASS({
     },
     [ 'worldWidth', 1600 ],
     [ 'worldHeight', 900 ],
+    {
+      name: 'entityPool',
+      factory: function() { 
+        var ret = this.ObjectPool.create({
+          of: this.Entity,
+        });
+        ret.resetArgs = {
+          x: 99999,
+          objectPool: ret,
+        };
+        return ret;
+      }
+    },
+    
   ],
   methods: [
     function init() {
