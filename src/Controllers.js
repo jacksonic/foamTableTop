@@ -71,7 +71,7 @@ foam.CLASS({
     },
 
     function collide(e, ft) {
-      if ( Math.random() < 0.8 ) { return; }
+      if ( Math.random() < 0.1 ) { return; }
 
       var collideWith = this.collideWith;
       // TODO: radius check too
@@ -130,6 +130,7 @@ foam.CLASS({
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
       } else {
+        // don't update, since nothing needs to collide with us
         //this.worldDAO.put(e);
       }
     },

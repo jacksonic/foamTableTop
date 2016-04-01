@@ -96,7 +96,7 @@ foam.CLASS({
             rotation: this.rotation,
             manager: this,
           });
-        this.aimTowards({ x: this.target.x, y: this.target.y }, b, 400, Math.random() * 0.2 - 0.1);
+        this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
         this.rotation = b.rotation + Math.PI; // TODO: off by 180?
         b.install();
         this.audioManager.play("impact", this);
@@ -126,7 +126,9 @@ foam.CLASS({
           rotation: this.rotation,
           imageIndex: 2,
           scaleX: 0.2,
-          scaleY: 0.2
+          scaleY: 0.2,
+          bplane: 1,
+          collisionPlane: 0,
         });
       }
     },
