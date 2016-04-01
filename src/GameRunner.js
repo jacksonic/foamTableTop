@@ -20,6 +20,7 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'FrameStepper',
+  implements: ['foam.dao.Sink'],
   requires: [
     'foam.mlang.Expressions as EXPRS',
     'foam.dao.ArraySink',
@@ -39,12 +40,20 @@ foam.CLASS({
         return this.worldDAO.where(m.EQ(tabletop.Entity.MOVE_REQUIRED, true));
       }
     },
+    {
+      /** the duration of this frame, in seconds */
+      class: 'Simple',
+      name: 'ft',
+    }
   ],
 
   methods: [
     function init() {
       this.previousTime = this.time;
       this.time$.sub(this.runFrame);
+    },
+    function put(e) {
+      e.moveStep(this.ft);
     },
   ],
 
@@ -53,18 +62,10 @@ foam.CLASS({
       name: 'runFrame',
       code: function() {
         // time since last frame computed (in seconds)
-        var ft = Math.min((this.time - this.previousTime) / 1000, 0.1);
+        this.ft = Math.min((this.time - this.previousTime) / 1000, 0.1);
         this.previousTime = this.time;
 
-        var sink = {
-          put: function(e) {
-            e.moveStep(ft);
-          },
-          remove: function() {},
-          error: function() {},
-          eof: function() {},
-        };
-        this.entitesToMoveDAO.select(sink);
+        this.entitesToMoveDAO.select(this);
       }
     }
   ]
@@ -159,8 +160,8 @@ foam.CLASS({
       // create test entities
       var x, y;
       var spacing = 80;
-      var cx = this.worldWidth / 2 - (5 * spacing);
-      var cy = this.worldHeight / 2 - (2 * spacing);
+      var cx = 1600 / 2 - (5 * spacing);
+      var cy = 900 / 2 - (2 * spacing);
       for (var k = 0; k < 40; ++k) {
 //        x = Math.random() * this.canvas.width;
 //        y = Math.random() * this.canvas.height;
@@ -214,15 +215,15 @@ foam.CLASS({
         this.canvas.width = document.body.clientWidth;
         this.canvas.height = document.body.clientHeight;
 
-        var ratio = this.worldWidth / this.worldHeight;
+        var ratio = 1600 / 900;
         if ( this.canvas.height * ratio > this.canvas.width ) {
           this.canvas.height = this.canvas.width / ratio;
         } else if ( this.canvas.width / ratio > this.canvas.height ) {
           this.canvas.width = this.canvas.height * ratio;
         }
 
-        var scale = Math.min(this.canvas.width / this.worldWidth,
-                             this.canvas.height / this.worldHeight);
+        var scale = Math.min(this.canvas.width / 1600,
+                             this.canvas.height / 900);
         this.canvas.cview.scaleX = scale;
         this.canvas.cview.scaleY = scale;
 
@@ -234,13 +235,13 @@ foam.CLASS({
       name: 'mouseDownEvent',
       code: function(e) {
         // find event location in world coords
-        var scale = Math.min(this.canvas.width / this.worldWidth,
-                             this.canvas.height / this.worldHeight);
+        var scale = Math.min(this.canvas.width / 1600,
+                             this.canvas.height / 900);
         var x = (e.clientX - this.canvas.element.offsetLeft) / scale;
         var y = (e.clientY - this.canvas.element.offsetTop) / scale;
 
         // deliver to player based on quadrant
-        var corner = [ x > this.worldWidth/2, y > this.worldHeight/2 ];
+        var corner = [ x > 1600/2, y > 900/2 ];
         for (var i = 0; i < this.players.length; ++i) {
           if ( ( ( !!this.players[i].corner[0] ) == corner[0] ) &&
                ( ( !!this.players[i].corner[1] ) == corner[1] )) {

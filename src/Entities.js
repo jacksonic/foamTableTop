@@ -185,6 +185,15 @@ foam.CLASS({
           this.BY_REF(this.targetBounds_)
         ));
       }
+    },
+    {
+      name: 'overlappingEntitiesOptions_',
+      factory: function() {
+        return foam.dao.DAOOptions.create({ where: this.INTERSECTS(
+          this.worldDAO.space,
+          this.BY_REF(this.targetBounds_)
+        )});
+      }
     }
   ],
 
@@ -326,9 +335,6 @@ foam.CLASS({
     }
   ]
 });
-
-
-
 
 /**
   Interface for entity Sprites. Sprites can form trees, so a single

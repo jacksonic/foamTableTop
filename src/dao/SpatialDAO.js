@@ -230,9 +230,27 @@ foam.CLASS({
         // TODO: removeAll and re-add
       }
     },
+    {
+      /** @internal Experimental memoization of sink+options from decorateSink_ */
+      name: 'sinkCache_',
+      factory: function() { return {}; }
+    }
   ],
 
   methods: [
+//     function decorateSink_(sink, options, isListener, disableLimit) {
+//       if ( ! options ) return sink;
+
+//       var s = this.sinkCache_[sink.$UID];
+//       if ( s ) {
+//         return s;
+//       }
+
+//       var ret = this.SUPER(sink, options, isListener, disableLimit);
+//       this.sinkCache_[sink.$UID] = ret;
+//       return ret;
+//     },
+
     /** A default hash for any object with an x, y, x2, y2.
       Returns an array of buckets the object should occupy. if createMode is
       true, buckets will be created if not present. */
@@ -541,53 +559,62 @@ foam.CLASS({
       return buckets;
     },
 
-    function select(isink, options) {
+    function selectAll_(isink, options) {
       var resultSink = isink || this.ArraySink.create();
-
       var sink = this.decorateSink_(resultSink, options);
+
+      // no optimal filtering available, so run all items through
+      var fc = this.FlowControl.create();
+      var items = this.items;
+      for ( var key in items ) {
+        if ( fc.stopped ) break;
+        if ( fc.errorEvt ) {
+          sink.error(fc.errorEvt);
+          return Promise.reject(fc.errorEvt);
+         }
+        sink.put(items[key].object, null, fc);
+      }
+
+      sink && sink.eof && sink.eof();
+      return Promise.resolve(resultSink);
+    },
+
+    function selectBuckets_(isink, buckets, options) {
+      var resultSink = isink || this.ArraySink.create();
+      var sink = this.decorateSink_(resultSink, options);
+
+      var duplicates = {};
+      for ( var i = 0; ( i < buckets.length ); ++i ) {
+        for ( var key in buckets[i] ) {
+          // skip things we've already seen from other buckets
+          if ( duplicates[key] ) { continue; }
+          duplicates[key] = true;
+          var obj = buckets[i][key];
+          if ( obj.id ) {
+            sink.put(obj, null); // HACK: removed FlowControl to gain optimization
+          }
+        }
+      }
+
+      sink && sink.eof && sink.eof();
+      return Promise.resolve(resultSink);
+    },
+
+    function select(isink, options) {
       var buckets;
 
       if ( options && options.where &&
        ( this.Intersects.isInstance(options.where) || this.ContainedBy.isInstance(options.where))) {
-         buckets = this.findBucketsFn(options.where.arg2.f());
+        buckets = this.findBucketsFn(options.where.arg2.f());
       } else {
         buckets = this.queryBuckets_(options);
       }
 
-      var fc = this.FlowControl.create();
-      var duplicates = {};
       if ( buckets ) {
-        for ( var i = 0; ( i < buckets.length ) && ! fc.stopped; ++i ) {
-          for ( var key in buckets[i] ) {
-            // skip things we've already seen from other buckets
-            if ( duplicates[key] ) { continue; }
-            duplicates[key] = true;
-            var obj = buckets[i][key];
-            if ( obj.id ) {
-              if ( fc.stopped ) break;
-              if ( fc.errorEvt ) {
-                sink.error(fc.errorEvt);
-                return Promise.reject(fc.errorEvt);
-              }
-              sink.put(obj, null, fc);
-            }
-          }
-        }
+        return this.selectBuckets_(isink, buckets, options);
       } else {
-        // no optimal filtering available, so run all items through
-        var items = this.items;
-        for ( var key in items ) {
-          if ( fc.stopped ) break;
-          if ( fc.errorEvt ) {
-            sink.error(fc.errorEvt);
-            return Promise.reject(fc.errorEvt);
-           }
-          sink.put(items[key].object, null, fc);
-        }
+        return this.selectAll_(isink, options);
       }
-      sink && sink.eof && sink.eof();
-
-      return Promise.resolve(resultSink);
     },
 
     function removeAll(sink, options) {

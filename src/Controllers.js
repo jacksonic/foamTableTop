@@ -26,14 +26,25 @@ foam.CLASS({
     'worldHeight',
   ],
 
-  constants: {
-    ENTITY_SINK: {
-      put: null,
-      remove: function() {},
-      error: function() {},
-      eof: function() {},
-    },
-  },
+
+  properties: [
+    {
+      name: 'collideSink',
+      factory: function() {
+        return {
+          put: function collideSinkPut(e) {
+            this.self.collideWith(this.baseEnt, e, this.ft);
+          },
+          remove: function() {},
+          error: function() {},
+          eof: function() {},
+          self: this,
+          baseEnt: null,
+          ft: null
+        };
+      }
+    }
+  ],
 
   methods: [
     function frameStep(
@@ -60,12 +71,13 @@ foam.CLASS({
     },
 
     function collide(e, ft) {
+      if ( Math.random() < 0.8 ) { return; }
+
       var collideWith = this.collideWith;
       // TODO: radius check too
-      var s = Object.create(this.ENTITY_SINK);
-      s.put = function(o) {
-        collideWith(e, o, ft);
-      }
+      var s = Object.create(this.collideSink);
+      s.baseEnt = e;
+      s.ft = ft;
       e.overlappingEntities.select(s);
     },
 
@@ -114,12 +126,11 @@ foam.CLASS({
   methods: [
     /** Also check for out of bounds and destroy self */
     function worldUpdate(e) {
-      if ( e.x > this.worldWidth+100 || e.y > this.worldHeight+100 ||
+      if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
-        //e.destroy();
-        e.manager && e.manager.returnToPool(e);
+        e.uninstall();
       } else {
-        this.SUPER(e);
+        //this.worldDAO.put(e);
       }
     },
 
@@ -162,14 +173,22 @@ foam.CLASS({
   methods: [
     /** Also check for out of bounds and destroy self */
     function move(e, ft) {
-      this.SUPER(e, ft);
+      /** Changes velocity of the given entity. */
+      e.vx += e.ax * ft;
+      e.vy += e.ay * ft;
+      e.vrotation += e.arotation * ft;
 
-      if ( e.x > this.worldWidth+100 || e.y > this.worldHeight+100 ||
+      /** Changes position of the given entity. */
+      e.x += e.vx * ft;
+      e.y += e.vy * ft;
+      e.rotation += e.vrotation * ft;
+
+      if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
         //e.destroy();
         //e.manager.returnToPool(e);
-        var cx = this.worldWidth / 2 - 25;
-        var cy = this.worldHeight / 2 - 25;
+        var cx = 1600 / 2 - 25;
+        var cy = 900 / 2 - 25;
         e.vx = 0;
         e.vy = 0;
         switch (Math.floor(Math.random() * 4)) {
@@ -181,7 +200,7 @@ foam.CLASS({
           e.rotation = Math.PI*1.5;
           break;
         case 1:
-          e.x = this.worldWidth + 100;
+          e.x = 1600 + 100;
           e.y = cy + Math.random() * 50;
           e.ax = -(40 + Math.random()*50);
           e.ay = 0;
@@ -195,7 +214,7 @@ foam.CLASS({
           e.rotation = Math.PI;
           break;
         case 3:
-          e.y = this.worldHeight + 100;
+          e.y = 900 + 100;
           e.x = cx + Math.random() * 50;
           e.ax = 0;
           e.ay = -(40 + Math.random()*50);
