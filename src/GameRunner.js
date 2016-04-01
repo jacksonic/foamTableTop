@@ -90,6 +90,7 @@ foam.CLASS({
     'tabletop.AudioManager',
     'tabletop.PlayerManager',
     'foam.core.ObjectPool',
+    'tabletop.EnemyWaveData',
   ],
   exports: [
     'worldDAO',
@@ -131,7 +132,7 @@ foam.CLASS({
     },
     {
       name: 'time',
-      defaultValue: 0
+      value: 0
     },
     {
       name: 'players',
@@ -154,12 +155,23 @@ foam.CLASS({
         });
         ret.resetArgs = {
           x: 99999,
+          vx: 0,
+          vy: 0,
+          ax: 0,
+          ay: 0,
+          vrotation: 0,
+          arotation: 0,
           objectPool: ret,
         };
         return ret;
       }
     },
-    
+    {
+      name: 'enemyWaves',
+      factory: function() {
+        return this.EnemyWaveData.create();
+      }
+    }
   ],
   methods: [
     function init() {
@@ -174,32 +186,32 @@ foam.CLASS({
 
       this.players;
       // create test entities
-      var x, y;
-      var spacing = 80;
-      var cx = 1600 / 2 - (5 * spacing);
-      var cy = 900 / 2 - (2 * spacing);
-      for (var k = 0; k < 40; ++k) {
-//        x = Math.random() * this.canvas.width;
-//        y = Math.random() * this.canvas.height;
-          this.TestEntity.create({
-            id: 'test'+k,
-            x: (k%10) * spacing + cx,
-            y: Math.floor(k/10) * spacing + cy,
-            br: 10,
-//            ax: Math.random() * 20 - 10,
-//            ay: Math.random() * 20 - 10,
-            vx: Math.random() * 10 - 5,
-            vy: Math.random() * 10 - 5,
-           
-            hp: {basehp: {hull: 3}, currhp: {hull: 3}},
-          }).install();
-      }
-      this.TestBoom.create({
-        id: 'blast',
-        br: 11,
-        x: 300,
-        y: 200,
-      }).install();
+//       var x, y;
+//       var spacing = 80;
+//       var cx = 1600 / 2 - (5 * spacing);
+//       var cy = 900 / 2 - (2 * spacing);
+//       for (var k = 0; k < 40; ++k) {
+// //        x = Math.random() * this.canvas.width;
+// //        y = Math.random() * this.canvas.height;
+//           this.TestEntity.create({
+//             id: 'test'+k,
+//             x: (k%10) * spacing + cx,
+//             y: Math.floor(k/10) * spacing + cy,
+//             br: 10,
+// //            ax: Math.random() * 20 - 10,
+// //            ay: Math.random() * 20 - 10,
+//             vx: Math.random() * 10 - 5,
+//             vy: Math.random() * 10 - 5,
+//
+//             hp: {basehp: {hull: 3}, currhp: {hull: 3}},
+//           }).install();
+//       }
+      // this.TestBoom.create({
+      //   id: 'blast',
+      //   br: 11,
+      //   x: 300,
+      //   y: 200,
+      // }).install();
 
       // insert canvas
       document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;
@@ -278,6 +290,7 @@ window.onload = function() {
     g.audioStart();
     introbox.style.display = "none";
     setInterval(g.step, 16);
+    setInterval(g.enemyWaves.data[0].install, 4000);
   });
 };
 

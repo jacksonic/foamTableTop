@@ -67,19 +67,19 @@ foam.CLASS({
     { /** loop or terminating animation */
       name: 'loop',
       class: 'Boolean',
-      defaultValue: false,
+      value: false,
     },
     { /** framerate of animation, in milliseconds per frame */
       name: 'framerate',
-      defaultValue: 33,
+      value: 33,
     },
     { /** last time the animation was updated */
       name: 'lastDrawn',
-      defaultValue: 0,
+      value: 0,
     },
     { /** next frame in the animation to draw */
       name: 'nextFrame',
-      defaultValue: 0,
+      value: 0,
     },
     {
       name: 'imageElement',

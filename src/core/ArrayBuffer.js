@@ -23,7 +23,7 @@ foam.CLASS({
   properties: [
     {
       name: 'type',
-      defaultValue: Float64Array
+      value: Float64Array
     },
     {
       name: 'buffer',
@@ -33,11 +33,11 @@ foam.CLASS({
     },
     {
       name: 'maxSize',
-      defaultValue: 1000,
+      value: 1000,
     },
     {
       name: 'lastFreeIndex',
-      defaultValue: 0
+      value: 0
     }
   ],
   methods: [
@@ -75,7 +75,7 @@ foam.CLASS({
       var buffer = this.buffer;
       var name = this.name;
       var factory = this.factory;
-      var defVal = this.defaultValue;
+      var defVal = this.value;
 
       // getter and setter pull/push value to/from a buffer
       var getter = function() {

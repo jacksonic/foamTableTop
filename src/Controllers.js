@@ -171,7 +171,15 @@ foam.CLASS({
   name: 'BasicController',
   extends: 'tabletop.EntityController',
   methods: [
-    /** Also check for out of bounds and destroy self */
+    function worldUpdate(e) {
+      if ( e.x > 1600+100 || e.y > 900+100 ||
+           e.x < -100 || e.y < -100 ) {
+        e.uninstall();
+      } else {
+        e.worldDAO.put(e);
+      }
+    },
+    
     function move(e, ft) {
       /** Changes velocity of the given entity. */
       e.vx += e.ax * ft;
@@ -183,43 +191,43 @@ foam.CLASS({
       e.y += e.vy * ft;
       e.rotation += e.vrotation * ft;
 
-      if ( e.x > 1600+100 || e.y > 900+100 ||
-           e.x < -100 || e.y < -100 ) {
-        var cx = 1600 / 2 - 25;
-        var cy = 900 / 2 - 25;
-        e.vx = 0;
-        e.vy = 0;
-        switch (Math.floor(Math.random() * 4)) {
-        case 0:
-          e.x = -100;
-          e.y = cy + Math.random() * 50;
-          e.ax = 40 + Math.random()*50;
-          e.ay = 0;
-          e.rotation = Math.PI*1.5;
-          break;
-        case 1:
-          e.x = 1600 + 100;
-          e.y = cy + Math.random() * 50;
-          e.ax = -(40 + Math.random()*50);
-          e.ay = 0;
-          e.rotation = Math.PI*0.5;
-          break;
-        case 2:
-          e.y = -80;
-          e.x = cx + Math.random() * 50;
-          e.ax = 0;
-          e.ay = 40 + Math.random()*50;
-          e.rotation = Math.PI;
-          break;
-        case 3:
-          e.y = 900 + 100;
-          e.x = cx + Math.random() * 50;
-          e.ax = 0;
-          e.ay = -(40 + Math.random()*50);
-          e.rotation = 0;
-          break;
-        };
-      }
+      // if ( e.x > 1600+100 || e.y > 900+100 ||
+      //      e.x < -100 || e.y < -100 ) {
+      //   var cx = 1600 / 2 - 25;
+      //   var cy = 900 / 2 - 25;
+      //   e.vx = 0;
+      //   e.vy = 0;
+      //   switch (Math.floor(Math.random() * 4)) {
+      //   case 0:
+      //     e.x = -100;
+      //     e.y = cy + Math.random() * 50;
+      //     e.ax = 40 + Math.random()*50;
+      //     e.ay = 0;
+      //     e.rotation = Math.PI*1.5;
+      //     break;
+      //   case 1:
+      //     e.x = 1600 + 100;
+      //     e.y = cy + Math.random() * 50;
+      //     e.ax = -(40 + Math.random()*50);
+      //     e.ay = 0;
+      //     e.rotation = Math.PI*0.5;
+      //     break;
+      //   case 2:
+      //     e.y = -80;
+      //     e.x = cx + Math.random() * 50;
+      //     e.ax = 0;
+      //     e.ay = 40 + Math.random()*50;
+      //     e.rotation = Math.PI;
+      //     break;
+      //   case 3:
+      //     e.y = 900 + 100;
+      //     e.x = cx + Math.random() * 50;
+      //     e.ax = 0;
+      //     e.ay = -(40 + Math.random()*50);
+      //     e.rotation = 0;
+      //     break;
+      //   };
+      // }
     },
     function collide() {
 

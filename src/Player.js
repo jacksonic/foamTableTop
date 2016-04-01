@@ -44,7 +44,7 @@ foam.CLASS({
           rotation: this.rotation,
           imageIndex: 0,
         });
-      }
+      },
     },
     {
       name: 'moveRequired',
@@ -53,7 +53,7 @@ foam.CLASS({
     [ 'coolDown', 1 ],
     {
       name: 'target',
-      factory: function() { return { x: 500, y: 350 }; }
+      factory: function() { return { x: 800, y: 450 }; }
     },
   ],
 
@@ -62,14 +62,14 @@ foam.CLASS({
     function moveStep(/* number // seconds since the last frame */ ft) {
       this.SUPER(ft);
 
-      this.updateSprite();
-
       // Doesn't move
       this.coolDown -= ft;
       if ( this.coolDown < 0 ) {
         this.coolDown = this.SHOT_COOL_DOWN;
         this.shoot();
       }
+
+      this.updateSprite();
     },
   ],
 
@@ -122,7 +122,7 @@ foam.CLASS({
     {
       name: 'main',
       factory: function() {
-        return this.PlayerEntity.create();
+        return this.PlayerEntity.create({ id: 'player' + this.$UID });
       }
     },
     {

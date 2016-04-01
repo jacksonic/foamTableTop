@@ -105,26 +105,26 @@ foam.CLASS({
     },
     { /** max simultaneous instances of that sound */
       name: 'instances',
-      defaultValue: 4,
+      value: 4,
     },
     { /** current instance */
       name: 'currentInstance',
-      defaultValue: 0,
+      value: 0,
     },
     { /** source file */
       name: 'src',
     },
     { /** playback volume */
       name: 'vol',
-      defaultValue: 0.5,
+      value: 0.5,
     },
     { /** cooldown between plays of the sound */
       name: 'cooldown',
-      defaultValue: 100,
+      value: 100,
     },
     { /** time the sound was last played */
       name: 'lastplayed',
-      defaultValue: 0,
+      value: 0,
     },
   ],
   methods: [

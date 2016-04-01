@@ -24,6 +24,7 @@ foam.CLASS({
   extends: 'foam.mlang.Expressions',
   requires: [
     'tabletop.EntityController',
+    'tabletop.Sprite',
     'tabletop.ImageSprite',
   ],
   imports: [
@@ -126,7 +127,7 @@ foam.CLASS({
     {
       /** hit-points for the entity */
       name: 'hp',
-      defaultValue: {order: {hull: 0}, basehp: {hull: 3}, currhp: {hull: 3}, process: {hull: false}, immunities: {hull: false}, consequences: {hull: false}, destruct: {hull: function() { this.x = 99999;}}},
+      value: {order: {hull: 0}, basehp: {hull: 3}, currhp: {hull: 3}, process: {hull: false}, immunities: {hull: false}, consequences: {hull: false}, destruct: {hull: function() { this.x = 99999;}}},
        /*hp: function() {
               var obj = {};
               Object.defineProperty(obj, 'order', {hull: 0,}); //order for default damage application: 0, 1, 2...
@@ -160,6 +161,12 @@ foam.CLASS({
       name: 'sprite',
       factory: function() {
         return this.ImageSprite.create();
+      },
+      adapt: function(old,nu) {
+        if ( ! nu.cls_ ) {
+          return this.ImageSprite.create(nu);
+        }
+        return nu;
       }
     },
     {
@@ -186,6 +193,7 @@ foam.CLASS({
       }
     },
     {
+      /** select from this DAO to get the entities that overlap this one */
       name: 'overlappingEntities',
       factory: function() {
         return this.worldDAO.where(this.INTERSECTS(
@@ -195,6 +203,8 @@ foam.CLASS({
       }
     },
     {
+      /** Experimental alternative to overlappingEntities that avoids some object creation.
+         Call this.worldDAO.select(sink, this.overlappingEntitiesOptions_); */
       name: 'overlappingEntitiesOptions_',
       factory: function() {
         return foam.dao.DAOOptions.create({ where: this.INTERSECTS(
