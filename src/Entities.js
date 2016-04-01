@@ -198,6 +198,7 @@ foam.CLASS({
   ],
 
   constants: {
+    /** Experimental proxy thing, to change the apparent bplane of the object to its collisionPlane */
     BOUNDS_WRAPPER: (function() {
         var obj = {};
         Object.defineProperty(obj, 'bx', { get: function() { return this.owner_.bx; } });
