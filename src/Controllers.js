@@ -41,6 +41,7 @@ foam.CLASS({
       /* number // seconds since the last frame  */ ft) {
       this.move(e, ft);
       this.collide(e, ft);
+      this.damage(e);
       e.updateSprite();
       this.worldUpdate(e);
     },
@@ -90,7 +91,15 @@ foam.CLASS({
       o.vx = -ax * vlen;
       o.vy = -ay * vlen;
     },
-
+    function damage(e) {
+      if (typeof(e.id) === 'string') {
+        if (e.id.startsWith("test")) { 
+          if (e.hp.currhp.hull < 1) { 
+          e.uninstall();
+          }
+        }
+      }
+    },
     function worldUpdate(e) {
       this.worldDAO.put(e);
     }
@@ -124,6 +133,7 @@ foam.CLASS({
 
       //play impact sound
       e.audioManager.play("impact", e);
+      o.hp.currhp.hull--;
 
       // position angle
       var ax = e.x - o.x, ay = e.y - o.y;

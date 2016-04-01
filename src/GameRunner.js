@@ -173,29 +173,8 @@ foam.CLASS({
 //            ay: Math.random() * 20 - 10,
             vx: Math.random() * 10 - 5,
             vy: Math.random() * 10 - 5,
-            hp: function() {
-              var obj = {};
-              Object.defineProperty(obj, 'order', {hull: 0,}); //order for default damage application: 0, 1, 2...
-              Object.defineProperty(obj, 'basehp', {hull: 3,}); //base starting HP
-              Object.defineProperty(obj, 'currhp', {hull: 3,}); //current HP
-              Object.defineProperty(obj, 'process', {hull:false,}); //any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...)
-              Object.defineProperty(obj, 'immunities', {hull:false,}); //does not receive damage from listed sources
-              Object.defineProperty(obj, 'consequences', {hull:false,}); //things that happen when damage is taken
-              Object.defineProperty(obj, 'destruct', {hull: function() { this.x = 99999;},}); //things that happen on destruction //TODO: replace default with actual destroy method
-              return obj;
-            }
-            
-            /*hp: function() {
-              var obj = {};
-              obj.order = {hull: 0,}; //order for default damage application: 0, 1, 2...
-              obj.basehp = {hull: 3,}; //base starting HP
-              obj.currhp = {hull: 3,}; //current HP
-              obj.process = {hull:false,}; //any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...)
-              obj.immunities = {hull:false,}; //does not receive damage from listed sources
-              obj.consequences = {hull:false,}; //things that happen when damage is taken
-              obj.destruct = {hull: function() { this.x = 99999;},}; //things that happen on destruction //TODO: replace default with actual destroy method
-              return obj;
-            }*/
+           
+            hp: {basehp: {hull: 3}, currhp: {hull: 3}},
           }).install();
       }
       this.TestBoom.create({

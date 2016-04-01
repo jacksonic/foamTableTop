@@ -125,17 +125,30 @@ foam.CLASS({
     {
       /** hit-points for the entity */
       name: 'hp',
-      //factory: function() {
-        /*var obj = {};
-        Object.defineProperty(obj, 'order', {hull: 0,}); //order for default damage application: 0, 1, 2...
-        Object.defineProperty(obj, 'basehp', {hull: 0,}); //base starting HP
-        Object.defineProperty(obj, 'currhp', {hull: 0,}); //current HP
-        Object.defineProperty(obj, 'process', {hull:false,}); //any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...)
-        Object.defineProperty(obj, 'immunities', {hull:false,}); //does not receive damage from listed sources
-        Object.defineProperty(obj, 'consequences', {hull:false,}); //things that happen when damage is taken
-        Object.defineProperty(obj, 'destruct', {hull: function() { this.x = 99999;},}); //things that happen on destruction //TODO: replace default with actual destroy method
-        return obj;*/
-      //}
+      defaultValue: {order: {hull: 0}, basehp: {hull: 3}, currhp: {hull: 3}, process: {hull: false}, immunities: {hull: false}, consequences: {hull: false}, destruct: {hull: function() { this.x = 99999;}}},
+       /*hp: function() {
+              var obj = {};
+              Object.defineProperty(obj, 'order', {hull: 0,}); //order for default damage application: 0, 1, 2...
+              Object.defineProperty(obj, 'basehp', {hull: 3,}); //base starting HP
+              Object.defineProperty(obj, 'currhp', {hull: 3,}); //current HP
+              Object.defineProperty(obj, 'process', {hull:false,}); //any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...)
+              Object.defineProperty(obj, 'immunities', {hull:false,}); //does not receive damage from listed sources
+              Object.defineProperty(obj, 'consequences', {hull:false,}); //things that happen when damage is taken
+              Object.defineProperty(obj, 'destruct', {hull: function() { this.x = 99999;},}); //things that happen on destruction //TODO: replace default with actual destroy method
+              return obj;
+            }
+            
+            hp: function() {
+              var obj = {};
+              obj.order = {hull: 0,}; //order for default damage application: 0, 1, 2...
+              obj.basehp = {hull: 3,}; //base starting HP
+              obj.currhp = {hull: 3,}; //current HP
+              obj.process = {hull:false,}; //any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...)
+              obj.immunities = {hull:false,}; //does not receive damage from listed sources
+              obj.consequences = {hull:false,}; //things that happen when damage is taken
+              obj.destruct = {hull: function() { this.x = 99999;},}; //things that happen on destruction //TODO: replace default with actual destroy method
+              return obj;
+            },*/
     },
     {
       /** The EntityManager that owns this entity. */
@@ -258,7 +271,6 @@ foam.CLASS({
       /* number // seconds since the last frame  */ ft) {
       this.move(e, ft);
       this.collide(e, ft);
-      this.damage(e);
       e.updateSprite();
       this.worldUpdate(e);
       
@@ -308,11 +320,6 @@ foam.CLASS({
       e.vy = (ay * vlen);
       o.vx = -ax * vlen;
       o.vy = -ay * vlen;
-    },
-    function damage(e) {
-      if (e.hp.currhp.hull < 1) {
-        e.hp.destruct.hull();
-      }
     },
     function worldUpdate(e) {
       this.worldDAO.put(e);
