@@ -106,10 +106,21 @@ foam.CLASS({
                 scaleY: 0.4,
               },
               controller: this.BasicController.create(),
-            }
+            },
+            {
+              br: 10,
+              hp: {basehp: {hull: 1}, currhp: {hull: 1}},
+              sprite: {
+                imageIndex: 1,
+                scaleX: 0.2,
+                scaleY: 0.2,
+              },
+              controller: this.BasicController.create(),
+            },
           ],
           enemyCounts: [
             20,
+            10,
           ],
         }),
       ]
