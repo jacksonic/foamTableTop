@@ -25,11 +25,12 @@ foam.CLASS({
   requires: [
     'tabletop.ImageSprite',
     'tabletop.BulletController',
+    'tabletop.Entity',
   ],
   imports: [
     'canvas',
     'audioManager',
-    'entityPool',
+//    'entityPool',
   ],
   constants: {
     SHOT_COOL_DOWN: 0.1
@@ -77,7 +78,7 @@ foam.CLASS({
     {
       name: 'shoot',
       code: function() {
-        var b = this.entityPool.pop({
+        var b = this.Entity.create({
           x: this.x,
           y: this.y,
           br: 3,

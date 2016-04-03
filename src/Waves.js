@@ -26,7 +26,7 @@ foam.CLASS({
     'worldDAO',
     'worldWidth',
     'worldHeight',
-    'entityPool',
+//    'entityPool',
   ],
   properties: [
     'id',
@@ -46,7 +46,7 @@ foam.CLASS({
         var def = this.enemyDefs[ct];
         if ( ! def ) { continue; }
         for ( var en = 0; en < this.enemyCounts[ct]; ++en ) {
-          var e = this.entityPool.pop(def);
+          var e = this.Entity.create(def);
           this.position(e, ct, en);
           e.install();
         }

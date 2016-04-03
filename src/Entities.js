@@ -22,6 +22,9 @@ foam.CLASS({
   package: 'tabletop',
   name: 'Entity',
   extends: 'foam.mlang.Expressions',
+  axioms: [
+    foam.pattern.Pooled.create(),
+  ],
   requires: [
     'tabletop.EntityController',
     'tabletop.Sprite',
@@ -261,7 +264,8 @@ foam.CLASS({
     function uninstall() {
       this.worldDAO.remove(this);
       this.sprite.uninstall();
-      this.objectPool && this.objectPool.push(this);
+      //this.objectPool && this.objectPool.push(this);
+      this.destroy();
     }
   ],
   listeners: [
@@ -283,7 +287,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'EntityController',
   imports: [ 'worldDAO' ],
-  axioms: [ foam.pattern.Singleton ],
+  axioms: [ foam.pattern.Singleton.create() ],
 
   constants: {
     ENTITY_SINK: {

@@ -99,7 +99,7 @@ foam.CLASS({
     'audioManager',
     'worldWidth',
     'worldHeight',
-    'entityPool',
+   // 'entityPool',
   ],
   properties: [
     {
@@ -147,25 +147,25 @@ foam.CLASS({
     },
     [ 'worldWidth', 1600 ],
     [ 'worldHeight', 900 ],
-    {
-      name: 'entityPool',
-      factory: function() { 
-        var ret = this.ObjectPool.create({
-          of: this.Entity,
-        });
-        ret.resetArgs = {
-          x: 99999,
-          vx: 0,
-          vy: 0,
-          ax: 0,
-          ay: 0,
-          vrotation: 0,
-          arotation: 0,
-          objectPool: ret,
-        };
-        return ret;
-      }
-    },
+    // {
+    //   name: 'entityPool',
+    //   factory: function() {
+    //     var ret = this.ObjectPool.create({
+    //       of: this.Entity,
+    //     });
+    //     ret.resetArgs = {
+    //       x: 99999,
+    //       vx: 0,
+    //       vy: 0,
+    //       ax: 0,
+    //       ay: 0,
+    //       vrotation: 0,
+    //       arotation: 0,
+    //       objectPool: ret,
+    //     };
+    //     return ret;
+    //   }
+    // },
     {
       name: 'enemyWaves',
       factory: function() {

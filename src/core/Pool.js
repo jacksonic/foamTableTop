@@ -15,54 +15,69 @@
  * limitations under the License.
  */
 
-/** Manages a pool of objects */
+
 foam.CLASS({
-  package: 'foam.core',
-  name: 'ObjectPool',
+  package: 'foam.pattern',
+  name: 'Pooled',
+  axioms: [ foam.pattern.Singleton.create() ],
   
-  properties: [
-    {
-      /** model for new pool objects */
-      name: 'of',
-    },
-    {
-      /** Creation arguments for new objects, and args to 
-        reset returned objects. */
-      name: 'resetArgs',
-    },
-    {
-      name: 'pool_',
-      factory: function() { return []; }
-    }
-  ],
   methods: [
-    function pop(opt_args) {
-      var ret;
-      var pool = this.pool_;
-      if ( pool.length > 0 ) {
-        ret = pool.splice(-1, 1)[0];
-      } else {
-        // nothing available, create a new one.
-        ret = this.of.create(this.resetArgs, this);
+    function installInClass(cls) {
+      // TODO: global for now, but could be anywhere that is 'per-process' and can
+      // be accessed for clearing out pools when desired
+      if ( ! foam.__FOAM_objectPools__ ) { foam.__FOAM_objectPools__ = {}; }
+      var pool = foam.__FOAM_objectPools__[cls];
+      if ( ! pool ) {
+        pool = foam.__FOAM_objectPools__[cls] = {};
       }
-      if ( opt_args ) {
-        for (var key in opt_args) {
-          ret[key] = opt_args[key];
+      
+      var oldCreate = cls.create;
+      cls.create = function(args, X) {
+        // Also differentiate pool by context. Ideally we'd be able to match the contents
+        // of the context, but the exact object will have to do for now.
+        var X = X.X || X;
+        var poolArr = pool[X];
+        if ( ! poolArr ) {
+          pool[X] = poolArr = [];
         }
+        
+        var nu;
+        if ( poolArr.length ) {
+          nu = poolArr.splice(-1, 1)[0];
+          nu.initArgs(args, X);
+          nu.destroyed = false;
+        } else {
+          nu = oldCreate.apply(this, arguments); 
+        }  
+        return nu;
       }
-      if ( ! ret.id ) { ret.id = ret.$UID; } // if no ID, use $UID
-      return ret;
-    },
-    function push(obj) {
-      this.reset_(obj);
-      this.pool_.push(obj);
-    },
-    function reset_(obj) {
-      var args = this.resetArgs;
-      for (var key in args) {
-        obj[key] = args[key];
+      
+      var oldDestroy = cls.prototype.destroy;
+      cls.prototype.destroy = function() {
+        if ( this.destroyed ) return;
+
+        // Run destroy process on the object, but leave its privates empty but intact
+        // to avoid reallocating them
+        var inst_ = this.instance_;
+        var priv_ = this.private_;  
+        var X = this.X;
+        
+        oldDestroy.apply(this, arguments);
+
+        for ( var ikey in inst_ ) { delete inst_[ikey]; }
+        for ( var pkey in priv_ ) { delete priv_[pkey]; }
+          
+        this.instance_ = inst_;  
+        this.private_ = priv_;
+        
+        // put the empty husk into the pool
+        var poolArr = pool[X];
+        if ( ! poolArr ) {
+          pool[X] = poolArr = [];
+        }
+        poolArr.push(this);
       }
-    }
-  ]
+    },
+  ]  
 });
 
