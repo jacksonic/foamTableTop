@@ -28,24 +28,18 @@ foam.CLASS({
       if ( ! foam.__FOAM_objectPools__ ) { foam.__FOAM_objectPools__ = {}; }
       var pool = foam.__FOAM_objectPools__[cls];
       if ( ! pool ) {
-        pool = foam.__FOAM_objectPools__[cls] = {};
+        pool = foam.__FOAM_objectPools__[cls] = [];
       }
       
       var oldCreate = cls.create;
       cls.create = function(args, X) {
-        // Also differentiate pool by context. Ideally we'd be able to match the contents
-        // of the context, but the exact object will have to do for now.
-        var X = X.X || X;
-        var poolArr = pool[X];
-        if ( ! poolArr ) {
-          pool[X] = poolArr = [];
-        }
-        
+      
         var nu;
-        if ( poolArr.length ) {
-          nu = poolArr.splice(-1, 1)[0];
-          nu.initArgs(args, X);
+        if ( pool.length ) {
+          nu = pool.splice(-1, 1)[0];
           nu.destroyed = false;
+          nu.initArgs(args, X);
+          nu.init && nu.init();
         } else {
           nu = oldCreate.apply(this, arguments); 
         }  
@@ -59,8 +53,7 @@ foam.CLASS({
         // Run destroy process on the object, but leave its privates empty but intact
         // to avoid reallocating them
         var inst_ = this.instance_;
-        var priv_ = this.private_;  
-        var X = this.X;
+        var priv_ = this.private_; 
         
         oldDestroy.apply(this, arguments);
 
@@ -71,13 +64,8 @@ foam.CLASS({
         this.private_ = priv_;
         
         // put the empty husk into the pool
-        var poolArr = pool[X];
-        if ( ! poolArr ) {
-          pool[X] = poolArr = [];
-        }
-        poolArr.push(this);
+        pool.push(this);
       }
     },
   ]  
 });
-
