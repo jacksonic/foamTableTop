@@ -421,11 +421,10 @@ foam.CLASS({
       name: 'consequences',
       value: false,
     },
-  ],
-  methods: [
-    /** Adds the sprite to the scene */
-    function destruct() {
-      return this.uninstall();
+    {
+      /** things that happen when the entity is destroyed */
+      name: 'destruct',
+      factory: function () {return this.uninstall()},
     },
   ],
 });
