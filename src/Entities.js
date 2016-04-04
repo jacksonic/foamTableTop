@@ -128,34 +128,6 @@ foam.CLASS({
       getter: function() { return this.bplane; }
     },
     {
-      /** hit-points for the entity */
-      name: 'hp',
-      value: {order: {hull: 0}, basehp: {hull: 3}, currhp: {hull: 3}, process: {hull: false}, immunities: {hull: false}, consequences: {hull: false}, destruct: {hull: function() { this.x = 99999;}}},
-       /*hp: function() {
-              var obj = {};
-              Object.defineProperty(obj, 'order', {hull: 0,}); //order for default damage application: 0, 1, 2...
-              Object.defineProperty(obj, 'basehp', {hull: 3,}); //base starting HP
-              Object.defineProperty(obj, 'currhp', {hull: 3,}); //current HP
-              Object.defineProperty(obj, 'process', {hull:false,}); //any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...)
-              Object.defineProperty(obj, 'immunities', {hull:false,}); //does not receive damage from listed sources
-              Object.defineProperty(obj, 'consequences', {hull:false,}); //things that happen when damage is taken
-              Object.defineProperty(obj, 'destruct', {hull: function() { this.x = 99999;},}); //things that happen on destruction //TODO: replace default with actual destroy method
-              return obj;
-            }
-            
-            hp: function() {
-              var obj = {};
-              obj.order = {hull: 0,}; //order for default damage application: 0, 1, 2...
-              obj.basehp = {hull: 3,}; //base starting HP
-              obj.currhp = {hull: 3,}; //current HP
-              obj.process = {hull:false,}; //any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...)
-              obj.immunities = {hull:false,}; //does not receive damage from listed sources
-              obj.consequences = {hull:false,}; //things that happen when damage is taken
-              obj.destruct = {hull: function() { this.x = 99999;},}; //things that happen on destruction //TODO: replace default with actual destroy method
-              return obj;
-            },*/
-    },
-    {
       /** The EntityManager that owns this entity. */
       name: 'manager'
     },
@@ -413,5 +385,47 @@ foam.CLASS({
       class: 'foam.core.Array',
       of: 'tabletop.Entity',
     }
+  ],
+});
+foam.CLASS({
+  package: 'tabletop',
+  name: 'HP',
+  properties: [
+    {
+      /** order for default damage application */
+      name: 'order',
+      value: 0,
+    },
+    {
+      /** base starting HP */
+      name: 'basehp',
+      value: 1,
+    },
+    {
+      /** current HP */
+      name: 'currhp',
+      value: 1,
+    },
+    {
+      /** any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...) */
+      name: 'process',
+      value: false,
+    },
+    {
+      /** does not receive damage from listed sources */
+      name: 'immunities',
+      value: false,
+    },
+    {
+      /** things that happen when damage is taken */
+      name: 'consequences',
+      value: false,
+    },
+  ],
+  methods: [
+    /** Adds the sprite to the scene */
+    function destruct() {
+      return this.uninstall();
+    },
   ],
 });
