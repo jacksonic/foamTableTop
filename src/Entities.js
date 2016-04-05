@@ -193,6 +193,12 @@ foam.CLASS({
       name: 'hitpoints',
       factory: function() {
         return this.HP.create();
+      },
+      adapt: function(old,nu) {
+        if ( ! nu.cls_ ) {
+          return this.HP.create(nu);
+        }
+        return nu;
       }
     },
   ],
