@@ -12,11 +12,27 @@
   #intro {
     z-index: 10;
     position: fixed;
-    top: 100px;
-    left: 100px;
-    background-color: #888888;
-    height: 500px;
-    width: 700px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    -webkit-animation: 4s linear 0s infinite rotateMe;
+  }
+
+  .rot180 {
+    transform: rotateZ(180deg);
+  }
+
+  @-webkit-keyframes rotateMe {
+    from { transform: rotateZ(0deg); }
+    to { transform: rotateZ(360deg); }
+  }
+
+  .padder {
+    flex-grow: 1;
   }
   </style>
   <title>FOAM TableTop</title>
@@ -24,7 +40,13 @@
 
  <body style="overflow:hidden;margin:0;padding:0;background-color:black">
    <img id="spritesheet" src="img/spritesheetwip.png" height="1000px" width="3000px" style="display:none" />
- </body>
+    <div id="intro">
+      <div class="padder"></div>
+      <img src="img/circletext.svg"/>
+
+      <div class="padder"></div>
+    </div>
+</body>
  <script language="javascript" src="img/spriteinfo.js"></script>
  <script language="javascript" src="Entities.js"></script>
  <script language="javascript" src="Controllers.js"></script>

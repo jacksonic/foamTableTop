@@ -283,9 +283,7 @@ foam.CLASS({
 });
 var g = tabletop.GameRunner.create();
 window.onload = function() {
-  var introbox = document.createElement("DIV");
-  introbox.id = "intro";
-  document.body.appendChild(introbox);
+  var introbox = document.getElementById("intro");
   introbox.addEventListener("click", function() {
     g.audioStart();
     introbox.style.display = "none";
