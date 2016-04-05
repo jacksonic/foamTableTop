@@ -29,6 +29,7 @@ foam.CLASS({
     'tabletop.EntityController',
     'tabletop.Sprite',
     'tabletop.ImageSprite',
+    'tabletop.HP',
   ],
   imports: [
     'worldDAO',
@@ -187,7 +188,13 @@ foam.CLASS({
           this.BY_REF(this.targetBounds_)
         )});
       }
-    }
+    },
+    { 
+      name: 'hitpoints',
+      factory: function() {
+        return this.HP.create();
+      }
+    },
   ],
 
   constants: {

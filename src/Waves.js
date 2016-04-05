@@ -21,6 +21,7 @@ foam.CLASS({
   extends: 'tabletop.EntityManager',
   requires: [
     'tabletop.Entity',
+    'tabletop.HP',
   ],
   imports: [
     'worldDAO',
@@ -99,7 +100,7 @@ foam.CLASS({
           enemyDefs: [
             {
               br: 20,
-              //hp: {basehp: {hull: 1}, currhp: {hull: 1}},
+              hitpoints: {basehp:3, currhp: 3},
               sprite: {
                 imageIndex: 0,
                 scaleX: 0.4,
@@ -109,7 +110,7 @@ foam.CLASS({
             },
             {
               br: 10,
-              //hp: {basehp: {hull: 1}, currhp: {hull: 1}},
+              hitpoints: {basehp:1, currhp: 1},
               sprite: {
                 imageIndex: 1,
                 scaleX: 0.2,
