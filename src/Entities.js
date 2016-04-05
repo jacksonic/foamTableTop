@@ -30,6 +30,7 @@ foam.CLASS({
     'tabletop.Sprite',
     'tabletop.ImageSprite',
     'tabletop.HP',
+    'tabletop.Dmg',
   ],
   imports: [
     'worldDAO',
@@ -193,6 +194,12 @@ foam.CLASS({
       name: 'hitpoints',
       factory: function() {
         return this.HP.create();
+      }
+    },
+    { 
+      name: 'damage',
+      factory: function() {
+        return this.Dmg.create();
       }
     },
   ],
@@ -399,6 +406,11 @@ foam.CLASS({
   name: 'HP',
   properties: [
     {
+      /** can actually take hitpoint damage */
+      name: 'destroyable',
+      value: true,
+    },
+    {
       /** order for default damage application */
       name: 'order',
       value: 0,
@@ -428,10 +440,62 @@ foam.CLASS({
       name: 'consequences',
       value: false,
     },
-    {
-      /** things that happen when the entity is destroyed */
-      name: 'destruct',
-      factory: function () {return this.uninstall()},
+  ],
+  methods: [
+    /** destroys the entity */
+    function destruct() {
+      this.uninstall()
     },
   ],
 });
+foam.CLASS({
+  package: 'tabletop',
+  name: 'Dmg',
+  properties: [
+    {
+      /** does this deal damage on impact */
+      name: 'damaging',
+      value: false,
+    },
+    {
+      /** damage type. */
+      name: 'type',
+      value: 'untyped',
+    },
+    {
+      /** source entity for projectile/damage */
+      name: 'source',
+    },
+    {
+      /** hit point damage */
+      name: 'hurt',
+      value: 0,
+    },
+    {
+      /** radius if an area damage weapon. 0 if not*/
+      name: 'blast',
+      value: 0,
+    },
+    {
+      /** any special modifers*/
+      name: 'modifers',
+      value: false,
+    },
+  ],
+  methods: [
+    /** destroys the entity */
+    function iHitYou(e, o) {
+      if (e.damage.damaging) {
+        if (o.hitpoints.destroyable) {
+          //checks for immunities, special conditions or resistances on-hit go here
+          o.hitpoints.currhp -= e.damage.hurt;
+          //checks for triggering hit consequences go here
+          if (o.hitpoints.currhp <= 0) {
+            o.hitpoints.destruct()
+          }
+        }
+      }     
+    },
+  ],
+});
+
