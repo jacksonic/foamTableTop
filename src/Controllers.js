@@ -232,12 +232,11 @@ foam.CLASS({
   ],
   
   methods: [
-    
     function move() {
-      this.accelerateTowards(this.target, this.owner, 100);
+      if ( this.target ) { this.accelerateTowards(this.target, this.owner, 100); }
       this.SUPER();
     },
-  ]
+  ],
 });
 
 foam.CLASS({

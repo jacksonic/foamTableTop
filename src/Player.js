@@ -138,6 +138,7 @@ foam.CLASS({
     function init() {
       this.main.install();
       this.corner = this.corner;
+      this.main.onDestroy(this.clearEntity);
     },
     /** Click/tap from user, in world coordinates */
     function clickEvent(x,y) {
@@ -146,4 +147,12 @@ foam.CLASS({
       this.main.controller.target = { x: x, y: y };
     }
   ],
+  listeners: [
+    {
+      name: 'clearEntity',
+      code: function() {
+        this.main = null;
+      }
+    }
+  ]
 });
