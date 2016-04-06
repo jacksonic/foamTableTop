@@ -47,7 +47,7 @@ foam.CLASS({
         var def = this.enemyDefs[ct];
         if ( ! def ) { continue; }
         for ( var en = 0; en < this.enemyCounts[ct]; ++en ) {
-          var e = this.Entity.create(def);
+          var e = this.Entity.create(def());
           this.position(e, ct, en);
           e.install();
         }
@@ -65,7 +65,7 @@ foam.CLASS({
       var angle = ( 2*Math.PI / count ) * i;
       var dist = 0;
       for ( var d = 0; d <= ct; ++d ) {
-        dist += this.enemyDefs[d].br; // bounding radius
+        dist += this.enemyDefs[d]().br; // bounding radius
       }
       
       e.x = this.worldWidth/2 + Math.cos(angle) * dist;
@@ -94,11 +94,12 @@ foam.CLASS({
   
       // hard coded wave data
       var waveCt = -1;
+      var self = this;
       this.data = [
         this.EnemyWave.create({
           id: ++waveCt,
           enemyDefs: [
-            {
+            function() { return {
               br: 20,
               hitpoints: {basehp:3, currhp: 3},
               sprite: {
@@ -106,9 +107,9 @@ foam.CLASS({
                 scaleX: 0.4,
                 scaleY: 0.4,
               },
-              controller: this.BasicController.create(),
-            },
-            {
+              controller: self.BasicController.create(),
+            }; },
+            function() { return {
               br: 10,
               hitpoints: {basehp:1, currhp: 1},
               sprite: {
@@ -116,8 +117,8 @@ foam.CLASS({
                 scaleX: 0.2,
                 scaleY: 0.2,
               },
-              controller: this.BasicController.create(),
-            },
+              controller: self.BasicController.create(),
+            }; },
           ],
           enemyCounts: [
             20,

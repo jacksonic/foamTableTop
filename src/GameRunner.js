@@ -99,7 +99,6 @@ foam.CLASS({
     'audioManager',
     'worldWidth',
     'worldHeight',
-   // 'entityPool',
   ],
   properties: [
     {

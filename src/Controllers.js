@@ -19,7 +19,7 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'EntityController',
-  axioms: [ foam.pattern.Singleton ],
+  axioms: [ foam.pattern.Pooled.create() ],
   imports: [
     'worldDAO',
     'worldWidth',
@@ -28,36 +28,41 @@ foam.CLASS({
 
   properties: [
     {
-      name: 'collideSink',
-      factory: function() {
-        return {
-          put: function collideSinkPut(e) {
-            this.self.collideWith(this.baseEnt, e, this.ft);
-          },
-          remove: function() {},
-          error: function() {},
-          eof: function() {},
-          self: this,
-          baseEnt: null,
-          ft: null
-        };
-      }
+      name: 'owner',
+    },
+    {
+      class: 'Simple',
+      name: 'frameTime',
     }
   ],
 
+  listeners: [
+    {
+      name: 'put',
+      code: function(o) {
+        this.collideWith(o);
+      },
+    }
+  ],
   methods: [
+    function remove() {},
+    function error() {},
+    function eof() {},
+    
     function frameStep(
-      /* tabletop.Entity // the entity to adjust */ e,
       /* number // seconds since the last frame  */ ft) {
-      this.move(e, ft);
-      this.collide(e, ft);
-      e.updateSprite();
-      this.worldUpdate(e);
+      this.frameTime = ft;
+      this.move();
+      this.collide();
+      this.owner.updateSprite();
+      this.worldUpdate();
     },
 
     /** Applies movement and physics calculations required for a frame. */
-    function move(e, ft) {
+    function move() {
       /** Changes velocity of the given entity. */
+      var ft = this.frameTime;
+      var e = this.owner;
       e.vx += e.ax * ft;
       e.vy += e.ay * ft;
       e.vrotation += e.arotation * ft;
@@ -68,18 +73,16 @@ foam.CLASS({
       e.rotation += e.vrotation * ft;
     },
 
-    function collide(e, ft) {
-      if ( Math.random() < 0.1 ) { return; }
+    function collide() {
+      //if ( Math.random() < 0.1 ) { return; }
 
-      var collideWith = this.collideWith;
       // TODO: radius check too
-      var s = Object.create(this.collideSink);
-      s.baseEnt = e;
-      s.ft = ft;
-      e.overlappingEntities.select(s);
+      this.owner.overlappingEntities.select(this);
     },
 
-    function collideWith(e, o, ft) {
+    function collideWith(o) {
+      var ft = this.frameTime;
+      var e = this.owner;
       if ( e === o ) return;
 
       //play impact sound
@@ -87,7 +90,7 @@ foam.CLASS({
 
       // position angle
       var ax = e.x - o.x, ay = e.y - o.y;
-      var len = Math.sqrt(ax*ax+ay*ay) || 1;
+      var len = (Math.sqrt(ax*ax+ay*ay) || 1);
       ax = ax / len; // normal vector for direction between the ents
       ay = ay / len;
 
@@ -101,8 +104,8 @@ foam.CLASS({
       o.vx = -ax * vlen;
       o.vy = -ay * vlen;
     },
-    function worldUpdate(e) {
-      this.worldDAO.put(e);
+    function worldUpdate() {
+      this.worldDAO.put(this.owner);
     }
   ]
 });
@@ -114,7 +117,8 @@ foam.CLASS({
   extends: 'tabletop.EntityController',
   methods: [
     /** Also check for out of bounds and destroy self */
-    function worldUpdate(e) {
+    function worldUpdate() {
+      var e = this.owner;
       if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
@@ -124,7 +128,9 @@ foam.CLASS({
       }
     },
 
-    function collideWith(e, o, ft) {
+    function collideWith(o) {
+      var ft = this.frameTime;
+      var e = this.owner;
       if ( e === o ) return;
 
       // don't collide with other bullets // TODO: select specific world planes
@@ -138,7 +144,7 @@ foam.CLASS({
 
       // position angle
       var ax = e.x - o.x, ay = e.y - o.y;
-      var len = Math.sqrt(ax*ax+ay*ay) || 1;
+      var len = (Math.sqrt(ax*ax+ay*ay) || 1);
       ax = ax / len; // normal vector for direction between the ents
       ay = ay / len;
 
@@ -161,7 +167,8 @@ foam.CLASS({
   name: 'BasicController',
   extends: 'tabletop.EntityController',
   methods: [
-    function worldUpdate(e) {
+    function worldUpdate() {
+      var e = this.owner;
       if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
@@ -170,7 +177,9 @@ foam.CLASS({
       }
     },
     
-    function move(e, ft) {
+    function move() {
+      var ft = this.frameTime;
+      var e = this.owner;
       /** Changes velocity of the given entity. */
       e.vx += e.ax * ft;
       e.vy += e.ay * ft;

@@ -516,7 +516,6 @@ foam.CLASS({
       // search bounds.
       // TODO: use compare instead of Math.min, to allow for non-number ranges
       var buckets;
-      if ( whereQuery )
 
       // Equals will completely restrict one axis to a zero-width range (one value)
       while ( args = isExprMatch(this.Eq) ) {
@@ -569,13 +568,17 @@ foam.CLASS({
       for ( var key in items ) {
         if ( fc.stopped ) break;
         if ( fc.errorEvt ) {
-          sink.error(fc.errorEvt);
-          return Promise.reject(fc.errorEvt);
+          var err = fc.errorEvt;
+          fc.destroy();
+          sink.error(err);
+          return Promise.reject(err);
          }
         sink.put(items[key].object, null, fc);
       }
-
-      sink && sink.eof && sink.eof();
+      fc.destroy();
+      
+      sink.eof();
+      sink.destroy();
       return Promise.resolve(resultSink);
     },
 
@@ -596,7 +599,8 @@ foam.CLASS({
         }
       }
 
-      sink && sink.eof && sink.eof();
+      sink.eof();
+      sink.destroy(); // for pooling
       return Promise.resolve(resultSink);
     },
 
