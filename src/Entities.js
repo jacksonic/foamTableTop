@@ -339,6 +339,9 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'HP',
+  axioms: [
+    foam.pattern.Pooled.create(),
+  ],
   properties: [
     {
       /** can actually take hitpoint damage */
@@ -386,6 +389,9 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'Dmg',
+  axioms: [
+    foam.pattern.Pooled.create(),
+  ],
   properties: [
     {
       /** does this deal damage on impact */
