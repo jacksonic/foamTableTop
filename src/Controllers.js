@@ -123,8 +123,7 @@ foam.CLASS({
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
       } else {
-        // don't update, since nothing needs to collide with us
-        //this.worldDAO.put(e);
+        this.worldDAO.put(e);
       }
     },
 
@@ -165,6 +164,18 @@ foam.CLASS({
   name: 'BulletController',
   extends: 'tabletop.BulletControllerBase',
   axioms: [ foam.pattern.Pooled.create() ],
+  methods: [
+    function worldUpdate() {
+      var e = this.owner;
+      if ( e.x > 1600+100 || e.y > 900+100 ||
+           e.x < -100 || e.y < -100 ) {
+        e.uninstall();
+      } else {
+        // don't update, since nothing needs to collide with us
+        //this.worldDAO.put(e);
+      }
+    },
+  ],
 });
 
 
