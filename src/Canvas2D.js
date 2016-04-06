@@ -52,6 +52,7 @@ foam.CLASS({
   implements: [
     'tabletop.Sprite'
   ],
+  axioms: [ foam.pattern.Pooled.create() ],
   imports: [
     'time',
     'canvas',

@@ -17,61 +17,35 @@
 
 foam.CLASS({
   package: 'tabletop',
-  name: 'PlayerEntity',
-  extends: 'tabletop.Entity',
-  implements: [
-    'tabletop.Physics'
-  ],
+  name: 'PlayerController',
+  extends: 'tabletop.EntityController',
   requires: [
-    'tabletop.ImageSprite',
     'tabletop.BulletController',
     'tabletop.Entity',
-  ],
-  imports: [
-    'canvas',
-    'audioManager',
-//    'entityPool',
   ],
   constants: {
     SHOT_COOL_DOWN: 0.1
   },
   properties: [
-    {
-      name: 'sprite',
-      factory: function() {
-        return this.ImageSprite.create({
-          x: this.x,
-          y: this.y,
-          rotation: this.rotation,
-          imageIndex: 0,
-        });
-      },
-    },
-    {
-      name: 'moveRequired',
-      getter: function() { return true; }
-    },
     [ 'coolDown', 1 ],
     {
       name: 'target',
       factory: function() { return { x: 800, y: 450 }; }
     },
-    [ 'bplane', 3 ],
+    
+    
   ],
 
   methods: [
     /** Applies movement and physics calculations required for a frame. */
-    function moveStep(/* number // seconds since the last frame */ ft) {
-      this.SUPER(ft);
-
-      // Doesn't move
-      this.coolDown -= ft;
+    function move() {
+      // Doesn't move, no super
+      
+      this.coolDown -= this.frameTime;
       if ( this.coolDown < 0 ) {
         this.coolDown = this.SHOT_COOL_DOWN;
         this.shoot();
       }
-
-      this.updateSprite();
     },
   ],
 
@@ -79,31 +53,32 @@ foam.CLASS({
     {
       name: 'shoot',
       code: function() {
+        var e = this.owner;
         var b = this.Entity.create({
-          x: this.x,
-          y: this.y,
+          x: e.x,
+          y: e.y,
           br: 3,
           bplane: 1,
           collisionPlane: 0,
-          rotation: this.rotation,
-          manager: this,
+          rotation: e.rotation,
+          manager: e,
           controller: this.BulletController.create(),
         });
         b.damage.damaging = true;
         b.damage.hurt = 1;
         
         // TODO: clean up sprite init
-        b.sprite.x = this.x;
-        b.sprite.y = this.y;
-        b.sprite.rotation = this.rotation;
+        b.sprite.x = e.x;
+        b.sprite.y = e.y;
+        b.sprite.rotation = e.rotation;
         b.sprite.imageIndex = 2;
         b.sprite.scaleX = 0.2;
         b.sprite.scaleY = 0.2;
         
         this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
-        this.rotation = b.rotation + Math.PI; // TODO: off by 180?
+        e.rotation = b.rotation + Math.PI; // TODO: off by 180?
         b.install();
-        this.audioManager.play("impact", this);
+        e.audioManager.play("impact", e);
       }
     }
   ]
@@ -115,7 +90,10 @@ foam.CLASS({
   name: 'PlayerManager',
   extends: 'tabletop.EntityManager',
   requires: [
-    'tabletop.PlayerEntity',
+    'tabletop.Entity',
+    'tabletop.ImageSprite',
+    'tabletop.HP',
+    'tabletop.PlayerController'
   ],
   imports: [
     'worldDAO',
@@ -126,7 +104,23 @@ foam.CLASS({
     {
       name: 'main',
       factory: function() {
-        return this.PlayerEntity.create({ id: 'player' + this.$UID });
+        return this.Entity.create({ 
+          id: 'player' + this.$UID,
+          bplane: 3,
+          vx: 1,
+          br: 30,
+          sprite: this.ImageSprite.create({
+            x: this.x,
+            y: this.y,
+            rotation: this.rotation,
+            imageIndex: 0,
+          }),
+          hitpoints: this.HP.create({
+            basehp: 10,
+            currhp: 10
+          }),
+          controller: this.PlayerController.create()
+        });
       }
     },
     {
@@ -149,7 +143,7 @@ foam.CLASS({
     function clickEvent(x,y) {
       console.log('player click', this.corner, x, y);
 
-      this.main.target = { x: x, y: y };
+      this.main.controller.target = { x: x, y: y };
     }
   ],
 });

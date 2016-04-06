@@ -22,9 +22,9 @@ foam.CLASS({
 
   methods: [
 
-    function aimTowards(src, dst, velocity, opt_angleAdjust) {
-      var dx = src.x - dst.x;
-      var dy = src.y - dst.y;
+    function aimTowards(target, e, velocity, opt_angleAdjust) {
+      var dx = target.x - e.x;
+      var dy = target.y - e.y;
       var theta = Math.atan2(dy,dx);
       //var r     = Math.sqrt(dx*dx+dy*dy);
       //r = r < 0 ? Math.max(-velocity, r) : Math.min(velocity, r);
@@ -32,9 +32,23 @@ foam.CLASS({
 
       theta = theta + (opt_angleAdjust || 0);
 
-      dst.vx = r*Math.cos(theta);
-      dst.vy = r*Math.sin(theta);
-      dst.rotation = Math.PI/2 - theta;
+      e.vx = r*Math.cos(theta);
+      e.vy = r*Math.sin(theta);
+      e.rotation = Math.PI/2 - theta;
+    },
+    function accelerateTowards(target, e, velocity, opt_angleAdjust) {
+      var dx = target.x - e.x;
+      var dy = target.y - e.y;
+      var theta = Math.atan2(dy,dx);
+      //var r     = Math.sqrt(dx*dx+dy*dy);
+      //r = r < 0 ? Math.max(-velocity, r) : Math.min(velocity, r);
+      var r = velocity;
+
+      theta = theta + (opt_angleAdjust || 0);
+
+      e.ax = r*Math.cos(theta);
+      e.ay = r*Math.sin(theta);
+      e.rotation = Math.PI/2 - theta;
     },
 
   ],

@@ -99,6 +99,7 @@ foam.CLASS({
     'audioManager',
     'worldWidth',
     'worldHeight',
+    'players',
   ],
   properties: [
     {

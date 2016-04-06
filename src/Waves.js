@@ -27,7 +27,6 @@ foam.CLASS({
     'worldDAO',
     'worldWidth',
     'worldHeight',
-//    'entityPool',
   ],
   properties: [
     'id',
@@ -85,6 +84,8 @@ foam.CLASS({
   requires: [
     'tabletop.EnemyWave',
     'tabletop.BasicController',
+    'tabletop.TargetPlayerController',
+    'tabletop.Dmg'
   ],
   properties: [
     'data'
@@ -117,7 +118,12 @@ foam.CLASS({
                 scaleX: 0.2,
                 scaleY: 0.2,
               },
-              controller: self.BasicController.create(),
+              collisionPlane: 3,
+              controller: self.TargetPlayerController.create(),
+              damage: self.Dmg.create({
+                damaging: true,
+                hurt: 1
+              }),
             }; },
           ],
           enemyCounts: [
