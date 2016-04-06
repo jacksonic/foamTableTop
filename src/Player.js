@@ -56,6 +56,7 @@ foam.CLASS({
       name: 'target',
       factory: function() { return { x: 800, y: 450 }; }
     },
+    [ 'bplane', 3 ],
   ],
 
   methods: [
@@ -88,6 +89,8 @@ foam.CLASS({
           manager: this,
           controller: this.BulletController.create(),
         });
+        b.damage.damaging = true;
+        b.damage.hurt = 1;
         
         // TODO: clean up sprite init
         b.sprite.x = this.x;

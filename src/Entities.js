@@ -150,7 +150,7 @@ foam.CLASS({
       /** The controller responsible to moving/targetting the entity */
       name: 'controller',
       postSet: function(old,nu) {
-        if ( old ) { old.destroy(); }
+        if ( old ) { old.owner = null; old.destroy(); }
         if ( nu ) { nu.owner = this; }
       }
     },
@@ -377,9 +377,9 @@ foam.CLASS({
     },
   ],
   methods: [
-    /** destroys the entity */
+    /** destroys the entity? */
     function destruct() {
-      this.uninstall()
+
     },
   ],
 });
@@ -426,7 +426,7 @@ foam.CLASS({
           o.hitpoints.currhp -= e.damage.hurt;
           //checks for triggering hit consequences go here
           if (o.hitpoints.currhp <= 0) {
-            o.hitpoints.destruct()
+            o.uninstall();
           }
         }
       }     

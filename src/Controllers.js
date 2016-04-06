@@ -19,7 +19,6 @@
 foam.CLASS({
   package: 'tabletop',
   name: 'EntityController',
-  axioms: [ foam.pattern.Pooled.create() ],
   imports: [
     'worldDAO',
     'worldWidth',
@@ -115,6 +114,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'BulletController',
   extends: 'tabletop.EntityController',
+  axioms: [ foam.pattern.Pooled.create() ],
   methods: [
     /** Also check for out of bounds and destroy self */
     function worldUpdate() {
@@ -166,6 +166,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'BasicController',
   extends: 'tabletop.EntityController',
+  axioms: [ foam.pattern.Pooled.create() ],
   methods: [
     function worldUpdate() {
       var e = this.owner;
@@ -173,7 +174,7 @@ foam.CLASS({
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
       } else {
-        e.worldDAO.put(e);
+        this.worldDAO.put(e);
       }
     },
     
