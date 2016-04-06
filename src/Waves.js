@@ -21,7 +21,7 @@ foam.CLASS({
   extends: 'tabletop.EntityManager',
   requires: [
     'tabletop.Entity',
-    'tabletop.HP',
+    'tabletop.Hull',
   ],
   imports: [
     'worldDAO',
@@ -85,7 +85,7 @@ foam.CLASS({
     'tabletop.EnemyWave',
     'tabletop.BasicController',
     'tabletop.TargetPlayerController',
-    'tabletop.Dmg'
+    'tabletop.Damage'
   ],
   properties: [
     'data'
@@ -102,7 +102,7 @@ foam.CLASS({
           enemyDefs: [
             function() { return {
               br: 20,
-              hitpoints: {basehp:3, currhp: 3},
+              hull: {basehp:3, currhp: 3},
               sprite: {
                 imageIndex: 0,
                 scaleX: 0.4,
@@ -112,7 +112,7 @@ foam.CLASS({
             }; },
             function() { return {
               br: 10,
-              hitpoints: {basehp:1, currhp: 1},
+              hull: {basehp:1, currhp: 1},
               sprite: {
                 imageIndex: 1,
                 scaleX: 0.2,
@@ -120,7 +120,7 @@ foam.CLASS({
               },
               collisionPlane: 3,
               controller: self.TargetPlayerController.create(),
-              damage: self.Dmg.create({
+              damage: self.Damage.create({
                 damaging: true,
                 hurt: 1
               }),

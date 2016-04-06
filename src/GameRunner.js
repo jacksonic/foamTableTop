@@ -22,7 +22,6 @@ foam.CLASS({
   name: 'FrameStepper',
   implements: ['foam.dao.Sink'],
   requires: [
-    'foam.mlang.Expressions as EXPRS',
     'foam.dao.ArraySink',
   ],
   imports: [
@@ -36,8 +35,7 @@ foam.CLASS({
       /** Queries the world for entities with velocity or acceleration above zero */
       name: 'entitesToMoveDAO',
       factory: function() {
-        var m = this.EXPRS.create();
-        return this.worldDAO.where(m.EQ(tabletop.Entity.MOVE_REQUIRED, true));
+        return this.worldDAO;
       }
     },
     {

@@ -578,7 +578,7 @@ foam.CLASS({
       fc.destroy();
       
       sink.eof();
-      sink.destroy();
+      if ( isink !== sink ) { sink.destroy(); }
       return Promise.resolve(resultSink);
     },
 
@@ -594,13 +594,13 @@ foam.CLASS({
           duplicates[key] = true;
           var obj = buckets[i][key];
           if ( obj.id ) {
-            sink.put(obj, null); // HACK: removed FlowControl to gain optimization
+            sink.put(obj); // HACK: removed FlowControl to gain optimization
           }
         }
       }
 
       sink.eof();
-      sink.destroy(); // for pooling
+      if ( isink !== sink ) { sink.destroy(); }
       return Promise.resolve(resultSink);
     },
 

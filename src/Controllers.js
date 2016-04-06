@@ -139,7 +139,7 @@ foam.CLASS({
 
       //play impact sound
       e.audioManager.play("impact", e);
-      e.damage.iHitYou(e, o);
+      e.damage.iHitYou(o);
 
       // position angle
       var ax = e.x - o.x, ay = e.y - o.y;
@@ -228,6 +228,9 @@ foam.CLASS({
   properties: [
     {
       name: 'target',
+      postSet: function(old,nu) {
+        if ( nu ) { nu.onDestroy(this.clearTarget); }
+      }
     }
   ],
   
@@ -237,6 +240,14 @@ foam.CLASS({
       this.SUPER();
     },
   ],
+  listeners: [
+    {
+      name: 'clearTarget',
+      code: function() {
+        this.target = null;
+      }
+    }
+  ]
 });
 
 foam.CLASS({

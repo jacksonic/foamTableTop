@@ -29,8 +29,8 @@ foam.CLASS({
     'tabletop.EntityController',
     'tabletop.Sprite',
     'tabletop.ImageSprite',
-    'tabletop.HP',
-    'tabletop.Dmg',
+    'tabletop.Hull',
+    'tabletop.Damage',
   ],
   imports: [
     'worldDAO',
@@ -83,15 +83,15 @@ foam.CLASS({
       class: 'Simple',
       name: 'arotation',
     },
-
-    { /** Computed, true if a new moveStep() call is needed */
-      name: 'moveRequired',
-      getter: function() {
-        return !! (this.vx || this.vy || this.vrotation ||
-          this.ax || this.ay || this.arotation);
-      }
+    
+    {
+      name: 'thrust',
     },
-
+    {
+      name: 'mass',
+    },
+    
+    
     { /** Bounding box size (radius from x,y) */
       name: 'br',
     },
@@ -195,13 +195,13 @@ foam.CLASS({
       }
     },
     { 
-      name: 'hitpoints',
+      name: 'hull',
       factory: function() {
-        return this.HP.create();
+        return this.Hull.create();
       },
       adapt: function(old,nu) {
         if ( ! nu.cls_ ) {
-          return this.HP.create(nu);
+          return this.Hull.create(nu);
         }
         return nu;
       }
@@ -209,7 +209,7 @@ foam.CLASS({
     { 
       name: 'damage',
       factory: function() {
-        return this.Dmg.create();
+        return this.Damage.create();
       }
     },
   ],
@@ -336,9 +336,32 @@ foam.CLASS({
     }
   ],
 });
+
 foam.CLASS({
   package: 'tabletop',
-  name: 'HP',
+  name: 'Engine',
+  axioms: [
+    foam.pattern.Pooled.create(),
+  ],
+  properties: [
+    {
+      name: 'thrust',
+      value: 0,
+    },
+  ],
+  methods: [
+    function applyThrust(e) {
+      var v = this.thrust / e.mass;
+      var a = e.rotation;
+      e.ax = v*Math.cos(a);
+      e.ay = v*Math.sin(a);
+    }
+  ]
+})
+
+foam.CLASS({
+  package: 'tabletop',
+  name: 'Hull',
   axioms: [
     foam.pattern.Pooled.create(),
   ],
@@ -366,29 +389,20 @@ foam.CLASS({
     {
       /** any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...) */
       name: 'process',
-      value: false,
     },
     {
       /** does not receive damage from listed sources */
       name: 'immunities',
-      value: false,
     },
     {
       /** things that happen when damage is taken */
       name: 'consequences',
-      value: false,
-    },
-  ],
-  methods: [
-    /** destroys the entity? */
-    function destruct() {
-
     },
   ],
 });
 foam.CLASS({
   package: 'tabletop',
-  name: 'Dmg',
+  name: 'Damage',
   axioms: [
     foam.pattern.Pooled.create(),
   ],
@@ -425,13 +439,13 @@ foam.CLASS({
   ],
   methods: [
     /** destroys the entity */
-    function iHitYou(e, o) {
-      if (e.damage.damaging) {
-        if (o.hitpoints.destroyable) {
+    function iHitYou(o) {
+      if (this.damaging) {
+        if (o.hull.destroyable) {
           //checks for immunities, special conditions or resistances on-hit go here
-          o.hitpoints.currhp -= e.damage.hurt;
+          o.hull.currhp -= this.hurt;
           //checks for triggering hit consequences go here
-          if (o.hitpoints.currhp <= 0) {
+          if (o.hull.currhp <= 0) {
             o.uninstall();
           }
         }

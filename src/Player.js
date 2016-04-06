@@ -92,7 +92,7 @@ foam.CLASS({
   requires: [
     'tabletop.Entity',
     'tabletop.ImageSprite',
-    'tabletop.HP',
+    'tabletop.Hull',
     'tabletop.PlayerController'
   ],
   imports: [
@@ -115,7 +115,7 @@ foam.CLASS({
             rotation: this.rotation,
             imageIndex: 0,
           }),
-          hitpoints: this.HP.create({
+          hull: this.Hull.create({
             basehp: 10,
             currhp: 10
           }),

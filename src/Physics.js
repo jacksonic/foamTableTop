@@ -21,7 +21,7 @@ foam.CLASS({
   name: 'Physics',
 
   methods: [
-
+    
     function aimTowards(target, e, velocity, opt_angleAdjust) {
       var dx = target.x - e.x;
       var dy = target.y - e.y;
