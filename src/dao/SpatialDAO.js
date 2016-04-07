@@ -230,26 +230,9 @@ foam.CLASS({
         // TODO: removeAll and re-add
       }
     },
-    {
-      /** @internal Experimental memoization of sink+options from decorateSink_ */
-      name: 'sinkCache_',
-      factory: function() { return {}; }
-    }
   ],
 
   methods: [
-//     function decorateSink_(sink, options, isListener, disableLimit) {
-//       if ( ! options ) return sink;
-
-//       var s = this.sinkCache_[sink.$UID];
-//       if ( s ) {
-//         return s;
-//       }
-
-//       var ret = this.SUPER(sink, options, isListener, disableLimit);
-//       this.sinkCache_[sink.$UID] = ret;
-//       return ret;
-//     },
 
     /** A default hash for any object with an x, y, x2, y2.
       Returns an array of buckets the object should occupy. if createMode is
@@ -365,10 +348,7 @@ foam.CLASS({
       throw new Error("SpatialHashDAO.findBuckets4_() not implemented!");
     },
 
-    function listen(sink, options) {
-    },
-
-    function put(obj, sink) {
+    function put(obj) {
       var min = this.hash_(obj, false);
       var max = this.hash_(obj, true);
 
@@ -378,7 +358,6 @@ foam.CLASS({
         // as before, none of the buckets need to be altered.
         if ( min == prev.min && max == prev.max ) {
           // hashes match, no change in buckets
-          sink && sink.put(obj);
           this.on.put.pub(obj);
           return Promise.resolve(obj);
         }
@@ -395,21 +374,14 @@ foam.CLASS({
         buckets[i][obj.id] = obj;
       }
 
-      sink && sink.put(obj);
       this.on.put.pub(obj);
       return Promise.resolve(obj);
     },
 
-    function remove(obj, sink) {
-      if ( ! this.remove_(obj) ) {
-        var err = this.ObjectNotFoundException.create({ id: obj.id });
-        sink && sink.error(err);
-        return Promise.reject(err);
-      } else {
-        sink && sink.remove(obj);
-        this.on.remove.pub(obj);
-        return Promise.resolve(sink);
-      }
+    function remove(obj) {
+      this.remove_(obj);
+      this.on.remove.pub(obj);
+      return Promise.resolve();
     },
     /** Internal version of remove, without DAO notification. @internal */
     function remove_(obj) {
@@ -434,9 +406,9 @@ foam.CLASS({
     },
     /** Attempts to optimize the query and find all buckets that contain
       potential matches. */
-    function queryBuckets_(options) {
+    function queryBuckets_(skip, limit, order, predicate) {
       var buckets;
-      var whereQuery = options ? options.where.clone() : null;
+      var whereQuery = predicate ? predicate.clone() : null;
 
       var space = this.space;
       var isIndexed = function(mlangArg) {
@@ -558,9 +530,9 @@ foam.CLASS({
       return buckets;
     },
 
-    function selectAll_(isink, options) {
+    function selectAll_(isink, skip, limit, order, predicate) {
       var resultSink = isink || this.ArraySink.create();
-      var sink = this.decorateSink_(resultSink, options);
+      var sink = this.decorateSink_(resultSink, skip, limit, order, predicate);
 
       // no optimal filtering available, so run all items through
       var fc = this.FlowControl.create();
@@ -576,15 +548,15 @@ foam.CLASS({
         sink.put(items[key].object, null, fc);
       }
       fc.destroy();
-      
+
       sink.eof();
       if ( isink !== sink ) { sink.destroy(); }
       return Promise.resolve(resultSink);
     },
 
-    function selectBuckets_(isink, buckets, options) {
+    function selectBuckets_(isink, buckets, skip, limit, order, predicate) {
       var resultSink = isink || this.ArraySink.create();
-      var sink = this.decorateSink_(resultSink, options);
+      var sink = this.decorateSink_(resultSink, skip, limit, order, predicate);
 
       var duplicates = {};
       for ( var i = 0; ( i < buckets.length ); ++i ) {
@@ -604,38 +576,37 @@ foam.CLASS({
       return Promise.resolve(resultSink);
     },
 
-    function select(isink, options) {
+    function select(isink, skip, limit, order, predicate) {
       var buckets;
 
-      if ( options && options.where &&
-       ( this.Intersects.isInstance(options.where) || this.ContainedBy.isInstance(options.where))) {
-        buckets = this.findBucketsFn(options.where.arg2.f());
+      if ( predicate &&
+       ( this.Intersects.isInstance(predicate) || this.ContainedBy.isInstance(predicate))) {
+        buckets = this.findBucketsFn(predicate.arg2.f());
       } else {
-        buckets = this.queryBuckets_(options);
+        buckets = this.queryBuckets_(skip, limit, order, predicate);
       }
 
       if ( buckets ) {
-        return this.selectBuckets_(isink, buckets, options);
+        return this.selectBuckets_(isink, buckets, skip, limit, order, predicate);
       } else {
-        return this.selectAll_(isink, options);
+        return this.selectAll_(isink, skip, limit, order, predicate);
       }
     },
 
-    function removeAll(sink, options) {
-      var predicate = ( options && options.where ) || this.True.create();
+    function removeAll(skip, limit, order, predicate) {
+      var predicate = ( predicate ) || this.True.create();
 
       for ( var key in this.items ) {
         var obj = this.items[key].object;
         if ( predicate.f(obj) ) {
           this.remove(obj);
-          sink && sink.remove(obj);
           this.on.remove.pub(obj);
         }
       }
 
       sink && sink.eof && sink.eof();
 
-      return Promise.resolve(sink || '');
+      return Promise.resolve();
     },
 
     function find(id) {

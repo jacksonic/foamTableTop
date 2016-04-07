@@ -16,11 +16,6 @@
  */
 
 foam.CLASS({
-  refines: 'foam.dao.DAOOptions',
-  axioms: [ foam.pattern.Pooled.create() ],
-});
-
-foam.CLASS({
   refines: 'foam.dao.PredicatedSink',
   axioms: [ foam.pattern.Pooled.create() ],
 })
