@@ -18,6 +18,12 @@
 foam.CLASS({
   refines: 'foam.dao.PredicatedSink',
   axioms: [ foam.pattern.Pooled.create() ],
+  methods: [
+    function eof() {
+      this.delegate.eof();
+      this.destroy();
+    }
+  ]
 })
 
 foam.CLASS({

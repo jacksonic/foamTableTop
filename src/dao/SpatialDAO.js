@@ -545,12 +545,11 @@ foam.CLASS({
           sink.error(err);
           return Promise.reject(err);
          }
-        sink.put(items[key].object, null, fc);
+        sink.put(items[key].object, fc);
       }
       fc.destroy();
 
       sink.eof();
-      if ( isink !== sink ) { sink.destroy(); }
       return Promise.resolve(resultSink);
     },
 
@@ -572,7 +571,6 @@ foam.CLASS({
       }
 
       sink.eof();
-      if ( isink !== sink ) { sink.destroy(); }
       return Promise.resolve(resultSink);
     },
 

@@ -183,17 +183,6 @@ foam.CLASS({
         ));
       }
     },
-    {
-      /** Experimental alternative to overlappingEntities that avoids some object creation.
-         Call this.worldDAO.select(sink, this.overlappingEntitiesOptions_); */
-      name: 'overlappingEntitiesOptions_',
-      factory: function() {
-        return foam.dao.DAOOptions.create({ where: this.INTERSECTS(
-          this.worldDAO.space,
-          this.BY_REF(this.targetBounds_)
-        )});
-      }
-    },
     { 
       name: 'hull',
       factory: function() {
