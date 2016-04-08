@@ -558,8 +558,16 @@ foam.CLASS({
       var sink = this.decorateSink_(resultSink, skip, limit, order, predicate);
 
       var duplicates = {};
-      for ( var i = 0; ( i < buckets.length ); ++i ) {
+      var fc = this.FlowControl.create();
+      for ( var i = 0; ( i < buckets.length && ! fc.stopped ); ++i ) {
         for ( var key in buckets[i] ) {
+          if ( fc.stopped ) break;
+          if ( fc.errorEvt ) {
+            var err = fc.errorEvt;
+            fc.destroy();
+            sink.error(err);
+            return Promise.reject(err);
+           }
           // skip things we've already seen from other buckets
           if ( duplicates[key] ) { continue; }
           duplicates[key] = true;
@@ -569,7 +577,7 @@ foam.CLASS({
           }
         }
       }
-
+      fc.destroy();
       sink.eof();
       return Promise.resolve(resultSink);
     },

@@ -31,6 +31,7 @@ foam.CLASS({
     'tabletop.ImageSprite',
     'tabletop.Hull',
     'tabletop.Damage',
+    'tabletop.Engine',
   ],
   imports: [
     'worldDAO',
@@ -85,12 +86,8 @@ foam.CLASS({
     },
     
     {
-      name: 'thrust',
-    },
-    {
       name: 'mass',
-    },
-    
+    },    
     
     { /** Bounding box size (radius from x,y) */
       name: 'br',
@@ -168,6 +165,7 @@ foam.CLASS({
         for entities in this box when colliding) */
       name: 'targetBounds_',
       factory: function() {
+        // TODO: make this a proxy
         var obj = Object.create(this.BOUNDS_WRAPPER);
         obj.owner_ = this;
         return obj;
@@ -199,8 +197,27 @@ foam.CLASS({
       name: 'damage',
       factory: function() {
         return this.Damage.create();
+      },
+      adapt: function(old,nu) {
+        if ( ! nu.cls_ ) {
+          return this.Damage.create(nu);
+        }
+        return nu;
       }
     },
+    {
+      name: 'engine',
+      factory: function() {
+        return this.Engine.create();
+      },
+      adapt: function(old,nu) {
+        if ( ! nu.cls_ ) {
+          return this.Engine.create(nu);
+        }
+        return nu;
+      }
+    },
+    
   ],
 
   constants: {
@@ -341,6 +358,7 @@ foam.CLASS({
   methods: [
     function applyThrust(e) {
       var v = this.thrust / e.mass;
+      if ( ! v ) return;
       var a = e.rotation;
       e.ax = v*Math.cos(a);
       e.ay = v*Math.sin(a);
