@@ -118,7 +118,7 @@ foam.CLASS({
             if (this.loop) {
               this.nextFrame = -1;
             } else {
-              this.x = 99999; //code for terminating upon animation completion // TODO destroy properly
+              this.uninstall(); //code for terminating upon animation completion
               return;
             }
           }

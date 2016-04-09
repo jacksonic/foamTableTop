@@ -453,7 +453,9 @@ foam.CLASS({
           o.hull.currhp -= this.hurt;
           //checks for triggering hit consequences go here
           if (o.hull.currhp <= 0) {
-            o.uninstall();
+            o.sprite.imageIndex = 8;
+            o.sprite.loop = false;
+            o.sprite.framerate = 60;
           }
         }
       }     
