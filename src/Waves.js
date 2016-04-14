@@ -64,7 +64,7 @@ foam.CLASS({
       var angle = ( 2*Math.PI / count ) * i;
       var dist = 0;
       for ( var d = 0; d <= ct; ++d ) {
-        dist += this.enemyDefs[d]().br; // bounding radius
+        dist += this.enemyDefs[d]().br*2; // bounding radius
       }
       
       e.x = this.worldWidth/2 + Math.cos(angle) * dist;
@@ -83,6 +83,7 @@ foam.CLASS({
   name: 'EnemyWaveData',
   requires: [
     'tabletop.EnemyWave',
+    'tabletop.EntityController',
     'tabletop.BasicController',
     'tabletop.TargetPlayerController',
     'tabletop.ShootPlayerController',
@@ -129,10 +130,28 @@ foam.CLASS({
                 hurt: 1
               }),
             }; },
+            function() { return {
+              br: 20,
+              hull: {basehp:10, currhp: 10},
+              engine: { thrust: 0 },
+              mass: 10,
+              sprite: {
+                imageIndex: 3,
+                scaleX: 0.5,
+                scaleY: 0.5,
+              },
+              collisionPlane: 0,
+              controller: self.EntityController.create(),
+              damage: self.Damage.create({
+                damaging: false,
+              }),
+            }; },
+            
           ],
           enemyCounts: [
             20,
             10,
+            3,
           ],
         }),
       ]

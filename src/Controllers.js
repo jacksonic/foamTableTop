@@ -97,12 +97,13 @@ foam.CLASS({
       // velocity based
       var dx = (e.vx - o.vx),
           dy = (e.vy - o.vy);
-      var vlen = (Math.sqrt(dx*dx+dy*dy) || 1) / 2;
+      var vlen = (Math.sqrt(dx*dx+dy*dy) || 1);
+      var massDist = e.mass / o.mass;
 
-      e.vx = (ax * vlen);
-      e.vy = (ay * vlen);
-      o.vx = -ax * vlen;
-      o.vy = -ay * vlen;
+      e.vx +=  ax * vlen / massDist;
+      e.vy +=  ay * vlen / massDist;
+      o.vx += -ax * vlen * massDist;
+      o.vy += -ay * vlen * massDist;
     },
     function worldUpdate() {
       this.worldDAO.put(this.owner);
