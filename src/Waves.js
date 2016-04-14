@@ -85,6 +85,7 @@ foam.CLASS({
     'tabletop.EnemyWave',
     'tabletop.BasicController',
     'tabletop.TargetPlayerController',
+    'tabletop.ShootPlayerController',
     'tabletop.Damage'
   ],
   properties: [
@@ -110,7 +111,7 @@ foam.CLASS({
                 scaleX: 0.4,
                 scaleY: 0.4,
               },
-              controller: self.BasicController.create(),
+              controller: self.ShootPlayerController.create(),
             }; },
             function() { return {
               br: 10,

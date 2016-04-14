@@ -256,6 +256,83 @@ foam.CLASS({
 
 foam.CLASS({
   package: 'tabletop',
+  name: 'AwesomeShotControllerTrait',
+  requires: [
+    'tabletop.Entity',
+    'tabletop.BulletController'
+  ],
+
+  constants: {
+    SHOT_COOL_DOWN: 2 // TODO: weapon
+  },
+  
+  properties: [
+    {
+      name: 'coolDown',
+      factory: function() { return Math.random() * 2; }
+    },
+    {
+      name: 'target',
+      postSet: function(old,nu) {
+        if ( nu ) { nu.onDestroy(this.clearTarget); }
+      }
+    }
+  ],
+  
+  methods: [
+    function move() {
+      this.SUPER();
+      
+      if ( this.target ) { 
+        // shoot!
+        this.coolDown -= this.frameTime;
+        if ( this.coolDown < 0 ) {
+          this.coolDown = this.SHOT_COOL_DOWN;
+          this.shoot();
+        }
+      }
+    },
+    
+    function shoot() {
+      var e = this.owner;
+      var b = this.Entity.create({
+        x: e.x,
+        y: e.y,
+        br: 3,
+        bplane: e.bplane,
+        collisionPlane: this.target.bplane,
+        rotation: e.rotation,
+        manager: e,
+        controller: this.BulletController.create(),
+      });
+      b.damage.damaging = true;
+      b.damage.hurt = 1; // TODO: weapon 
+      
+      // TODO: clean up sprite init
+      b.sprite.x = e.x;
+      b.sprite.y = e.y;
+      b.sprite.rotation = e.rotation;
+      b.sprite.imageIndex = 2;
+      b.sprite.scaleX = 0.2;
+      b.sprite.scaleY = 0.2;
+      
+      this.aimTowards({ x: this.target.x, y: this.target.y }, b, 400, Math.random() * 0.4 - 0.2);
+      b.install();
+      e.audioManager.play("impact", e);
+    }
+  ],
+  listeners: [
+    {
+      name: 'clearTarget',
+      code: function() {
+        this.target = null;
+      }
+    }
+  ]
+});
+
+foam.CLASS({
+  package: 'tabletop',
   name: 'TargetPlayerController',
   extends: 'tabletop.BulletControllerBase',
   implements: [
@@ -276,4 +353,51 @@ foam.CLASS({
   
 });
 
+foam.CLASS({
+  package: 'tabletop',
+  name: 'ShootPlayerController',
+  extends: 'tabletop.BasicControllerBase',
+  implements: [
+    'tabletop.AwesomeShotControllerTrait'
+  ],
+  axioms: [ foam.pattern.Pooled.create() ],
+  imports: [
+    'players',
+  ],
+  properties: [
+    {
+      name: 'target',
+      factory: function() {
+        return this.players[Math.floor(Math.random()*4)].main; // random player
+      }
+    }
+  ]
+  
+});
 
+
+
+foam.CLASS({
+  package: 'tabletop',
+  name: 'ExplodingController',
+  extends: 'tabletop.EntityController',
+  axioms: [ foam.pattern.Pooled.create() ],
+  
+  properties: [
+    {
+      /** time until uninstall() of this entity */
+      name: 'timeToLive',
+      value: 0.5,
+    },
+  ],
+  
+  methods: [
+    function worldUpdate() {
+      this.timeToLive -= this.frameTime;
+      if ( this.timeToLive < 0 ) {
+        this.owner.uninstall();
+      }
+    },
+    function collide() { },
+  ]
+});

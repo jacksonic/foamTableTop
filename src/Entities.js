@@ -411,6 +411,9 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'Damage',
+  requires: [
+    'tabletop.ExplodingController',
+  ],
   axioms: [
     foam.pattern.Pooled.create(),
   ],
@@ -457,6 +460,7 @@ foam.CLASS({
             o.sprite.imageIndex = 8;
             o.sprite.loop = false;
             o.sprite.framerate = 60;
+            o.controller = this.ExplodingController.create({ timeToLive: 0.3 }, o);
           }
         }
       }     
