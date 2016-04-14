@@ -76,7 +76,7 @@ foam.CLASS({
         b.sprite.scaleY = 0.2;
         
         this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
-        e.rotation = b.rotation + Math.PI; // TODO: off by 180?
+        e.rotation = b.rotation;
         b.install();
         e.audioManager.play("impact", e);
       }

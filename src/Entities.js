@@ -87,6 +87,7 @@ foam.CLASS({
     
     {
       name: 'mass',
+      value: 1,
     },    
     
     { /** Bounding box size (radius from x,y) */

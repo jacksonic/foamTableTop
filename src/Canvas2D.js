@@ -107,7 +107,7 @@ foam.CLASS({
     function doTransform(x) {
       // quick path to skip caluclating the matrix
       x.translate(this.x, this.y);
-      x.rotate(-this.rotation);
+      x.rotate(this.rotation + Math.PI/2);
       x.scale(this.scaleX, this.scaleY);
     },
     function paintSelf(x) {

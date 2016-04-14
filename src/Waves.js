@@ -69,7 +69,7 @@ foam.CLASS({
       
       e.x = this.worldWidth/2 + Math.cos(angle) * dist;
       e.y = this.worldHeight/2 + Math.sin(angle) * dist;
-      e.rotation = -angle - Math.PI/2;
+      e.rotation = angle;
       e.ax = e.vx = Math.cos(angle) * dist;
       e.ay = e.vy = Math.sin(angle) * dist;
       e.bplane = 0;
@@ -103,6 +103,8 @@ foam.CLASS({
             function() { return {
               br: 20,
               hull: {basehp:3, currhp: 3},
+              engine: { thrust: 500 },
+              mass: 10,
               sprite: {
                 imageIndex: 0,
                 scaleX: 0.4,
@@ -113,6 +115,7 @@ foam.CLASS({
             function() { return {
               br: 10,
               hull: {basehp:1, currhp: 1},
+              engine: { thrust: 400 },
               sprite: {
                 imageIndex: 1,
                 scaleX: 0.2,

@@ -150,12 +150,12 @@ foam.CLASS({
       // velocity based
       var dx = (e.vx - o.vx),
           dy = (e.vy - o.vy);
-      var vlen = (Math.sqrt(dx*dx+dy*dy) || 1) / 2;
-
+      var vlen = (Math.sqrt(dx*dx+dy*dy) || 1);
+      var massDistrib = e.mass / o.mass;
       e.x = 9999999; // remove self
 
-      o.vx = -ax * vlen;
-      o.vy = -ay * vlen;
+      o.vx = -ax * vlen * massDistrib;
+      o.vy = -ay * vlen * massDistrib;
     }
   ]
 });
@@ -236,7 +236,11 @@ foam.CLASS({
   
   methods: [
     function move() {
-      if ( this.target ) { this.accelerateTowards(this.target, this.owner, 100); }
+      if ( this.target ) { 
+        var e = this.owner;
+        this.rotateTowards(this.target, e);
+        e.engine.applyThrust(e); 
+      }
       this.SUPER();
     },
   ],
