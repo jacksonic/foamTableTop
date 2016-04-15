@@ -22,9 +22,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'Entity',
   extends: 'foam.mlang.Expressions',
-  axioms: [
-    foam.pattern.Pooled.create(),
-  ],
+  axioms: [    foam.pattern.Pooled.create(),  ],
   requires: [
     'tabletop.EntityController',
     'tabletop.Sprite',
@@ -252,6 +250,8 @@ foam.CLASS({
       this.br = this.br || 10;
       this.bplane = this.bplane || 0;
       this.collisionPlane = this.collisionPlane || 0;
+      
+      this.onDestroy(this.clearSubModules);
     },
 
     /** Applies movement and physics calculations required for a frame. */
@@ -265,9 +265,6 @@ foam.CLASS({
     },
 
     function uninstall() {
-      this.worldDAO.remove(this);
-      this.sprite.uninstall();
-      this.controller = null;
       this.destroy();
     }
   ],
@@ -281,6 +278,15 @@ foam.CLASS({
         s.x = this.x;
         s.y = this.y;
         s.rotation = this.rotation;
+      }
+    },
+    {
+      name: 'clearSubModules',
+      code: function() {
+        this.controller = null;
+        this.worldDAO.remove(this);
+        this.sprite.uninstall();
+        
       }
     }
   ]
@@ -413,6 +419,10 @@ foam.CLASS({
   requires: [
     'tabletop.ExplodingController',
   ],
+  imports: [
+    'worldDAO'
+  ],
+  
   axioms: [
     foam.pattern.Pooled.create(),
   ],
@@ -450,6 +460,11 @@ foam.CLASS({
   methods: [
     /** destroys the entity */
     function iHitYou(o) {
+      if ( ! o.controller ) {
+        console.log("Removed bad collider", o.$UID);
+        this.worldDAO.remove(o);
+        return; //TODO: clean up life cycle
+      }
       if (this.damaging) {
         if (o.hull.destroyable) {
           //checks for immunities, special conditions or resistances on-hit go here

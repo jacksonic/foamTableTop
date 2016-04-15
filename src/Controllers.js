@@ -45,16 +45,25 @@ foam.CLASS({
     }
   ],
   methods: [
+    function init() {
+      if ( ! this.worldDAO ) {
+        console.assert("context bad!")
+      }
+    },
+    
     function remove() {},
     function error() {},
     function eof() {},
     
     function frameStep(
       /* number // seconds since the last frame  */ ft) {
+      var e = this.owner; if ( ! e ) return; 
+      //if ( ! e  || e.destroyed ) return; // if destroyed before getting processed this frame
+        
       this.frameTime = ft;
       this.move();
       this.collide();
-      this.owner.updateSprite();
+      e.updateSprite();
       this.worldUpdate();
     },
 
@@ -62,7 +71,7 @@ foam.CLASS({
     function move() {
       /** Changes velocity of the given entity. */
       var ft = this.frameTime;
-      var e = this.owner;
+      var e = this.owner; if ( ! e ) return; 
       e.vx += e.ax * ft;
       e.vy += e.ay * ft;
       e.vrotation += e.arotation * ft;
@@ -82,7 +91,7 @@ foam.CLASS({
 
     function collideWith(o) {
       var ft = this.frameTime;
-      var e = this.owner;
+      var e = this.owner; if ( ! e ) return; 
       if ( e === o ) return;
 
       //play impact sound
@@ -106,7 +115,7 @@ foam.CLASS({
       o.vy += -ay * vlen * massDist;
     },
     function worldUpdate() {
-      var e = this.owner;
+      var e = this.owner; if ( ! e ) return; 
       if ( e.x > 1600+1000 || e.y > 900+1000 || // be default, check for waaay out of bounds
            e.x < -1000 || e.y < -1000 ) {
         e.uninstall();
@@ -125,7 +134,7 @@ foam.CLASS({
   methods: [
     /** Also check for out of bounds and destroy self */
     function worldUpdate() {
-      var e = this.owner;
+      var e = this.owner; if ( ! e ) return; 
       if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
@@ -135,34 +144,10 @@ foam.CLASS({
     },
 
     function collideWith(o) {
-      var ft = this.frameTime;
-      var e = this.owner;
-      if ( e === o ) return;
-
-      // don't collide with other bullets // TODO: select specific world planes
-      //if ( e.cls_.isInstance(o) || tabletop.PlayerEntity.isInstance(o) ) return;
-
-      //TODO: hurt o
-
-      //play impact sound
-      e.audioManager.play("impact", e);
+      this.SUPER(o);
+      var e = this.owner; if ( ! e ) return; 
+      e.x = -99999; // trigger removal
       e.damage.iHitYou(o);
-
-      // position angle
-      var ax = e.x - o.x, ay = e.y - o.y;
-      var len = (Math.sqrt(ax*ax+ay*ay) || 1);
-      ax = ax / len; // normal vector for direction between the ents
-      ay = ay / len;
-
-      // velocity based
-      var dx = (e.vx - o.vx),
-          dy = (e.vy - o.vy);
-      var vlen = (Math.sqrt(dx*dx+dy*dy) || 1);
-      var massDistrib = e.mass / o.mass;
-      e.x = 9999999; // remove self
-
-      o.vx = -ax * vlen * massDistrib;
-      o.vy = -ay * vlen * massDistrib;
     }
   ]
 });
@@ -171,18 +156,6 @@ foam.CLASS({
   name: 'BulletController',
   extends: 'tabletop.BulletControllerBase',
   axioms: [ foam.pattern.Pooled.create() ],
-  methods: [
-    function worldUpdate() {
-      var e = this.owner;
-      if ( e.x > 1600+100 || e.y > 900+100 ||
-           e.x < -100 || e.y < -100 ) {
-        e.uninstall();
-      } else {
-        // don't update, since nothing needs to collide with us
-        //this.worldDAO.put(e);
-      }
-    },
-  ],
 });
 
 
@@ -192,7 +165,7 @@ foam.CLASS({
   extends: 'tabletop.EntityController',
   methods: [
     function worldUpdate() {
-      var e = this.owner;
+      var e = this.owner; if ( ! e ) return; 
       if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
@@ -203,7 +176,7 @@ foam.CLASS({
     
     function move() {
       var ft = this.frameTime;
-      var e = this.owner;
+      var e = this.owner; if ( ! e ) return; 
       /** Changes velocity of the given entity. */
       e.vx += e.ax * ft;
       e.vy += e.ay * ft;
@@ -244,7 +217,7 @@ foam.CLASS({
   methods: [
     function move() {
       if ( this.target ) { 
-        var e = this.owner;
+        var e = this.owner; if ( ! e ) return; 
         this.rotateTowards(this.target, e);
         e.engine.applyThrust(e); 
       }
@@ -301,11 +274,12 @@ foam.CLASS({
     },
     
     function shoot() {
-      var e = this.owner;
+      var e = this.owner; if ( ! e ) return; 
       var b = this.Entity.create({
         x: e.x,
         y: e.y,
-        br: 3,
+        br: 5,
+        hull: {basehp:1, currhp: 1},
         bplane: e.bplane,
         collisionPlane: this.target.bplane,
         rotation: e.rotation,
@@ -323,7 +297,7 @@ foam.CLASS({
       b.sprite.scaleX = 0.2;
       b.sprite.scaleY = 0.2;
       
-      this.aimTowards({ x: this.target.x, y: this.target.y }, b, 400, Math.random() * 0.4 - 0.2);
+      this.aimTowards({ x: this.target.x, y: this.target.y }, b, 200, Math.random() * 0.4 - 0.2);
       b.install();
       e.audioManager.play("impact", e);
     }

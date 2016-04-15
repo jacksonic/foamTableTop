@@ -50,9 +50,6 @@ foam.CLASS({
       this.previousTime = this.time;
       this.time$.sub(this.runFrame);
     },
-    function put(e) {
-      e.moveStep(this.ft);
-    },
   ],
 
   listeners: [
@@ -60,12 +57,21 @@ foam.CLASS({
       name: 'runFrame',
       code: function() {
         // time since last frame computed (in seconds)
-        this.ft = Math.min((this.time - this.previousTime) / 1000, 0.1);
+        var ft = this.ft = Math.min((this.time - this.previousTime) / 1000, 0.1);
         this.previousTime = this.time;
 
-        this.entitesToMoveDAO.select(this);
+        this.entitesToMoveDAO.select().then(function(asink) {
+          var a = asink.a;
+          for ( var i = 0; i < a.length; ++i ) {
+            var e = a[i];
+            if ( ! e.destroyed ) e.moveStep(ft);
+          }
+        });
       }
-    }
+    },
+    function put(e) {
+      if ( ! e.destroyed ) e.moveStep(this.ft);
+    },
   ]
 
 });
