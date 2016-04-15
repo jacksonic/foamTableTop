@@ -268,7 +268,6 @@ foam.CLASS({
       this.worldDAO.remove(this);
       this.sprite.uninstall();
       this.controller = null;
-      //this.objectPool && this.objectPool.push(this);
       this.destroy();
     }
   ],

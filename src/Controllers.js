@@ -106,8 +106,14 @@ foam.CLASS({
       o.vy += -ay * vlen * massDist;
     },
     function worldUpdate() {
-      this.worldDAO.put(this.owner);
-    }
+      var e = this.owner;
+      if ( e.x > 1600+1000 || e.y > 900+1000 || // be default, check for waaay out of bounds
+           e.x < -1000 || e.y < -1000 ) {
+        e.uninstall();
+      } else {
+        this.worldDAO.put(e);
+      }
+    },
   ]
 });
 

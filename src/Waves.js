@@ -137,8 +137,8 @@ foam.CLASS({
               mass: 10,
               sprite: {
                 imageIndex: 3,
-                scaleX: 0.5,
-                scaleY: 0.5,
+                scaleX: 2,
+                scaleY: 2,
               },
               collisionPlane: 0,
               controller: self.EntityController.create(),
