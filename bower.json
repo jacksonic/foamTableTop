@@ -1,0 +1,27 @@
+{
+  "name": "memegen-foam",
+  "authors": [
+    "Jackson Stone <jacksonic@google.com>",
+    "Michael Stone <micuu1@google.com>"
+  ],
+  "description": "Spaceships for TableTop",
+  "main": "src/index.html",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "foam",
+    "foam2"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vjlofvhjfgm": "jacksonic/vjlofvhjfgm"
+  }
+}
