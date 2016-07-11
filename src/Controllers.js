@@ -330,8 +330,8 @@ foam.CLASS({
         return this.players[Math.floor(Math.random()*4)].main; // random player
       }
     }
-  ]
-  
+  ],
+    
 });
 
 foam.CLASS({

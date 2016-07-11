@@ -151,7 +151,7 @@ foam.CLASS({
           enemyCounts: [
             20,
             10,
-            3,
+            5,
           ],
         }),
       ]

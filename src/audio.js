@@ -38,7 +38,7 @@
       this.audioLib.impact = (this.Audio.create({
         ident: 'impact',
         instances: 3,
-        src: 'assets/impact.mp3',
+        src: 'src/assets/impact.mp3',
         vol: 0.3,
       });
     }
@@ -72,7 +72,7 @@ foam.CLASS({
       this.audioDAO.put(this.Audio.create({
         ident: 'impact',
         instances: 3,
-        src: 'assets/impact.mp3',
+        src: 'src/assets/impact.mp3',
         vol: 0.3,
         cooldown: 75,
       }));
