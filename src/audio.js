@@ -36,9 +36,9 @@
   methods: [
     function init() {
       this.audioLib.impact = (this.Audio.create({
-        ident: 'impact', 
-        instances: 3, 
-        src: 'assets/impact.mp3', 
+        ident: 'impact',
+        instances: 3,
+        src: 'assets/impact.mp3',
         vol: 0.3,
       });
     }
@@ -70,9 +70,9 @@ foam.CLASS({
   methods: [
     function init() {
       this.audioDAO.put(this.Audio.create({
-        ident: 'impact', 
-        instances: 3, 
-        src: 'assets/impact.mp3', 
+        ident: 'impact',
+        instances: 3,
+        src: 'assets/impact.mp3',
         vol: 0.3,
         cooldown: 75,
       }));
@@ -120,7 +120,7 @@ foam.CLASS({
     },
     { /** cooldown between plays of the sound */
       name: 'cooldown',
-      value: 100,
+      value: 500,
     },
     { /** time the sound was last played */
       name: 'lastplayed',
@@ -153,7 +153,7 @@ foam.CLASS({
       else {
         if (this.lastplayed + this.cooldown < Date.now()) {
           var toBePlayed = document.getElementById(this.ident + this.currentInstance);
-          toBePlayed.pause();
+          //toBePlayed.pause();
           toBePlayed.currentTime = 0;
           toBePlayed.volume = this.vol;
           toBePlayed.play();

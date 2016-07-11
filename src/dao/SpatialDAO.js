@@ -118,29 +118,6 @@ foam.CLASS({
   ],
 });
 
-/** Binary expression for bounds check of the first argument within the
- range given by the second argument (an array of [min, max]). */
-foam.CLASS({
-  package: 'foam.mlang.sink',
-  name: 'Map',
-  implements: ['foam.dao.Sink'],
-  properties: [
-    {
-      name: 'f',
-    },
-    {
-      name: 'delegate',
-    }
-  ],
-  methods: [
-    function put(o) {
-      this.delegate.put(this.f(o));
-    },
-    function toString() {
-      return 'MAP('+this.f.toString()+":"+this.delegate.toString()+')';
-    },
-  ]
-});
 
 
 // TODO: implement CONTAINED_BY, INTERSECTS, etc.

@@ -82,12 +82,12 @@ foam.CLASS({
       class: 'Simple',
       name: 'arotation',
     },
-    
+
     {
       name: 'mass',
       value: 1,
-    },    
-    
+    },
+
     { /** Bounding box size (radius from x,y) */
       name: 'br',
     },
@@ -180,7 +180,7 @@ foam.CLASS({
         ));
       }
     },
-    { 
+    {
       name: 'hull',
       factory: function() {
         return this.Hull.create();
@@ -192,7 +192,7 @@ foam.CLASS({
         return nu;
       }
     },
-    { 
+    {
       name: 'damage',
       factory: function() {
         return this.Damage.create();
@@ -216,7 +216,7 @@ foam.CLASS({
         return nu;
       }
     },
-    
+
   ],
 
   constants: {
@@ -250,7 +250,7 @@ foam.CLASS({
       this.br = this.br || 10;
       this.bplane = this.bplane || 0;
       this.collisionPlane = this.collisionPlane || 0;
-      
+
       this.onDestroy(this.clearSubModules);
     },
 
@@ -286,7 +286,7 @@ foam.CLASS({
         this.controller = null;
         this.worldDAO.remove(this);
         this.sprite.uninstall();
-        
+
       }
     }
   ]
@@ -343,7 +343,7 @@ foam.CLASS({
     {
       /** The group of managed entities */
       name: 'entities',
-      class: 'foam.core.Array',
+      class: 'foam.core.FObjectArray',
       of: 'tabletop.Entity',
     }
   ],
@@ -422,7 +422,7 @@ foam.CLASS({
   imports: [
     'worldDAO'
   ],
-  
+
   axioms: [
     foam.pattern.Pooled.create(),
   ],
@@ -477,7 +477,7 @@ foam.CLASS({
             o.controller = this.ExplodingController.create({ timeToLive: 0.3 }, o);
           }
         }
-      }     
+      }
     },
   ],
 });
