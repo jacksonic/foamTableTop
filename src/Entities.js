@@ -22,7 +22,7 @@ foam.CLASS({
   package: 'tabletop',
   name: 'Entity',
   extends: 'foam.mlang.Expressions',
-  axioms: [    foam.pattern.Pooled.create(),  ],
+  //axioms: [    foam.pattern.Pooled.create(),  ], // still some dangling references left when re-using entities
   requires: [
     'tabletop.EntityController',
     'tabletop.Sprite',
