@@ -112,7 +112,7 @@ foam.CLASS({
     },
     function paintSelf(x) {
       var imageInfo = this.bitblt[this.imageIndex];
-      if (Object.prototype.toString.apply(imageInfo.sequence) === '[object Array]') {
+      if ( imageInfo.sequence ) {
         if (this.lastDrawn + this.framerate < this.time) {
           if (this.nextFrame + 1 === imageInfo.sequence.length) {
             if (this.loop) {
@@ -125,44 +125,18 @@ foam.CLASS({
           this.nextFrame++;
           this.lastDrawn = this.time;
         }
-        x.drawImage(this.imageElement,imageInfo.sequence[this.nextFrame].left,imageInfo.sequence[this.nextFrame].top,imageInfo.sequence[this.nextFrame].width,imageInfo.sequence[this.nextFrame].height,
-          -(imageInfo.sequence[this.nextFrame].centerX - imageInfo.sequence[this.nextFrame].left),
-          -(imageInfo.sequence[this.nextFrame].centerY - imageInfo.sequence[this.nextFrame].top),
-          imageInfo.sequence[this.nextFrame].width,
-          imageInfo.sequence[this.nextFrame].height
-        );
+        imageInfo = imageInfo.sequence[this.nextFrame];
       }
-      else {
-        x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
-          -(imageInfo.centerX - imageInfo.left),
-          -(imageInfo.centerY - imageInfo.top),
-          imageInfo.width,
-          imageInfo.height
-        );
-      }
+      x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
+        -(imageInfo.centerX - imageInfo.left),
+        -(imageInfo.centerY - imageInfo.top),
+        imageInfo.width,
+        imageInfo.height
+      );
     }
   ]
 });
 
-/*foam.CLASS({
-  package: 'tabletop',
-  name: 'TestSprite',
-  extends: 'foam.graphics.CView',
-  implements: ['tabletop.ImageSprite'],
-  properties: [
-    [ 'imageIndex', 0 ],
-  ]
-});
-
-foam.CLASS({
-  package: 'tabletop',
-  name: 'TestExplosion',
-  extends: 'foam.graphics.CView',
-  implements: ['tabletop.ImageSprite'],
-  properties: [
-    [ 'imageIndex', 8 ],
-  ]
-});*/
 
 foam.CLASS({
   package: 'tabletop',
