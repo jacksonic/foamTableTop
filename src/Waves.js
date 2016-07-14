@@ -60,18 +60,18 @@ foam.CLASS({
       // count is the total number in the ring
       // i is the index within that total
       var count = this.enemyCounts[ct];
-      
+
       var angle = ( 2*Math.PI / count ) * i;
       var dist = 0;
       for ( var d = 0; d <= ct; ++d ) {
         dist += this.enemyDefs[d]().br*2; // bounding radius
       }
-      
+
       e.x = this.worldWidth/2 + Math.cos(angle) * dist;
       e.y = this.worldHeight/2 + Math.sin(angle) * dist;
       e.rotation = angle;
-      e.ax = e.vx = Math.cos(angle) * dist;
-      e.ay = e.vy = Math.sin(angle) * dist;
+      //e.ax = e.vx = Math.cos(angle) * dist;
+      //e.ay = e.vy = Math.sin(angle) * dist;
       e.bplane = 0;
     }
   ],
@@ -94,7 +94,7 @@ foam.CLASS({
   ],
   methods: [
     function init() {
-  
+
       // hard coded wave data
       var waveCt = -1;
       var self = this;
@@ -105,7 +105,8 @@ foam.CLASS({
             function() { return {
               br: 20,
               hull: {basehp:3, currhp: 3},
-              engine: { thrust: 500 },
+              engine: { thrust: 800 },
+              arotation: Math.random() - 0.5,
               mass: 10,
               sprite: {
                 imageIndex: 0,
@@ -117,7 +118,7 @@ foam.CLASS({
             function() { return {
               br: 10,
               hull: {basehp:1, currhp: 1},
-              engine: { thrust: 400 },
+              engine: { thrust: 200 },
               sprite: {
                 imageIndex: 1,
                 scaleX: 0.2,
@@ -146,11 +147,11 @@ foam.CLASS({
                 damaging: false,
               }),
             }; },
-            
+
           ],
           enemyCounts: [
-            20,
             10,
+            6,
             5,
           ],
         }),

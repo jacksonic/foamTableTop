@@ -211,6 +211,17 @@ foam.CLASS({
 
   methods: [
 
+    function decorateSink_(sink, skip, limit, order, predicate) {
+      if ( predicate ) return {
+        put: function(o) { if ( predicate.f(o) ) sink.put(o); },
+        remove: function(o) { if ( predicate.f(o) ) sink.remove(o); },
+        eof: function() { sink.eof(); },
+        error: function(e) { sink.error(e); }
+      };
+
+      return sink;
+    },
+
     /** A default hash for any object with an x, y, x2, y2.
       Returns an array of buckets the object should occupy. if createMode is
       true, buckets will be created if not present. */

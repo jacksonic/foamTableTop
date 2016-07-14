@@ -56,40 +56,30 @@ foam.CLASS({
     'foam.mlang.sink.Map',
   ],
   exports: [
-    'audioDAO',
+    'audioMap',
   ],
   properties: [
     {
       /** The group of managed sounds */
-      name: 'audioDAO',
+      name: 'audioMap',
       factory: function() {
-        return this.ArrayDAO.create();
+        return {};
       }
     }
   ],
   methods: [
     function init() {
-      this.audioDAO.put(this.Audio.create({
+      this.audioMap['impact'] = this.Audio.create({
         ident: 'impact',
         instances: 3,
         src: 'src/assets/impact.mp3',
         vol: 0.3,
         cooldown: 75,
-      }));
+      });
     },
     function play(soundname, soundorigin) {
-      this.audioDAO.where(this.EQ(this.Audio.IDENT, soundname)).select({
-        put: function(t) {
-          if (soundorigin === "startup") {
-            t.playInstance(true);
-          } else {
-            t.playInstance(false);
-          }
-        },
-        remove: function() {},
-        eof: function() {},
-        error: function() {}
-      });
+      var aud = this.audioMap[soundname];
+      aud.playInstance(soundorigin === "startup");
     },
   ],
 });
