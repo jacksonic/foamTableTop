@@ -292,7 +292,12 @@ window.onload = function() {
     g.audioStart();
     introbox.style.display = "none";
     setInterval(g.step, 16);
-    setInterval(g.enemyWaves.data[0].install, 4000);
+
+    var enemyCreate = function() {
+      g.enemyWaves.data[0].install();
+      setTimeout(enemyCreate, 4000);
+    }
+    setTimeout(enemyCreate, 4000);
   });
 };
 
