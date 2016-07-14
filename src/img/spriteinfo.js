@@ -117,5 +117,23 @@ spritesheetplot = [{
 "height" : 541,
 "centerX" : 362,
 "centerY" : 612
-}]
+}],
+{
+"name" : "carrier",
+"left" : 281,
+"top" : 130,
+"width" : 105,
+"height" : 208,
+"centerX" : 333,
+"centerY" : 234
+},
+{
+"name" : "drone",
+"left" : 396,
+"top" : 131,
+"width" : 24,
+"height" : 24,
+"centerX" : 408,
+"centerY" : 143
+}
 }];
