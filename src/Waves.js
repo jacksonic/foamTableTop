@@ -70,8 +70,8 @@ foam.CLASS({
       e.x = this.worldWidth/2 + Math.cos(angle) * dist;
       e.y = this.worldHeight/2 + Math.sin(angle) * dist;
       e.rotation = angle;
-      //e.ax = e.vx = Math.cos(angle) * dist;
-      //e.ay = e.vy = Math.sin(angle) * dist;
+      //e.vx = Math.cos(angle) * dist;
+      //e.vy = Math.sin(angle) * dist;
       e.bplane = 0;
     }
   ],
