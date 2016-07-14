@@ -32,15 +32,15 @@ foam.CLASS({
       name: 'target',
       factory: function() { return { x: 800, y: 450 }; }
     },
-    
-    
+
+
   ],
 
   methods: [
     /** Applies movement and physics calculations required for a frame. */
     function move() {
       // Doesn't move, no super
-      
+
       this.coolDown -= this.frameTime;
       if ( this.coolDown < 0 ) {
         this.coolDown = this.SHOT_COOL_DOWN;
@@ -66,7 +66,8 @@ foam.CLASS({
         });
         b.damage.damaging = true;
         b.damage.hurt = 1;
-        
+        b.damage.killed.sub(e.manager.killedSomething);
+
         // TODO: clean up sprite init
         b.sprite.x = e.x;
         b.sprite.y = e.y;
@@ -74,7 +75,7 @@ foam.CLASS({
         b.sprite.imageIndex = 2;
         b.sprite.scaleX = 0.2;
         b.sprite.scaleY = 0.2;
-        
+
         this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
         e.rotation = b.rotation;
         b.install();
@@ -92,6 +93,7 @@ foam.CLASS({
   requires: [
     'tabletop.Entity',
     'tabletop.ImageSprite',
+    'tabletop.TextSprite',
     'tabletop.Hull',
     'tabletop.PlayerController'
   ],
@@ -104,24 +106,46 @@ foam.CLASS({
     {
       name: 'main',
       factory: function() {
-        return this.Entity.create({ 
+        var h = this.Hull.create({
+          basehp: 10,
+          currhp: 10
+        });
+
+        var s = this.ImageSprite.create({
+          x: this.x,
+          y: this.y,
+          rotation: this.rotation,
+          imageIndex: 0,
+        });
+        var t = this.TextSprite.create({
+          y: -55,
+          color: 'red'
+        });
+        t.text$.follow(h.currhp$);
+        s.addChild(t);
+
+        var ptsT = this.TextSprite.create({
+          y: -30,
+          color: 'lightgreen'
+        });
+        ptsT.text$.follow(this.points$);
+        s.addChild(ptsT);
+
+        return this.Entity.create({
           id: 'player' + this.$UID,
           bplane: 3,
           vx: 1,
           br: 30,
-          sprite: this.ImageSprite.create({
-            x: this.x,
-            y: this.y,
-            rotation: this.rotation,
-            imageIndex: 0,
-          }),
-          hull: this.Hull.create({
-            basehp: 10,
-            currhp: 10
-          }),
-          controller: this.PlayerController.create()
+          sprite: s,
+          hull: h,
+          controller: this.PlayerController.create(),
+          manager: this
         });
-      }
+      },
+    },
+    {
+      name: 'points',
+      value: 0
     },
     {
       name: 'corner',
@@ -139,6 +163,7 @@ foam.CLASS({
       this.main.install();
       this.corner = this.corner;
       this.main.onDestroy(this.clearEntity);
+      this.healMe();
     },
     /** Click/tap from user, in world coordinates */
     function clickEvent(x,y) {
@@ -152,6 +177,22 @@ foam.CLASS({
       name: 'clearEntity',
       code: function() {
         this.main = null;
+      }
+    },
+    {
+      name: 'healMe',
+      code: function() {
+        if ( this.main ) {
+          this.main.hull.heal(1);
+          setTimeout(this.healMe, 5000);
+        }
+      }
+    },
+    {
+      name: 'killedSomething',
+      code: function(_, _, target) {
+        //console.log('killed', target);
+        this.points += target.hull.basehp;
       }
     }
   ]

@@ -137,6 +137,40 @@ foam.CLASS({
   ]
 });
 
+foam.CLASS({
+  package: 'tabletop',
+  name: 'TextSprite',
+  extends: 'foam.graphics.CView',
+  implements: [
+    'tabletop.Sprite'
+  ],
+  axioms: [ foam.pattern.Pooled.create() ],
+  imports: [
+    'time',
+    'canvas',
+  ],
+  properties: [
+    {
+      name: 'text',
+      class: 'String',
+    },
+    {
+      name: 'font',
+      value: "24px sans-serif",
+    },
+  ],
+  methods: [
+
+    function paintSelf(x) {
+      x.textAlign = 'center';
+      x.textBaseline = 'middle';
+
+      x.font = this.font;
+      x.fillText(this.text, 0, 0);
+    }
+  ]
+});
+
 
 foam.CLASS({
   package: 'tabletop',

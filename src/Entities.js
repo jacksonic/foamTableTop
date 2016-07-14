@@ -399,19 +399,14 @@ foam.CLASS({
       name: 'currhp',
       value: 1,
     },
-    {
-      /** any special modifers or changes when damage is applied (damage reduction, order of damage applications, etc...) */
-      name: 'process',
-    },
-    {
-      /** does not receive damage from listed sources */
-      name: 'immunities',
-    },
-    {
-      /** things that happen when damage is taken */
-      name: 'consequences',
-    },
   ],
+  methods: [
+    function heal(amount) {
+      if ( this.currhp < this.basehp ) {
+        this.currhp += 1;
+      }
+    }
+  ]
 });
 foam.CLASS({
   package: 'tabletop',
@@ -423,6 +418,9 @@ foam.CLASS({
     'worldDAO'
   ],
 
+  topics: [
+    'killed',
+  ],
   axioms: [
     foam.pattern.Pooled.create(),
   ],
@@ -475,6 +473,8 @@ foam.CLASS({
             o.sprite.loop = false;
             o.sprite.framerate = 60;
             o.controller = this.ExplodingController.create({ timeToLive: 0.3 }, o);
+
+            this.killed.pub(o);
           }
         }
       }
