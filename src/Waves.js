@@ -118,7 +118,8 @@ foam.CLASS({
             function() { return {
               br: 10,
               hull: {basehp:1, currhp: 1},
-              engine: { thrust: 200 },
+              engine: { thrust: 800 },
+              mass: 5,
               sprite: {
                 imageIndex: 1,
                 scaleX: 0.2,
@@ -135,7 +136,7 @@ foam.CLASS({
               br: 20,
               hull: {basehp:10, currhp: 10},
               engine: { thrust: 0 },
-              mass: 10,
+              mass: 20,
               sprite: {
                 imageIndex: 3,
                 scaleX: 2,
@@ -152,7 +153,7 @@ foam.CLASS({
           enemyCounts: [
             10,
             6,
-            5,
+            4,
           ],
         }),
       ]
