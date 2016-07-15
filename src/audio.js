@@ -85,7 +85,7 @@ foam.CLASS({
       });
       this.audioMap['Big_Explosion_Cut_Off'] = this.Audio.create({
         ident: 'Big_Explosion_Cut_Off',
-        instances: 10,
+        instances: 3,
         src: 'src/assets/Big_Explosion_Cut_Off.mp3',
         vol: 0.3,
         cooldown: 75,
