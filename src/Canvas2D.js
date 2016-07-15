@@ -89,7 +89,7 @@ foam.CLASS({
       }
     },
     {
-      name: 'bitblt',
+      name: 'srcSpriteSheet',
       factory: function() {
         return spritesheetplot;
       }
@@ -111,7 +111,7 @@ foam.CLASS({
       x.scale(this.scaleX, this.scaleY);
     },
     function paintSelf(x) {
-      var imageInfo = this.bitblt[this.imageIndex];
+      var imageInfo = this.srcSpriteSheet[this.imageIndex];
       if ( imageInfo.sequence ) {
         if (this.lastDrawn + this.framerate < this.time) {
           if (this.nextFrame + 1 === imageInfo.sequence.length) {
@@ -192,7 +192,7 @@ foam.CLASS({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
-          imageIndex: 0,
+          imageIndex: 'enemy',
           scaleX: 0.4,
           scaleY: 0.4
         });
@@ -234,7 +234,7 @@ foam.CLASS({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
-          imageIndex: 8,
+          imageIndex: 'explosion',
           loop: true,
           framerate:33,
           scaleX: 0.2,

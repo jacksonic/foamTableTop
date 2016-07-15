@@ -72,7 +72,7 @@ foam.CLASS({
         b.sprite.x = e.x;
         b.sprite.y = e.y;
         b.sprite.rotation = e.rotation;
-        b.sprite.imageIndex = 2;
+        b.sprite.imageIndex = 'playerprojectile';
         b.sprite.scaleX = 0.2;
         b.sprite.scaleY = 0.2;
 
@@ -115,7 +115,7 @@ foam.CLASS({
           x: this.x,
           y: this.y,
           rotation: this.rotation,
-          imageIndex: 0,
+          imageIndex: 'enemy',
         });
         var t = this.TextSprite.create({
           y: -55,

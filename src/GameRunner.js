@@ -293,8 +293,10 @@ window.onload = function() {
     introbox.style.display = "none";
     setInterval(g.step, 16);
 
+    var curWave = 0;
     var enemyCreate = function() {
-      g.enemyWaves.data[0].install();
+      g.enemyWaves.data[curWave++].install();
+      if ( curWave >= g.enemyWaves.data.length ) curWave = 0;
       setTimeout(enemyCreate, 4000);
     }
     setTimeout(enemyCreate, 4000);
