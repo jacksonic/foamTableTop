@@ -258,6 +258,28 @@ foam.CLASS({
       this.onDestroy(this.clearSubModules);
     },
 
+    function pooledDestroy() {
+      this.x = 0;
+      this.y = 0;
+      this.rotation = 0;
+      this.vx = 0;
+      this.vy = 0;
+      this.vrotation = 0;
+      this.ax = 0;
+      this.ay = 0;
+      this.arotation = 0;
+
+      this.br = 10;
+      this.bplane = 0;
+      this.collisionPlane = 0;
+
+      this.controller = undefined;
+      this.hull = undefined;
+      this.damage = undefined;
+      this.engine = undefined;
+      this.manager = undefined;
+    },
+
     /** Applies movement and physics calculations required for a frame. */
     function moveStep(/* number // seconds since the last frame */ ft) {
       this.controller && this.controller.frameStep(ft);

@@ -44,6 +44,9 @@ foam.CLASS({
   ]
 });
 
+var noDraw__ = false;
+// function flipDraw__() { noDraw__ = ! noDraw__; }
+// setInterval(flipDraw__, 5000);
 
 foam.CLASS({
   package: 'tabletop',
@@ -138,12 +141,23 @@ foam.CLASS({
         }
         imageInfo = imageInfo.sequence[this.nextFrame];
       }
-      x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
-        -(imageInfo.centerX - imageInfo.left) * 2,
-        -(imageInfo.centerY - imageInfo.top) * 2,
-        imageInfo.width * 2,
-        imageInfo.height * 2 // scale values are for "large" sprite sheet FIX
-      );
+
+      if ( noDraw__ ) {
+//         x.fillStyle = "white";
+//         x.fillRect(
+//           -(imageInfo.centerX - imageInfo.left) * 2,
+//           -(imageInfo.centerY - imageInfo.top) * 2,
+//           imageInfo.width * 2,
+//           imageInfo.height * 2 // scale values are for "large" sprite sheet FIX
+//         );
+      } else {
+        x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
+          -(imageInfo.centerX - imageInfo.left) * 2,
+          -(imageInfo.centerY - imageInfo.top) * 2,
+          imageInfo.width * 2,
+          imageInfo.height * 2 // scale values are for "large" sprite sheet FIX
+        );
+      }
     }
   ]
 });
