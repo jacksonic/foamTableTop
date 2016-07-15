@@ -93,6 +93,10 @@ foam.CLASS({
       factory: function() {
         return spritesheetplot;
       }
+    },
+    {
+      name: 'opacity',
+      value: 0
     }
   ],
   methods: [
@@ -111,6 +115,12 @@ foam.CLASS({
       x.scale(this.scaleX, this.scaleY);
     },
     function paintSelf(x) {
+      if ( this.opacity < 1 ) {
+        this.opacity += 0.1;
+        this.opacity = Math.min(this.opacity, 1);
+      }
+      x.globalAlpha = this.opacity;
+
       var imageInfo = this.srcSpriteSheet[this.imageIndex];
       if ( imageInfo.sequence ) {
         if (this.lastDrawn + this.framerate < this.time) {

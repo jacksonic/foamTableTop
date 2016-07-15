@@ -148,7 +148,7 @@ foam.CLASS({
             function() { return {
               br: 100,
               hull: {basehp:100, currhp: 100},
-              engine: { thrust: 8000 },
+              engine: { thrust: 80000 },
               mass: 10000,
               sprite: {
                 imageIndex: 'carrier',
@@ -220,6 +220,31 @@ foam.CLASS({
           ],
           enemyCounts: [
             6,
+          ],
+        }),
+        this.EnemyWave.create({
+          id: ++waveCt,
+          enemyDefs: [
+            function() { return {
+              br: 10,
+              hull: {basehp:1, currhp: 1},
+              engine: { thrust: 800 },
+              mass: 5,
+              sprite: {
+                imageIndex: 'drone',
+                scaleX: 0.5,
+                scaleY: 0.5,
+              },
+              collisionPlane: 3,
+              controller: self.TargetPlayerController.create(),
+              damage: self.Damage.create({
+                damaging: true,
+                hurt: 1
+              }),
+            }; },
+          ],
+          enemyCounts: [
+            20,
           ],
         }),
       ]
