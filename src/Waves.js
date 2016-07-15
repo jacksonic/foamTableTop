@@ -226,7 +226,7 @@ foam.CLASS({
           id: ++waveCt,
           enemyDefs: [
             function() { return {
-              br: 10,
+              br: 30,
               hull: {basehp:15, currhp: 15},
               engine: { thrust: 8000 },
               mass: 500,

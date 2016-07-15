@@ -166,8 +166,9 @@ foam.CLASS({
   methods: [
     function worldUpdate() {
       var e = this.owner; if ( ! e ) return;
-      if ( e.x > 1600+100 || e.y > 900+100 ||
-           e.x < -100 || e.y < -100 ) {
+      var r = e.br*2;
+      if ( e.x > 1600+100+r || e.y > 900+100+r ||
+           e.x < -100-r || e.y < -100-r ) {
         e.uninstall();
       } else {
         this.worldDAO.put(e);

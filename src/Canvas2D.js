@@ -142,22 +142,19 @@ foam.CLASS({
         imageInfo = imageInfo.sequence[this.nextFrame];
       }
 
-      if ( noDraw__ ) {
-//         x.fillStyle = "white";
-//         x.fillRect(
-//           -(imageInfo.centerX - imageInfo.left) * 2,
-//           -(imageInfo.centerY - imageInfo.top) * 2,
-//           imageInfo.width * 2,
-//           imageInfo.height * 2 // scale values are for "large" sprite sheet FIX
-//         );
-      } else {
-        x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
-          -(imageInfo.centerX - imageInfo.left) * 2,
-          -(imageInfo.centerY - imageInfo.top) * 2,
-          imageInfo.width * 2,
-          imageInfo.height * 2 // scale values are for "large" sprite sheet FIX
-        );
-      }
+      x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
+        -(imageInfo.centerX - imageInfo.left) * 2,
+        -(imageInfo.centerY - imageInfo.top) * 2,
+        imageInfo.width * 2,
+        imageInfo.height * 2 // scale values are for "large" sprite sheet FIX
+      );
+//         if ( noDraw__ && this.owner ) {
+//           x.scale(1/this.scaleX, 1/this.scaleY);
+//           x.beginPath();
+//           x.arc(0,0,this.owner.br,0, 2 * Math.PI);
+//           x.strokeStyle = "white";
+//           x.stroke();
+//         }
     }
   ]
 });

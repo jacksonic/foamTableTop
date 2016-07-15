@@ -135,7 +135,7 @@ foam.CLASS({
           id: 'player' + this.$UID,
           bplane: 3,
           vx: 1,
-          br: 30,
+          br: 40,
           sprite: s,
           hull: h,
           controller: this.PlayerController.create(),
