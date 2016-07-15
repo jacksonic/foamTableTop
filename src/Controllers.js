@@ -153,6 +153,9 @@ foam.CLASS({
   name: 'BulletController',
   extends: 'tabletop.BulletControllerBase',
   axioms: [ foam.pattern.Pooled.create() ],
+  methods: [
+    function pooledDestroy() {}
+  ]
 });
 
 
@@ -198,6 +201,10 @@ foam.CLASS({
   name: 'BasicController',
   extends: 'tabletop.BasicControllerBase',
   axioms: [ foam.pattern.Pooled.create() ],
+  methods: [
+    function pooledDestroy() {}
+  ]
+
 });
 
 foam.CLASS({
@@ -330,6 +337,9 @@ foam.CLASS({
       }
     }
   ],
+  methods: [
+    function pooledDestroy() { this.target = undefined; }
+  ]
 
 });
 
@@ -351,6 +361,9 @@ foam.CLASS({
         return this.players[Math.floor(Math.random()*4)].main; // random player
       }
     }
+  ],
+  methods: [
+    function pooledDestroy() { this.target = undefined; }
   ]
 
 });
@@ -379,6 +392,7 @@ foam.CLASS({
       }
     },
     function collide() { },
+    function pooledDestroy() { this.timeToLive = 0.5; },
   ]
 });
 

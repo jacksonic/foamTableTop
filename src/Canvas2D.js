@@ -90,14 +90,12 @@ foam.CLASS({
     },
     {
       name: 'srcSpriteSheet',
-      factory: function() {
-        return spritesheetplot;
-      }
+      value: spritesheetplot_sm
     },
     {
       name: 'opacity',
       value: 0
-    }
+    },
   ],
   methods: [
     function install() {
@@ -110,8 +108,11 @@ foam.CLASS({
 
     function doTransform(x) {
       // quick path to skip caluclating the matrix
-      x.translate(this.x, this.y);
-      x.rotate(this.rotation + Math.PI/2);
+      // use owner position
+      var o = this.owner;
+
+      x.translate(o.x, o.y);
+      x.rotate(o.rotation + Math.PI/2);
       x.scale(this.scaleX, this.scaleY);
     },
     function paintSelf(x) {
@@ -138,10 +139,10 @@ foam.CLASS({
         imageInfo = imageInfo.sequence[this.nextFrame];
       }
       x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
-        -(imageInfo.centerX - imageInfo.left),
-        -(imageInfo.centerY - imageInfo.top),
-        imageInfo.width,
-        imageInfo.height
+        -(imageInfo.centerX - imageInfo.left) * 2,
+        -(imageInfo.centerY - imageInfo.top) * 2,
+        imageInfo.width * 2,
+        imageInfo.height * 2 // scale values are for "large" sprite sheet FIX
       );
     }
   ]

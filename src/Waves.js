@@ -44,7 +44,7 @@ foam.CLASS({
     function install(opt_x, opt_y) {
       opt_x = opt_x || this.worldWidth/2;
       opt_y = opt_y || this.worldHeight/2;
-      
+
       for ( var ct = 0; ct < this.enemyCounts.length; ++ct ) {
         var def = this.enemyDefs[ct];
         if ( ! def ) { continue; }
@@ -113,7 +113,7 @@ foam.CLASS({
               arotation: Math.random() - 0.5,
               mass: 10,
               sprite: {
-                imageIndex: 'enemy',
+                imageIndex: 'drone',
                 scaleX: 0.4,
                 scaleY: 0.4,
               },
@@ -139,7 +139,7 @@ foam.CLASS({
           ],
           enemyCounts: [
             10,
-            6,
+            0,
           ],
         }),
         this.EnemyWave.create({
@@ -174,7 +174,7 @@ foam.CLASS({
                     }; },
                   ],
                   enemyCounts: [
-                    10,
+                    6,
                   ],
                 }),
               }),
@@ -194,7 +194,7 @@ foam.CLASS({
           ],
           enemyCounts: [
             2,
-            20,
+            10,
           ],
         }),
         this.EnemyWave.create({
@@ -227,24 +227,46 @@ foam.CLASS({
           enemyDefs: [
             function() { return {
               br: 10,
-              hull: {basehp:1, currhp: 1},
-              engine: { thrust: 800 },
-              mass: 5,
+              hull: {basehp:15, currhp: 15},
+              engine: { thrust: 8000 },
+              mass: 500,
               sprite: {
-                imageIndex: 'drone',
-                scaleX: 0.5,
-                scaleY: 0.5,
+                imageIndex: 'enemy',
+                scaleX: 0.4,
+                scaleY: 0.4,
               },
               collisionPlane: 3,
-              controller: self.TargetPlayerController.create(),
-              damage: self.Damage.create({
-                damaging: true,
-                hurt: 1
-              }),
+              controller: self.CarrierController.create({
+                wave: self.EnemyWave.create({
+                  id: waveCt+"missiles",
+                  enemyDefs: [
+                    function() { return {
+                      br: 10,
+                      hull: {basehp:1, currhp: 1},
+                      engine: { thrust: 800 },
+                      mass: 3,
+                      sprite: {
+                        imageIndex: 'missileflight',
+                        scaleX: 0.2,
+                        scaleY: 0.2,
+                      },
+                      collisionPlane: 3,
+                      controller: self.TargetPlayerController.create(),
+                      damage: self.Damage.create({
+                        damaging: true,
+                        hurt: 1
+                      }),
+                    }; },
+                  ],
+                  enemyCounts: [
+                    2,
+                  ],
+                }),
+              })
             }; },
           ],
           enemyCounts: [
-            20,
+            4,
           ],
         }),
       ]
