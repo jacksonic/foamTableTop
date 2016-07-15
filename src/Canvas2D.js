@@ -109,7 +109,7 @@ foam.CLASS({
     function doTransform(x) {
       // quick path to skip caluclating the matrix
       // use owner position
-      var o = this.owner;
+      var o = this.owner || this;
 
       x.translate(o.x, o.y);
       x.rotate(o.rotation + Math.PI/2);
