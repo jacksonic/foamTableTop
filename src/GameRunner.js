@@ -115,7 +115,7 @@ foam.CLASS({
             [ this.Entity.BY, this.Entity.BY2 ],
             [ this.Entity.BPLANE, this.Entity.BPLANE2 ]
           ],
-          bucketWidths: [20, 20, 1]
+          bucketWidths: [40, 40, 1]
         });
       }
     },
@@ -228,6 +228,8 @@ foam.CLASS({
     },
     function audioStart() {
       this.audioManager.play("impact", "startup");
+      this.audioManager.play("Laser_Gun", "startup");
+      this.audioManager.play("Big_Explosion_Cut_Off", "startup");
     }
   ],
   listeners: [
@@ -238,6 +240,8 @@ foam.CLASS({
         var t = Date.now();
         //if ( ( t - this.time ) < 32 ) return;
         this.time = t;
+
+        this.step();
       }
     },
     {
@@ -266,6 +270,8 @@ foam.CLASS({
     {
       name: 'mouseDownEvent',
       code: function(e) {
+        e.preventDefault();
+
         // find event location in world coords
         var scale = Math.min(this.canvas.width / 1600,
                              this.canvas.height / 900);
@@ -291,7 +297,7 @@ window.onload = function() {
   introbox.addEventListener("click", function() {
     g.audioStart();
     introbox.style.display = "none";
-    setInterval(g.step, 16);
+    g.step();
 
     var curWave = 0;
     var enemyCreate = function() {

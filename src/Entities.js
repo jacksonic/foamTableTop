@@ -140,6 +140,10 @@ foam.CLASS({
           return this.ImageSprite.create(nu);
         }
         return nu;
+      },
+      postSet: function(o, n) {
+        n.owner = this;
+        if ( o && ( o.owner === this ) ) o.owner = null;
       }
     },
     {
@@ -254,6 +258,28 @@ foam.CLASS({
       this.onDestroy(this.clearSubModules);
     },
 
+    function pooledDestroy() {
+      this.x = 0;
+      this.y = 0;
+      this.rotation = 0;
+      this.vx = 0;
+      this.vy = 0;
+      this.vrotation = 0;
+      this.ax = 0;
+      this.ay = 0;
+      this.arotation = 0;
+
+      this.br = 10;
+      this.bplane = 0;
+      this.collisionPlane = 0;
+
+      this.controller = undefined;
+      this.hull = undefined;
+      this.damage = undefined;
+      this.engine = undefined;
+      this.manager = undefined;
+    },
+
     /** Applies movement and physics calculations required for a frame. */
     function moveStep(/* number // seconds since the last frame */ ft) {
       this.controller && this.controller.frameStep(ft);
@@ -266,20 +292,21 @@ foam.CLASS({
 
     function uninstall() {
       this.destroy();
-    }
-  ],
-  listeners: [
+    },
+
     {
       /** This is standing in for buggy direct bindings */
       name: 'updateSprite',
       //isFramed: true, // ends up taking too much time
       code: function() {
-        var s = this.sprite;
-        s.x = this.x;
-        s.y = this.y;
-        s.rotation = this.rotation;
+//         var s = this.sprite;
+//         s.x = this.x;
+//         s.y = this.y;
+//         s.rotation = this.rotation;
       }
     },
+  ],
+  listeners: [
     {
       name: 'clearSubModules',
       code: function() {
@@ -302,20 +329,9 @@ foam.CLASS({
   package: 'tabletop',
   name: 'Sprite',
   properties: [
-    { /** Rendering coords */
-      name: 'x'
+    { /** owner entity, must have x,y,rotation */
+      name: 'owner'
     },
-    { /** Rendering coords */
-      name: 'y'
-    },
-    { /** Parent sprite relative */
-      name: 'rotation'
-    },
-//     {
-//       /** The entity that owns this sprite. */
-//       name: 'entity'
-//     },
-    // TODO: image, offset....
   ],
   methods: [
     /** Adds the sprite to the scene */
@@ -368,6 +384,9 @@ foam.CLASS({
       var a = e.rotation;
       e.ax = v*Math.cos(a);
       e.ay = v*Math.sin(a);
+    },
+    function pooledDestroy() {
+      this.thrust = 0;
     }
   ]
 })
@@ -405,6 +424,8 @@ foam.CLASS({
       if ( this.currhp < this.basehp ) {
         this.currhp += 1;
       }
+    },
+    function pooledDestroy() {
     }
   ]
 });
@@ -473,12 +494,16 @@ foam.CLASS({
             o.sprite.loop = false;
             o.sprite.framerate = 60;
             o.controller = this.ExplodingController.create({ timeToLive: 0.3 }, o);
-
+            o.audioManager.play("Big_Explosion_Cut_Off", o);
             this.killed.pub(o);
           }
         }
       }
     },
+    function pooledDestroy() {
+      this.hurt = 0;
+    }
+
   ],
 });
 

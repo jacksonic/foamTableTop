@@ -24,7 +24,7 @@ foam.CLASS({
     'tabletop.Entity',
   ],
   constants: {
-    SHOT_COOL_DOWN: 0.1
+    SHOT_COOL_DOWN: 0.15
   },
   properties: [
     [ 'coolDown', 1 ],
@@ -57,7 +57,7 @@ foam.CLASS({
         var b = this.Entity.create({
           x: e.x,
           y: e.y,
-          br: 3,
+          br: 10,
           bplane: 1,
           collisionPlane: 0,
           rotation: e.rotation,
@@ -73,8 +73,8 @@ foam.CLASS({
         b.sprite.y = e.y;
         b.sprite.rotation = e.rotation;
         b.sprite.imageIndex = 'playerprojectile';
-        b.sprite.scaleX = 0.2;
-        b.sprite.scaleY = 0.2;
+        b.sprite.scaleX = 0.3;
+        b.sprite.scaleY = 0.3;
 
         this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
         e.rotation = b.rotation;
@@ -135,7 +135,7 @@ foam.CLASS({
           id: 'player' + this.$UID,
           bplane: 3,
           vx: 1,
-          br: 30,
+          br: 40,
           sprite: s,
           hull: h,
           controller: this.PlayerController.create(),
@@ -151,12 +151,42 @@ foam.CLASS({
       name: 'corner',
       factory: function() { return [0,0]; },
       postSet: function(old,nu) {
-        this.main.x = nu[0] ? 1600 - 20 : 20;
-        this.main.y = nu[1] ? 900 - 20 : 20;
-        this.main.rotation = Math.PI * ( nu[0] ? 1 : -1 ) * ( nu[1] ? 1/4 : 3/4 );
-      }
-    }
+        var r;
+        if ( nu[0] ) {
+          r = nu[1] ? Math.PI * 5/4 : Math.PI * 3/4;
+        } else {
+          r = nu[1] ? Math.PI * 7/4 : Math.PI * 1/4;
+        }
 
+
+        Math.PI * ( nu[0] ? 1 : -1 ) * ( nu[1] ? 1/4 : 3/4 );
+
+        if ( this.main ) {
+          this.main.x = nu[0] ? 1600 - 20 : 20;
+          this.main.y = nu[1] ? 900 - 20 : 20;
+          this.main.rotation = r;
+        }
+        this.restartButton.x = nu[0] ? 1600 - 20 : 20;
+        this.restartButton.y = nu[1] ? 900 - 20 : 20;
+        this.restartButton.rotation = r;
+      }
+    },
+    {
+      name: 'restartButton',
+      factory: function() {
+        var s = this.ImageSprite.create({
+          imageIndex: 'enemy',
+        });
+        var t = this.TextSprite.create({
+          y: -55,
+          text: 'Start',
+          color: 'lightgreen'
+        });
+        s.addChild(t);
+
+        return s;
+      },
+    }
   ],
   methods: [
     function init() {
@@ -169,7 +199,20 @@ foam.CLASS({
     function clickEvent(x,y) {
       console.log('player click', this.corner, x, y);
 
-      this.main.controller.target = { x: x, y: y };
+      if ( this.main ) {
+        this.main.controller.target = { x: x, y: y };
+      } else {
+        this.reset();
+      }
+    },
+
+    function reset() {
+      this.restartButton.uninstall();
+      this.points = 0;
+      this.main = undefined;
+      this.main.install();
+      this.corner = this.corner;
+      this.main.onDestroy(this.clearEntity);
     }
   ],
   listeners: [
@@ -177,6 +220,7 @@ foam.CLASS({
       name: 'clearEntity',
       code: function() {
         this.main = null;
+        this.restartButton.install();
       }
     },
     {

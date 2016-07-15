@@ -129,3 +129,30 @@ spritesheetplot = {
     "centerY": 404
   }
 };
+
+spritesheetplot_sm = {};
+for (var key in spritesheetplot) {
+  var src = spritesheetplot[key];
+  var dst = {};
+  for (var ikey in src) {
+    if ( typeof src[ikey] === 'number' ) {
+      dst[ikey] = src[ikey] / 2;
+    } else if ( Array.isArray(src[ikey]) ) {
+      dst[ikey] = [];
+      for ( var i = 0; i < src[ikey].length; i++ ) {
+        var item = {};
+        for (var jkey in src[ikey][i]) {
+          if ( typeof src[ikey][i][jkey] === 'number' ) {
+            item[jkey] = src[ikey][i][jkey] / 2;
+          } else {
+            item[jkey] = src[ikey][i][jkey];
+          }
+        }
+        dst[ikey][i] = item;
+      }
+    } else {
+      dst[ikey] = src[ikey];
+    }
+  }
+  spritesheetplot_sm[key] = dst;
+}
