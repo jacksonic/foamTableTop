@@ -50,16 +50,16 @@ foam.CLASS({
         console.assert("context bad!")
       }
     },
-    
+
     function remove() {},
     function error() {},
     function eof() {},
-    
+
     function frameStep(
       /* number // seconds since the last frame  */ ft) {
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       //if ( ! e  || e.destroyed ) return; // if destroyed before getting processed this frame
-        
+
       this.frameTime = ft;
       this.move();
       this.collide();
@@ -71,7 +71,7 @@ foam.CLASS({
     function move() {
       /** Changes velocity of the given entity. */
       var ft = this.frameTime;
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       e.vx += e.ax * ft;
       e.vy += e.ay * ft;
       e.vrotation += e.arotation * ft;
@@ -80,9 +80,9 @@ foam.CLASS({
       e.x += e.vx * ft;
       e.y += e.vy * ft;
       e.rotation += e.vrotation * ft;
-      
-      e.engine.applyThrust(e); 
-      
+
+      e.engine.applyThrust(e);
+
     },
 
     function collide() {
@@ -94,25 +94,25 @@ foam.CLASS({
 
     function collideWith(o) {
 
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       if ( e === o ) return;
 
       //play impact sound
-      e.audioManager.play("impact", e);
+      //e.audioManager.play("impact", e);
 
       var nvex = (e.vx * (e.mass - o.mass) + (2 * o.mass * o.vx)) / (e.mass + o.mass);
       var nvey = (e.vy * (e.mass - o.mass) + (2 * o.mass * o.vy)) / (e.mass + o.mass);
       var nvox = (o.vx * (o.mass - e.mass) + (2 * e.mass * e.vx)) / (e.mass + o.mass);
-      var nvoy = (o.vy * (o.mass - e.mass) + (2 * e.mass * e.vy)) / (e.mass + o.mass);       
-      
+      var nvoy = (o.vy * (o.mass - e.mass) + (2 * e.mass * e.vy)) / (e.mass + o.mass);
+
       e.vx = nvex;
       e.vy = nvey;
       o.vx = nvox;
       o.vy = nvoy;
-      
+
     },
     function worldUpdate() {
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       if ( e.x > 1600+1000 || e.y > 900+1000 || // be default, check for waaay out of bounds
            e.x < -1000 || e.y < -1000 ) {
         e.uninstall();
@@ -131,7 +131,7 @@ foam.CLASS({
   methods: [
     /** Also check for out of bounds and destroy self */
     function worldUpdate() {
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
@@ -142,7 +142,7 @@ foam.CLASS({
 
     function collideWith(o) {
       this.SUPER(o);
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       e.x = -99999; // trigger removal
       e.damage.iHitYou(o);
     }
@@ -162,7 +162,7 @@ foam.CLASS({
   extends: 'tabletop.EntityController',
   methods: [
     function worldUpdate() {
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       if ( e.x > 1600+100 || e.y > 900+100 ||
            e.x < -100 || e.y < -100 ) {
         e.uninstall();
@@ -170,10 +170,10 @@ foam.CLASS({
         this.worldDAO.put(e);
       }
     },
-    
+
     function move() {
       var ft = this.frameTime;
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       /** Changes velocity of the given entity. */
       e.vx += e.ax * ft;
       e.vy += e.ay * ft;
@@ -184,7 +184,7 @@ foam.CLASS({
       e.y += e.vy * ft;
       e.rotation += e.vrotation * ft;
 
-      e.engine.applyThrust(e); 
+      e.engine.applyThrust(e);
 
     },
     function collide() {
@@ -203,7 +203,7 @@ foam.CLASS({
 foam.CLASS({
   package: 'tabletop',
   name: 'TargetingControllerTrait',
-  
+
   properties: [
     {
       name: 'target',
@@ -212,13 +212,13 @@ foam.CLASS({
       }
     }
   ],
-  
+
   methods: [
     function move() {
-      if ( this.target ) { 
-        var e = this.owner; if ( ! e ) return; 
+      if ( this.target ) {
+        var e = this.owner; if ( ! e ) return;
         this.rotateTowards(this.target, e);
-        e.engine.applyThrust(e); 
+        e.engine.applyThrust(e);
       }
       this.SUPER();
     },
@@ -244,7 +244,7 @@ foam.CLASS({
   constants: {
     SHOT_COOL_DOWN: 2 // TODO: weapon
   },
-  
+
   properties: [
     {
       name: 'coolDown',
@@ -257,12 +257,12 @@ foam.CLASS({
       }
     }
   ],
-  
+
   methods: [
     function move() {
       this.SUPER();
-      
-      if ( this.target ) { 
+
+      if ( this.target ) {
         // shoot!
         this.coolDown -= this.frameTime;
         if ( this.coolDown < 0 ) {
@@ -271,9 +271,9 @@ foam.CLASS({
         }
       }
     },
-    
+
     function shoot() {
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       var b = this.Entity.create({
         x: e.x,
         y: e.y,
@@ -286,8 +286,8 @@ foam.CLASS({
         controller: this.BulletController.create(),
       });
       b.damage.damaging = true;
-      b.damage.hurt = 1; // TODO: weapon 
-      
+      b.damage.hurt = 1; // TODO: weapon
+
       // TODO: clean up sprite init
       b.sprite.x = e.x;
       b.sprite.y = e.y;
@@ -295,10 +295,10 @@ foam.CLASS({
       b.sprite.imageIndex = 'enemyprojectile';
       b.sprite.scaleX = 0.3;
       b.sprite.scaleY = 0.3;
-      
+
       this.aimTowards({ x: this.target.x, y: this.target.y }, b, 200, Math.random() * 0.4 - 0.2);
       b.install();
-      e.audioManager.play("impact", e);
+      e.audioManager.play("Laser_Gun", e);
     }
   ],
   listeners: [
@@ -330,7 +330,7 @@ foam.CLASS({
       }
     }
   ],
-    
+
 });
 
 foam.CLASS({
@@ -352,7 +352,7 @@ foam.CLASS({
       }
     }
   ]
-  
+
 });
 
 
@@ -362,7 +362,7 @@ foam.CLASS({
   name: 'ExplodingController',
   extends: 'tabletop.EntityController',
   axioms: [ foam.pattern.Pooled.create() ],
-  
+
   properties: [
     {
       /** time until uninstall() of this entity */
@@ -370,7 +370,7 @@ foam.CLASS({
       value: 0.5,
     },
   ],
-  
+
   methods: [
     function worldUpdate() {
       this.timeToLive -= this.frameTime;
@@ -394,7 +394,7 @@ foam.CLASS({
   constants: {
     SHOT_COOL_DOWN: 4 // TODO: weapon
   },
-  
+
   properties: [
     {
       name: 'coolDown',
@@ -411,12 +411,12 @@ foam.CLASS({
       name: 'wave',
     }
   ],
-  
+
   methods: [
     function move() {
       this.SUPER();
-      
-      if ( this.wave ) { 
+
+      if ( this.wave ) {
         // shoot!
         this.coolDown -= this.frameTime;
         if ( this.coolDown < 0 ) {
@@ -425,9 +425,9 @@ foam.CLASS({
         }
       }
     },
-    
+
     function shoot() {
-      var e = this.owner; if ( ! e ) return; 
+      var e = this.owner; if ( ! e ) return;
       this.wave && this.wave.install(e.x, e.y);
     }
   ],

@@ -473,7 +473,7 @@ foam.CLASS({
             o.sprite.loop = false;
             o.sprite.framerate = 60;
             o.controller = this.ExplodingController.create({ timeToLive: 0.3 }, o);
-
+            o.audioManager.play("Big_Explosion_Cut_Off", o);
             this.killed.pub(o);
           }
         }

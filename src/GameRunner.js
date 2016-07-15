@@ -228,6 +228,8 @@ foam.CLASS({
     },
     function audioStart() {
       this.audioManager.play("impact", "startup");
+      this.audioManager.play("Laser_Gun", "startup");
+      this.audioManager.play("Big_Explosion_Cut_Off", "startup");
     }
   ],
   listeners: [

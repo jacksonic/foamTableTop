@@ -73,6 +73,20 @@ foam.CLASS({
         ident: 'impact',
         instances: 3,
         src: 'src/assets/impact.mp3',
+        vol: 0.05,
+        cooldown: 75,
+      });
+      this.audioMap['Laser_Gun'] = this.Audio.create({
+        ident: 'Laser_Gun',
+        instances: 3,
+        src: 'src/assets/Laser_Gun.mp3',
+        vol: 0.3,
+        cooldown: 75,
+      });
+      this.audioMap['Big_Explosion_Cut_Off'] = this.Audio.create({
+        ident: 'Big_Explosion_Cut_Off',
+        instances: 10,
+        src: 'src/assets/Big_Explosion_Cut_Off.mp3',
         vol: 0.3,
         cooldown: 75,
       });
