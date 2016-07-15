@@ -23,6 +23,24 @@
     -webkit-animation: 4s linear 0s infinite rotateMe;
   }
 
+  .title {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    color: red;
+    transform: rotateZ(135deg);
+  }
+  .innerTitle {
+    text-align:center;
+    width:100%;
+    font-size:48px;
+  }
+
   .rot180 {
     transform: rotateZ(180deg);
   }
@@ -44,8 +62,8 @@
     <div id="intro">
       <div class="padder"></div>
       <img src="src/img/circletext.svg"/>
-
       <div class="padder"></div>
+      <div class="title"><div class="innerTitle">FOAM_Space</div></div>
     </div>
 </body>
  <script language="javascript" src="src/img/spriteinfo.js"></script>
