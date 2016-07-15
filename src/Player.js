@@ -24,7 +24,7 @@ foam.CLASS({
     'tabletop.Entity',
   ],
   constants: {
-    SHOT_COOL_DOWN: 0.1
+    SHOT_COOL_DOWN: 0.15
   },
   properties: [
     [ 'coolDown', 1 ],
@@ -57,7 +57,7 @@ foam.CLASS({
         var b = this.Entity.create({
           x: e.x,
           y: e.y,
-          br: 6,
+          br: 10,
           bplane: 1,
           collisionPlane: 0,
           rotation: e.rotation,

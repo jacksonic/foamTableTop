@@ -242,13 +242,13 @@ foam.CLASS({
   ],
 
   constants: {
-    SHOT_COOL_DOWN: 2 // TODO: weapon
+    SHOT_COOL_DOWN: 3 // TODO: weapon
   },
 
   properties: [
     {
       name: 'coolDown',
-      factory: function() { return Math.random() * 2; }
+      factory: function() { return Math.random() * 3; }
     },
     {
       name: 'target',
@@ -296,7 +296,7 @@ foam.CLASS({
       b.sprite.scaleX = 0.3;
       b.sprite.scaleY = 0.3;
 
-      this.aimTowards({ x: this.target.x, y: this.target.y }, b, 200, Math.random() * 0.4 - 0.2);
+      this.aimTowards({ x: this.target.x, y: this.target.y }, b, 100, Math.random() * 0.4 - 0.2);
       b.install();
       e.audioManager.play("Laser_Gun", e);
     }
