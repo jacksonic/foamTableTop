@@ -381,3 +381,54 @@ foam.CLASS({
     function collide() { },
   ]
 });
+
+
+foam.CLASS({
+  package: 'tabletop',
+  name: 'CarrierController',
+  extends: 'tabletop.BasicControllerBase',
+  requires: [
+    'tabletop.Entity',
+  ],
+
+  constants: {
+    SHOT_COOL_DOWN: 4 // TODO: weapon
+  },
+  
+  properties: [
+    {
+      name: 'coolDown',
+      factory: function() { return Math.random() * 4; }
+    },
+    {
+      name: 'target',
+      postSet: function(old,nu) {
+        if ( nu ) { nu.onDestroy(this.clearTarget); }
+      }
+    },
+    {
+      // enemy wave to create each interval
+      name: 'wave',
+    }
+  ],
+  
+  methods: [
+    function move() {
+      this.SUPER();
+      
+      if ( this.wave ) { 
+        // shoot!
+        this.coolDown -= this.frameTime;
+        if ( this.coolDown < 0 ) {
+          this.coolDown = this.SHOT_COOL_DOWN;
+          this.shoot();
+        }
+      }
+    },
+    
+    function shoot() {
+      var e = this.owner; if ( ! e ) return; 
+      this.wave && this.wave.install(e.x, e.y);
+    }
+  ],
+});

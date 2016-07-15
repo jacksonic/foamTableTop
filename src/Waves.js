@@ -41,20 +41,23 @@ foam.CLASS({
     },
   ],
   listeners: [
-    function install() {
+    function install(opt_x, opt_y) {
+      opt_x = opt_x || this.worldWidth/2;
+      opt_y = opt_y || this.worldHeight/2;
+      
       for ( var ct = 0; ct < this.enemyCounts.length; ++ct ) {
         var def = this.enemyDefs[ct];
         if ( ! def ) { continue; }
         for ( var en = 0; en < this.enemyCounts[ct]; ++en ) {
           var e = this.Entity.create(def());
-          this.position(e, ct, en);
+          this.position(e, ct, en, opt_x, opt_y);
           e.install();
         }
       }
     },
   ],
   methods: [
-    function position(e, ct, i) {
+    function position(e, ct, i, x, y) {
       // distribute radially:
       // ct is the ring number,
       // count is the total number in the ring
@@ -67,8 +70,8 @@ foam.CLASS({
         dist += this.enemyDefs[d]().br*2; // bounding radius
       }
 
-      e.x = this.worldWidth/2 + Math.cos(angle) * dist;
-      e.y = this.worldHeight/2 + Math.sin(angle) * dist;
+      e.x = x + Math.cos(angle) * dist;
+      e.y = y + Math.sin(angle) * dist;
       e.rotation = angle;
       //e.vx = Math.cos(angle) * dist;
       //e.vy = Math.sin(angle) * dist;
@@ -87,6 +90,7 @@ foam.CLASS({
     'tabletop.BasicController',
     'tabletop.TargetPlayerController',
     'tabletop.ShootPlayerController',
+    'tabletop.CarrierController',
     'tabletop.Damage'
   ],
   properties: [
@@ -151,7 +155,29 @@ foam.CLASS({
                 scaleX: 0.5,
                 scaleY: 0.5,
               },
-              controller: self.ShootPlayerController.create(),
+              controller: self.CarrierController.create({
+                wave: self.EnemyWave.create({
+                  id: waveCt+"drones",
+                  enemyDefs: [
+                    function() { return {
+                      br: 10,
+                      hull: {basehp:2, currhp: 2},
+                      engine: { thrust: 500 },
+                      mass: 5,
+                      arotation: Math.random() - 1,
+                      sprite: {
+                        imageIndex: 'drone',
+                        scaleX: 0.5,
+                        scaleY: 0.5,
+                      },
+                      controller: self.ShootPlayerController.create(),
+                    }; },
+                  ],
+                  enemyCounts: [
+                    10,
+                  ],
+                }),
+              }),
             }; },
             function() { return {
               br: 10,
@@ -168,26 +194,6 @@ foam.CLASS({
           ],
           enemyCounts: [
             2,
-            20,
-          ],
-        }),
-        this.EnemyWave.create({
-          id: ++waveCt,
-          enemyDefs: [
-            function() { return {
-              br: 10,
-              hull: {basehp:1, currhp: 1},
-              engine: { thrust: 800 },
-              mass: 5,
-              sprite: {
-                imageIndex: 'drone',
-                scaleX: 0.5,
-                scaleY: 0.5,
-              },
-              controller: self.ShootPlayerController.create(),
-            }; },
-          ],
-          enemyCounts: [
             20,
           ],
         }),
