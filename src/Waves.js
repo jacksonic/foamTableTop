@@ -110,7 +110,7 @@ foam.CLASS({
               br: 20,
               hull: {basehp:3, currhp: 3},
               engine: { thrust: 800 },
-              arotation: Math.random() - 0.5,
+              vrotation: 5 * (Math.random() - 0.5),
               mass: 10,
               sprite: {
                 imageIndex: 'drone',
@@ -164,7 +164,7 @@ foam.CLASS({
                       hull: {basehp:2, currhp: 2},
                       engine: { thrust: 500 },
                       mass: 5,
-                      arotation: Math.random() - 1,
+                      //arotation: Math.random() - 0.5,
                       sprite: {
                         imageIndex: 'drone',
                         scaleX: 0.5,
@@ -235,7 +235,6 @@ foam.CLASS({
                 scaleX: 0.4,
                 scaleY: 0.4,
               },
-              collisionPlane: 3,
               controller: self.CarrierController.create({
                 wave: self.EnemyWave.create({
                   id: waveCt+"missiles",
@@ -267,6 +266,52 @@ foam.CLASS({
           ],
           enemyCounts: [
             4,
+          ],
+        }),
+        this.EnemyWave.create({
+          id: ++waveCt,
+          enemyDefs: [
+            function() { return {
+              br: 30,
+              hull: {basehp:15, currhp: 15},
+              engine: { thrust: 10000 },
+              mass: 300,
+              sprite: {
+                imageIndex: 'drone',
+                scaleX: 1,
+                scaleY: 1,
+              },
+              controller: self.CarrierController.create({
+                wave: self.EnemyWave.create({
+                  id: waveCt+"missiles",
+                  enemyDefs: [
+                    function() { return {
+                      br: 20,
+                      hull: {basehp:3, currhp: 3},
+                      engine: { thrust: 800 },
+                      mass: 3,
+                      sprite: {
+                        imageIndex: 'enemyprojectile',
+                        scaleX: 1,
+                        scaleY: 1,
+                      },
+                      collisionPlane: 3,
+                      controller: self.TargetPlayerController.create(),
+                      damage: self.Damage.create({
+                        damaging: true,
+                        hurt: 1
+                      }),
+                    }; },
+                  ],
+                  enemyCounts: [
+                    1,
+                  ],
+                }),
+              })
+            }; },
+          ],
+          enemyCounts: [
+            6,
           ],
         }),
       ]
