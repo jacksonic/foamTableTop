@@ -39,23 +39,24 @@ foam.CLASS({
     },
     {
 //      type: 'Model',
-      name: 'of',
-      postSet: function(oldCls, cls) {
-        console.assert(foam.core.FObject.isSubClass(cls), 'Invalid model specified for ' + this.name_);
-        if ( oldCls !== cls ) {
-          this.properties = cls.getAxiomsByClass(foam.core.Property).filter(function(p) { return ! p.hidden; });
-        }
-        if ( ( ! oldCls && ! this.hasOwnProperty('title') ) || this.title === oldCls.label ) {
-          this.title = cls.label;
-        }
-      }
+      name: 'of'
     },
     {
-      type: 'Boolean',
+      class: 'Boolean',
       name: 'showActions'
     },
     {
-      name: 'properties'
+      name: 'properties',
+      expression: function(of) {
+        return of.getAxiomsByClass(foam.core.Property).
+          filter(function(p) { return ! p.hidden; });
+      }
+    },
+    {
+      name: 'actions',
+      expression: function(of) {
+        return of.getAxiomsByClass(foam.core.Action);
+      }
     },
     {
       name: 'controllerMode',
@@ -64,10 +65,11 @@ foam.CLASS({
     {
       name: 'title',
       attribute: true,
-      documentation: function() {/*
-        <p>The display title for the $$DOC{ref:'foam.ui.View'}.
-        </p>
-      */}
+      expression: function(of) { return of.label; },
+      // documentation: function() {/*
+      //  <p>The display title for the $$DOC{ref:'foam.ui.View'}.
+      //  </p>
+      //*/}
     },
     [ 'nodeName', 'div' ]
   ],
@@ -124,17 +126,20 @@ foam.CLASS({
     function init() {
       this.SUPER();
 
-//      this.Y.registerModel(this.DetailPropertyView, 'foam.u2.PropertyView');
+      this.__subContext__.register(
+          this.DetailPropertyView,
+          'foam.u2.PropertyView');
     },
 
     function initE() {
+      // TODO: replace with fast bind()
       this.add(this.expression(function(model, properties) {
         if ( ! model ) return 'Set model or data.';
 
         var title = this.title && this.E('tr').
-              start('td').cssClass(this.myCls('title')).attrs({colspan: 2}).
-                add(this.title$).
-              end();
+          start('td').cssClass(this.myCls('title')).attrs({colspan: 2}).
+            add(this.title$).
+          end();
 
         return this.actionBorder(
           this.E('table').cssClass(this.myCls()).add(title).add(properties));
@@ -142,37 +147,16 @@ foam.CLASS({
     },
 
     function actionBorder(e) {
-      if ( ! this.showActions || ! this.of.actions.length ) return e;
+      if ( ! this.showActions || ! this.actions.length ) return e;
 
-      return this.Y.E().add(e).start('div').cls(this.myCls('toolbar')).add(this.of.actions).end();
+      console.log('adding actions', this.actions);
+      return this.E().add(e).
+        start('div').cssClass(this.myCls('toolbar')).add(this.actions).end();
     },
 
     function elementForFeature(fName) {
       var f = this.cls_.getFeature(fName) || this.X.data.model_.getFeature(fName);
       return f ? f.toE(this.Y) : this.E('Unknown feature: ' + fName).style({color: 'red'});
-    }
-  ]
-});
-
-
-foam.CLASS({
-  refines: 'foam.core.Property',
-
-  requires: [
-    'foam.u2.PropertyView',
-    'foam.u2.TextField'
-  ],
-
-  methods: [
-    function toPropertyE(X) {
-      return this.TextField.create(null, X);
-    },
-
-    function toE(X) {
-      return this.PropertyView.create({
-        prop: this,
-        view: this.toPropertyE(X)
-      }, X);
     }
   ]
 });

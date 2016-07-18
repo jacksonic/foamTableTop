@@ -828,6 +828,24 @@ log(dyn.get());
 dyn.set('John');
 log(dyn.get());
 
+// Nested slots
+foam.CLASS({ name: 'Holder', properties: [ 'data' ] });
+var p1 = Person.create({name: 'John'});
+var p2 = Person.create({name: 'Paul'});
+var h = Holder.create({data: p1});
+var s = h.data$.dot('name');
+s.sub(function() { console.log('change: ', arguments, h.data.name); });
+log(s.get());
+s.set('George');
+log(p1.name);
+p1.name = 'Ringo';
+log('Setting to p2');
+h.data = p2;
+log(s.get());
+s.set('George');
+log(p2.name);
+p2.name = 'Ringo';
+
 // Two-Way Data-Binding
 // Slots can be assigned, causing two values to be
 // bound to the same value.
@@ -838,16 +856,23 @@ log(p1.name, p2.name);
 p2.name = 'Steve';
 log(p1.name, p2.name);
 
-// Another way to link two Slots is to call .link() on one of them.
-var p1 = Person.create(), p2 = Person.create();
-var d = p1.name$.link(p2.name$);
+// Another way to link two Slots is to call .linkFrom() on one of them.
+var p1 = Person.create({name:'p1'}), p2 = Person.create({name:'p2'});
+var d = p1.name$.linkFrom(p2.name$);
 p1.name = 'John';
 log(p1.name, p2.name);
 
 // But this style of link can be broken by calling .destroy()
-// on the object return from .link().
+// on the object return from .linkFrom/To().
 d.destroy();
 p2.name = 'Steve';
+log(p1.name, p2.name);
+
+// linkTo() is the same as linkFrom(), except that the initial value
+// is taken from 'this' instead of the other object.
+var p1 = Person.create({name:'p1'}), p2 = Person.create({name:'p2'});
+var d = p1.name$.linkTo(p2.name$);
+p1.name = 'John';
 log(p1.name, p2.name);
 
 // Two values can be linked through a relationship,
@@ -875,7 +900,7 @@ t.c = 100;
 log(t.stringify());
 
 // One-Way Data-Binding
-// Calling .link() creates a two-way data-binding, meaning a change in either
+// Calling .linkFrom()/.linkTo() creates a two-way data-binding, meaning a change in either
 // value is reflected in the other.  But FOAM supports one-way data-binding as well.
 // To do this, use the .follow() method.
 var d = p1.name$.follow(p2.name$);
@@ -894,7 +919,7 @@ log(p1.name, p2.name);
 
 // One-Way Data-Binding, with Map function (mapFrom)
 var d = p1.name$.mapFrom(p2.name$, function(n) {
-  return "Mr. " + n; 
+  return "Mr. " + n;
 });
 p1.name$.clear();
 p2.name$.clear();
@@ -906,7 +931,7 @@ d.destroy();
 
 // One-Way Data-Binding, with Map function (mapTo)
 var d = p2.name$.mapTo(p1.name$, function(n) {
-  return "Mr. " + n; 
+  return "Mr. " + n;
 });
 p1.name$.clear();
 p2.name$.clear();
@@ -943,12 +968,24 @@ foam.CLASS({name: 'Person', properties: ['fname', 'lname']});
 var p = Person.create({fname: 'John', lname: 'Smith'});
 var e = foam.core.ExpressionSlot.create({
   args: [ p.fname$, p.lname$],
-  fn: function(f, l) { return f + ' ' + l; }
+  code: function(f, l) { return f + ' ' + l; }
 });
 log(e.get());
 e.sub(log);
 p.fname = 'Steve';
 p.lname = 'Jones';
+log(e.get());
+
+// ExpressionSlot can also be supplied an object to work with, and then takes slots from function argument names.
+var p = foam.CLASS({name: 'Person', properties: [ 'f', 'l' ]}).create({f:'John', l: 'Smith'});
+var e = foam.core.ExpressionSlot.create({
+  obj: p,
+  code: function(f, l) { return f + ' ' + l; }
+});
+log(e.get());
+e.sub(log);
+p.f = 'Steve';
+p.l = 'Jones';
 log(e.get());
 
 // Destroy the ExpressionSlot to prevent further updates.
@@ -1684,7 +1721,7 @@ foam.CLASS({
   ]
 });
 var g = GraphicsDemo.create();
-log_(g.toHTML());
+g.write();
 g.step();
 
 //:NOTEST
@@ -1727,7 +1764,7 @@ foam.CLASS({
   ]
 });
 var g = Spin.create();
-log_(g.toHTML());
+g.write();
 
 //:NOTEST
 // More Graphics
@@ -1791,7 +1828,7 @@ foam.CLASS({
   ]
 });
 var g = TudorWall.create();
-log_(g.toHTML());
+g.write();
 </script>
 
   <div id='output'></div>

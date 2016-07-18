@@ -92,7 +92,7 @@ var e13 = E('div').add(
   'dynamic function: ',
   foam.core.ExpressionSlot.create({
     args: [ timer.second$ ],
-    fn: function(s) {
+    code: function(s) {
       return s % 2 ?
         E('span').add('PI', 'NG').style({color: 'aqua'}) :
         E('span').add('PONG').style({color: 'orange'});
@@ -193,11 +193,55 @@ i.write();
 
 foam.CLASS({
   name: 'Person',
-  properties: [ 'firstName', 'lastName', 'age' ]
+  properties: [ 'firstName', 'lastName', 'age' ],
+  actions: [
+    function sayHello() {
+      console.log('hello');
+    },
+    function sayGoodbye() {
+      console.log('goodbye');
+    }
+  ]
 });
 
-var p = Person.create();
+var p = Person.create({firstName: 'John', lastName: 'Doe', age: 42});
+
+var Y =  foam.__context__.createSubContext({data: p});
+console.log('data: ', Y.data);
+
+var s = p.firstName$;
+var input = foam.u2.tag.Input.create({data: 'william'});
+var input2 = foam.u2.tag.Input.create({data: 'john'});
+input.data$ = input2.data$;
+input.write(); 
+input2.write();
+
+Person.FIRST_NAME.toE(Y).write();
+Person.FIRST_NAME.toE(Y).write();
+
+var e = Y.E('div').add('simple: ').add(Person.FIRST_NAME, Person.LAST_NAME);
+e.write();
+
+var e2 = Y.E('div').add('simple2: ').add(Person.getAxiomsByClass(foam.core.Property));
+e2.write();
 
 foam.u2.DetailView.create({
   data: p
+}).write();
+
+var dv2 = foam.u2.DetailView.create({
+  data: p,
+  showActions: true
+}).write();
+
+foam.u2.DetailView.create({
+  data: foam.util.Timer.create(),
+  showActions: true
+}).write();
+
+foam.u2.DetailView.create({
+  data: foam.util.Timer.create(),
+  showActions: true,
+  properties: [ foam.util.Timer.INTERVAL, foam.util.Timer.I ],
+  actions: [ foam.util.Timer.STOP, foam.util.Timer.START ]
 }).write();

@@ -36,15 +36,24 @@ foam.CLASS({
   methods: [
     /**
     */
-    function slot(name) {
+    function dot(name) {
+      return foam.core.internal.SubSlot.create({
+        parent: this,
+        name:   name
+      });
+    },
 
+    // TODO: remove when all code ported
+    function link(other) {
+      console.warn('deprecated use of link(), use linkFrom() instead');
+      return this.linkFrom(other);
     },
 
     /**
       Link two Slots together, setting both to other's value.
       Returns a Destroyable which can be used to break the link.
     */
-    function link(other) {
+    function linkFrom(other) {
       var sub1 = this.follow(other);
       var sub2 = other.follow(this);
 
@@ -55,6 +64,10 @@ foam.CLASS({
           sub1 = sub2 = null;
         }
       };
+    },
+
+    function linkTo(other) {
+      return other.linkFrom(this);
     },
 
     /**
@@ -159,6 +172,10 @@ foam.CLASS({
 
     function clear() {
       this.obj.clearProperty(this.prop.name);
+    },
+
+    function toString() {
+      return 'PropertySlot(' + this.prop.name + ')';
     }
   ]
 });
@@ -170,10 +187,10 @@ foam.CLASS({
 foam.CLASS({
   package: 'foam.core.internal',
   name: 'SubSlot',
-  extends: 'foam.core.Slot',
+  implements: [ 'foam.core.Slot' ],
 
   properties: [
-    'parentSlot',
+    'parent', // parent slot, not parent object
     'name',
     'value',
     'prevSub'
@@ -181,16 +198,16 @@ foam.CLASS({
 
   methods: [
     function init() {
-      this.parentSlot.sub(this.parentChange);
+      this.parent.sub(this.parentChange);
       this.parentChange();
     },
 
     function get() {
-      return this.parentSlot[this.name];
+      return this.parent.get()[this.name];
     },
 
     function set(value) {
-      this.parentSlot[this.name] = value;
+      this.parent.get()[this.name] = value;
     },
 
     /** Needed? **/
@@ -214,18 +231,22 @@ foam.CLASS({
     },
 
     function isDefined() {
-      return this.parentSlot.get().hasOwnProperty(this.name);
+      return this.parent.get().hasOwnProperty(this.name);
     },
 
     function clear() {
-      this.parentSlot.get().clearProperty(this.prop.name);
+      this.parent.get().clearProperty(this.name);
+    },
+
+    function toString() {
+      return 'SubSlot(' + this.parent + ',' + this.name + ')';
     }
   ],
 
   listeners: [
     function parentChange() {
       this.prevSub && this.prevSub.destroy();
-      this.prevSub = this.parent.sub('propertyChange', this.name, this.valueChange);
+      this.prevSub = this.parent.get().sub('propertyChange', this.name, this.valueChange);
       this.valueChange();
     },
 
@@ -266,14 +287,14 @@ foam.CLASS({
 
 
 /**
-  Tracks dependencies for a dynamic function and invalidates is they change.
+  Tracks dependencies for a dynamic function and invalidates if they change.
 
 <pre>
 foam.CLASS({name: 'Person', properties: ['fname', 'lname']});
 var p = Person.create({fname: 'John', lname: 'Smith'});
 var e = foam.core.ExpressionSlot.create({
   args: [ p.fname$, p.lname$ ],
-  fn: function(f, l) { return f + ' ' + l; }
+  code: function(f, l) { return f + ' ' + l; }
 });
 log(e.get());
 e.sub(log);
@@ -285,6 +306,12 @@ Output:
  > [object Object] propertyChange value [object Object]
  > [object Object] propertyChange value [object Object]
  > Steve Jones
+
+var p = foam.CLASS({name: 'Person', properties: [ 'f', 'l' ]}).create({f:'John', l: 'Doe'});
+var e = foam.core.ExpressionSlot.create({
+  obj: p,
+  code: function(f, l) { return f + ' ' + l; }
+});
 </pre>
 */
 foam.CLASS({
@@ -293,12 +320,13 @@ foam.CLASS({
   implements: [ 'foam.core.Slot' ],
 
   properties: [
+    'obj',
     'args',
-    'fn',
+    'code',
     {
       name: 'value',
       factory: function() {
-        return this.fn.apply(this, this.args.map(function(a) {
+        return this.code.apply(this, this.args.map(function(a) {
           return a.get();
         }));
       }
@@ -307,6 +335,18 @@ foam.CLASS({
 
   methods: [
     function init() {
+      this.assert(
+          !! this.obj !== !! this.args,
+          'ExpressionSlot: set only one of "obj" and "args".');
+
+      if ( ! this.args ) {
+        var args = foam.Function.formalArgs(this.code);
+        for ( var i = 0 ; i < args.length ; i++ ) {
+          args[i] = this.obj.slot(args[i]);
+        }
+        this.args = args;
+      }
+
       for ( var i = 0 ; i < this.args.length ; i++ ) {
         this.onDestroy(this.args[i].sub(this.invalidate));
       }
@@ -333,7 +373,6 @@ foam.CLASS({
 });
 
 
-// ???: Should there also be an 'obj' option instead of 'args'?
 foam.CLASS({
   package: 'foam.core',
   name: 'ExpressionSlotHelper',
@@ -342,10 +381,11 @@ foam.CLASS({
 
   methods: [
     function expression(fn /* ... args */) {
-      return this.ExpressionSlot.create({
-        fn: fn,
-        args: Array.prototype.slice.call(arguments, 1)
-      });
+      return this.ExpressionSlot.create(
+          arguments.length == 1 ?
+              { code: fn, obj: this } :
+              { code: fn, args: Array.prototype.slice.call(arguments, 1) }
+          );
     }
   ]
 });

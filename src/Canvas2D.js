@@ -44,6 +44,35 @@ foam.CLASS({
   ]
 });
 
+// fix with U2 support
+foam.CLASS({
+  refines: 'foam.graphics.Canvas',
+
+  properties: [
+    {
+      name: 'element',
+      factory: function() {
+        var e = this.getElementById(this.id);
+        e.width = this.width;
+        e.height = this.height;
+        return e;
+      },
+      postSet: function(_, e) {
+        e.width = this.width;
+        e.height = this.height;
+      }
+    },
+  ],
+  methods: [
+    function toHTML() {
+      return '<canvas id="' + this.id + '"></canvas>';
+    }
+
+  ]
+});
+
+
+
 var noDraw__ = false;
 // function flipDraw__() { noDraw__ = ! noDraw__; }
 // setInterval(flipDraw__, 5000);

@@ -20,7 +20,6 @@ TODO:
  - Fix handling of Slots that return arrays.
  - Add support for FOAM1 style dynamic functions?
  - Properly handle insertBefore_ of an element that's already been inserted?
- - Fix ExpressionSlot firing too many property change events (already fixed?)
 */
 
 foam.CLASS({
@@ -117,7 +116,17 @@ foam.CLASS({
     function onAddChildren() {},
     function onInsertChildren() {},
     function onReplaceChild() {},
-    function onRemoveChild() {}
+    function onRemoveChild() {},
+    function getBoundingClientRect() {
+      return {
+        left: 0,
+        right: 0,
+        bottom: 0,
+        top: 0,
+        width: 0,
+        height: 0
+      };
+    }
   ]
 });
 
@@ -183,17 +192,17 @@ foam.CLASS({
     function error() {
       throw new Error('Mutations not allowed in OUTPUT state.');
     },
-    function onSetCls(cls, enabled) { error(); },
-    function onFocus(cls, enabled) { error(); },
-    function onAddListener(topic, listener) { error(); },
-    function onRemoveListener(topic, listener) { error(); },
-    function onSetStyle(key, value) { error(); },
-    function onSetAttr(key, value) { error(); },
-    function onRemoveAttr(key, value) { error(); },
-    function onAddChildren(c) { error(); },
-    function onInsertChildren() { error(); },
-    function onReplaceChild() { error(); },
-    function onRemoveChild() { error(); },
+    function onSetCls(cls, enabled) { this.error(); },
+    function onFocus(cls, enabled) { this.error(); },
+    function onAddListener(topic, listener) { this.error(); },
+    function onRemoveListener(topic, listener) { this.error(); },
+    function onSetStyle(key, value) { this.error(); },
+    function onSetAttr(key, value) { this.error(); },
+    function onRemoveAttr(key, value) { this.error(); },
+    function onAddChildren(c) { this.error(); },
+    function onInsertChildren() { this.error(); },
+    function onReplaceChild() { this.error(); },
+    function onRemoveChild() { this.error(); },
     function toString() { return 'OUTPUT'; }
   ]
 });
@@ -205,7 +214,10 @@ foam.CLASS({
   extends: 'foam.u2.ElementState',
 
   methods: [
-    function output(out) { this.warn('Duplicate output.'); },
+    function output(out) {
+      this.warn('Duplicate output.');
+      return this.INITIAL.output.call(this, out);
+    },
     function load() { this.error('Duplicate load.'); },
     function unload() {
       var e = this.el();
@@ -297,6 +309,9 @@ foam.CLASS({
         child.remove();
       }
     },
+    function getBoundingClientRect() {
+      return this.el().getBoundingClientRect();
+    },
     function toString() { return 'LOADED'; }
   ]
 });
@@ -328,7 +343,7 @@ foam.CLASS({
 
   requires: [
     'foam.u2.DefaultValidator',
-    'foam.u2.ElementValue',
+    'foam.u2.AttrSlot',
     'foam.u2.Entity'
   ],
 
@@ -413,12 +428,14 @@ foam.CLASS({
   properties: [
     {
       name: 'id',
+      transient: true,
       factory: function() { return this.NEXT_ID(); }
     },
     {
       name: 'state',
       class: 'Proxy',
       of: 'foam.u2.ElementState',
+      transient: true,
       delegates: foam.u2.ElementState.getOwnAxiomsByClass(foam.core.Method).
           map(function(m) { return m.name; }),
       factory: function() { return this.INITIAL; },
@@ -431,7 +448,8 @@ foam.CLASS({
       }
     },
     {
-      name: 'parentNode'
+      name: 'parentNode',
+      transient: true
     },
     {
       class: 'Proxy',
@@ -454,7 +472,7 @@ foam.CLASS({
     },
     {
       name: 'attributeMap',
-      // documentation: 'Same information as attributes, but in map form for faster lookup',
+      // documentation: 'Same information as "attributes", but in map form for faster lookup',
       transient: true,
       factory: function() { return {}; }
     },
@@ -547,33 +565,33 @@ foam.CLASS({
       return this.__subContext__.E(opt_nodeName);
     },
 
-    function XXXE(opt_nodeName /* | DIV */) {
-      /* Create a new Element */
-      var Y = this.__subContext__;
+    // function XXXE(opt_nodeName /* | DIV */) {
+    //   /* Create a new Element */
+    //   var Y = this.__subContext__;
+    //
+    //   // ???: Is this needed / a good idea?
+    //   if ( this.data && ! Y.data ) Y = Y.createSubContext({ data: this.data });
+    //
+    //   // Some names have sub-Models registered for them.
+    //   // Example 'input'
+    //   var e = Y.elementForName(opt_nodeName);
+    //
+    //   if ( ! e ) {
+    //     e = foam.u2.Element.create(null, Y);
+    //     if ( opt_nodeName ) e.nodeName = opt_nodeName;
+    //   }
+    //
+    //   return e;
+    // },
 
-      // ???: Is this needed / a good idea?
-      if ( this.data && ! Y.data ) Y = Y.createSubContext({ data: this.data });
-
-      // Some names have sub-Models registered for them.
-      // Example 'input'
-      var e = Y.elementForName(opt_nodeName);
-
-      if ( ! e ) {
-        e = foam.u2.Element.create(null, Y);
-        if ( opt_nodeName ) e.nodeName = opt_nodeName;
-      }
-
-      return e;
-    },
-
-    function attrValue(opt_name, opt_event) {
-      /* Convenience method for creating an ElementValue. */
+    function attrSlot(opt_name, opt_event) {
+      /* Convenience method for creating an AttrSlot's. */
       var args = { element: this };
 
       if ( opt_name  ) args.property = opt_name;
       if ( opt_event ) args.event    = opt_event;
 
-      return this.ElementValue.create(args);
+      return this.AttrSlot.create(args);
     },
 
     function myCls(opt_extra) {
@@ -735,6 +753,21 @@ foam.CLASS({
     },
 
     function getAttribute(name) {
+      // TODO: add support for other dynamic attributes also
+      // TODO: don't lookup in real DOM if listener present
+      if ( name === 'value' && this.el() ) {
+        var value = this.el().value;
+        var attr  = this.getAttributeNode(name);
+
+        if ( attr ) {
+          attr.value = value;
+        } else {
+          // TODO: add attribute
+        }
+
+        return value;
+      }
+
       /*
         Get value associated with attribute 'name',
         or undefined if attribute not set.
@@ -1228,12 +1261,13 @@ foam.CLASS({
       return e;
     },
 
+    // ???/TODO: What is this doing?
     function addEventListener_(topic, listener) {
       var foamtopic = topic.startsWith('on') ?
           'on' + topic :
           topic ;
       this.sub(foamtopic, listener);
-      this.el() && this.el().addEventListener(topic, listener);
+      this.el() && this.el().addEventListener(topic, listener, false);
     },
 
     function removeEventListener_(topic, listener) {
@@ -1337,7 +1371,7 @@ foam.CLASS({
   package: 'foam.core',
   name: 'ContextMethod',
   extends: 'foam.core.Method',
-  
+
   methods: [
     function exportAs(obj) {
       return obj[this.name];
@@ -1380,7 +1414,7 @@ foam.CLASS({
       var key = opt_elName || elClass.name;
       this.elementMap[key.toUpperCase()] = elClass;
     },
-    
+
     function elementForName(nodeName) {
       if ( this.elementMap[nodeName] ) console.log('NODENAME: ', nodeName, this.elementMap[nodeName]);
       return this.elementMap[nodeName];
@@ -1390,14 +1424,49 @@ foam.CLASS({
 
 foam.__context__ = foam.__context__.createSubContext(foam.u2.U2Context.create().__subContext__);
 
-
 foam.CLASS({
   refines: 'foam.core.Property',
 
+  requires: [
+    'foam.u2.PropertyView',
+    'foam.u2.TextField'
+  ],
+
   properties: [
     {
+      // If true, this property is treated as a psedo-U2 attribute.
       name: 'attribute',
       value: false
+    }
+  ],
+
+  methods: [
+    function toPropertyE(X) {
+      return this.TextField.create(null, X);
+    },
+
+    function toE(X) {
+      return X.lookup('foam.u2.PropertyView').create({
+        prop: this,
+        view: this.toPropertyE(X)
+      }, X);
+    }
+  ]
+});
+
+
+foam.CLASS({
+  refines: 'foam.core.Action',
+
+  requires: [
+    'foam.u2.ActionView'
+  ],
+
+  methods: [
+    function toE(X) {
+      return X.lookup('foam.u2.ActionView').create({
+        action: this
+      }, X);
     }
   ]
 });

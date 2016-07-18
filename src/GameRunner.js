@@ -218,7 +218,8 @@ foam.CLASS({
       // }).install();
 
       // insert canvas
-      document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;
+      //document.body.innerHTML = this.canvas.toHTML() + document.body.innerHTML;
+      this.canvas.write();
 
       window.onresize = this.windowResize;
       this.windowResize();
@@ -296,10 +297,10 @@ window.onload = function() {
   var introbox = document.getElementById("intro");
   introbox.addEventListener("click", function() {
     g.audioStart();
-    
+
     var el = document.documentElement , rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen ;
     rfs.call(el);
-    
+
     introbox.style.display = "none";
     g.step();
 

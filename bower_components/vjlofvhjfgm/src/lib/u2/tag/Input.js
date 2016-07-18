@@ -25,7 +25,7 @@ foam.CLASS({
   properties: [
     [ 'nodeName', 'input' ],
     {
-      type: 'Boolean',
+      class: 'Boolean',
       name: 'onKey',
       attribute: true,
       // documentation: 'When true, $$DOC{ref:".data"} is updated on every keystroke, rather than on blur.'
@@ -41,12 +41,8 @@ foam.CLASS({
   methods: [
     function initE() {
       this.cssClass(this.myCls());
-      this.link();
-    },
 
-    function link() {
-      // TODO
-      Events.link(this.data$, this.attrValue(null, this.onKey ? 'input' : null));
+      this.attrSlot(null, this.onKey ? 'input' : null).linkFrom(this.data$);
     },
 
     function updateMode_(mode) {

@@ -35,12 +35,12 @@ foam.CLASS({
     'headerState',
     'state',
     {
-      type: 'Boolean',
+      class: 'Boolean',
       name: 'framing',
       value: true
     },
     {
-      type: 'Boolean',
+      class: 'Boolean',
       name: 'finished',
       value: false
     }
@@ -92,9 +92,9 @@ foam.CLASS({
 
     function frameHeader(byte) {
       this.opcode = byte & 0x0f;
-      this.fin = !! ( byte & 0x80 );
+      this.fin  = !! ( byte & 0x80 );
       this.rsv1 = !! ( byte & 0x40 );
-      this.rsv2  = !! ( byte & 0x20 );
+      this.rsv2 = !! ( byte & 0x20 );
       this.rsv3 = !! ( byte & 0x10 );
 
       this.headerState = this.maskLength0;
@@ -298,7 +298,7 @@ foam.CLASS({
 
   methods: [
     function write(msg) {
-      var serialized = foam.json.Network.stringify(msg);
+      var serialized = foam.json.Network.stringify(msg.clone().toRemote());
       var size = Buffer.byteLength(serialized);
       var packet = new Buffer(size + 4);
       packet.writeInt32LE(size);
@@ -356,10 +356,11 @@ foam.CLASS({
             start += 4;
           }
 
-          var written = data.copy(this.buffer,
-                                  this.offset,
-                                  start,
-                                  Math.min(remaining + start, end));
+          var written = data.copy(
+              this.buffer,
+              this.offset,
+              start,
+              Math.min(remaining + start, end));
 
           start += written;
           this.offset += written;
@@ -424,6 +425,7 @@ foam.CLASS({
         console.log("Server error", e);
         server.unref();
       }.bind(this));
+
       if ( this.listen ) this.server.listen(this.port);
     },
 
@@ -440,7 +442,6 @@ foam.CLASS({
             socket: socket
           });
           return;
-
         }
 
         this.delegate && this.delegate.send(m);
@@ -499,6 +500,11 @@ foam.CLASS({
 
   methods: [
     function send(data) {
+      if ( foam.box.Message.isInstance(data) ) {
+        data = data.clone().toRemote();
+        data = foam.json.Network.stringify(data);
+      }
+
       if ( typeof data == "string" ) {
         var opcode = 1;
         data = new Buffer(data);
