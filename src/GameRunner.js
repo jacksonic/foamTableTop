@@ -296,6 +296,10 @@ window.onload = function() {
   var introbox = document.getElementById("intro");
   introbox.addEventListener("click", function() {
     g.audioStart();
+    
+    var el = document.documentElement , rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen ;
+    rfs.call(el);
+    
     introbox.style.display = "none";
     g.step();
 
@@ -308,5 +312,3 @@ window.onload = function() {
     setTimeout(enemyCreate, 4000);
   });
 };
-
-
