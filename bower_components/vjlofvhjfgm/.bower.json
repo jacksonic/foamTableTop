@@ -1,11 +1,11 @@
 {
   "name": "vjlofvhjfgm",
   "homepage": "https://github.com/jacksonic/vjlofvhjfgm",
-  "_release": "0ba6911177",
+  "_release": "6d9513df81",
   "_resolution": {
     "type": "branch",
     "branch": "ImplementFix",
-    "commit": "0ba6911177c7c24dfcffbd9fa23ad5dc403fffef"
+    "commit": "6d9513df813e0ed5ae55b00158e75f072f4388e8"
   },
   "_source": "git://github.com/jacksonic/vjlofvhjfgm.git",
   "_target": "ImplementFix",
