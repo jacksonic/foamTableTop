@@ -22,6 +22,6 @@
     "tests"
   ],
   "dependencies": {
-    "vjlofvhjfgm": "jacksonic/vjlofvhjfgm#ImplementFix"
+    "foam2-experimental": "foam-framework/foam2-experimental#ImplementFix"
   }
 }

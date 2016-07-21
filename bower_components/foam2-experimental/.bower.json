@@ -1,13 +1,13 @@
 {
-  "name": "vjlofvhjfgm",
-  "homepage": "https://github.com/jacksonic/vjlofvhjfgm",
+  "name": "foam2-experimental",
+  "homepage": "https://github.com/foam-framework/foam2-experimental",
   "_release": "6d9513df81",
   "_resolution": {
     "type": "branch",
     "branch": "ImplementFix",
     "commit": "6d9513df813e0ed5ae55b00158e75f072f4388e8"
   },
-  "_source": "git://github.com/jacksonic/vjlofvhjfgm.git",
+  "_source": "git://github.com/foam-framework/foam2-experimental.git",
   "_target": "ImplementFix",
-  "_originalSource": "jacksonic/vjlofvhjfgm"
+  "_originalSource": "foam-framework/foam2-experimental"
 }
