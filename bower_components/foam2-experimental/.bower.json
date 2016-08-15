@@ -1,11 +1,11 @@
 {
   "name": "foam2-experimental",
   "homepage": "https://github.com/foam-framework/foam2-experimental",
-  "_release": "6d9513df81",
+  "_release": "8adec2586f",
   "_resolution": {
     "type": "branch",
     "branch": "ImplementFix",
-    "commit": "6d9513df813e0ed5ae55b00158e75f072f4388e8"
+    "commit": "8adec2586fc260d7ccd0aae64f9a2c3c941da431"
   },
   "_source": "git://github.com/foam-framework/foam2-experimental.git",
   "_target": "ImplementFix",

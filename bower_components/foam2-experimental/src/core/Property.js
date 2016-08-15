@@ -201,10 +201,12 @@ foam.CLASS({
     */
     function mergeOnto(baseAxiom) {
       var prop = this;
-      if ( baseAxiom ) {
-        prop = prop.cls_ === foam.core.Property ?
-          baseAxiom.clone().copyFrom(prop) :
-          prop.cls_.create().copyFrom(baseAxiom).copyFrom(this);
+
+      if (  baseAxiom &&
+            foam.core.Property.isInstance(baseAxiom) &&
+            baseAxiom.__context__ // this check prevents endBoot-phase2 problems. This HACK is not to survive past the ImplementsFix branch!
+          ) {
+        prop = baseAxiom.createChildProperty_(prop);
 
         // If properties would be shadowed by baseAxiom properties, then
         // clear the shadowing property since the new value should
@@ -473,6 +475,28 @@ foam.CLASS({
     function set(o, value) {
       o[this.name] = value;
       return this;
+    },
+
+    /**
+     * Handles property inheritance.  Builds a new version of
+     * this property to be installed on classes that inherit from
+     * this but define their own property with the same name as this.
+     */
+    function createChildProperty_(child) {
+      var prop = this.clone();
+
+      if ( child.cls_ !== foam.core.Property &&
+           child.cls_ !== this.cls_ ) {
+        this.warn('Unsupported change of property type from', this.cls_.id, 'to', child.cls_.id);
+
+        return child;
+      }
+
+      for ( var key in child.instance_ ) {
+        prop.instance_[key] = child.instance_[key];
+      }
+
+      return prop;
     },
 
     function exportAs(obj) {

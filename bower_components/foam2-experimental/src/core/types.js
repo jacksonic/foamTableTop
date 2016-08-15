@@ -45,7 +45,7 @@ foam.CLASS({
     [ 'value', 0 ],
     [ 'adapt', function adaptInt(_, v) {
         // FUTURE: replace with Math.trunc() when available everywhere.
-        return typeof v === 'number' ? ( v > 0 ? Math.floor(v) : Math.ceil(v) ) :
+        return typeof v === 'number' ? Math.trunc(v) :
           v ? parseInt(v) :
           0 ;
       }
@@ -210,7 +210,6 @@ foam.CLASS({
       value: function(_, v, prop) {
         var of = foam.lookup(prop.of);
 
-
         return of.isInstance(v) ? v :
           ( v.class ? foam.looup(v.class) : of ).create(v);
       }
@@ -295,11 +294,13 @@ foam.CLASS({
   ]
 });
 
+
 //TODO(adamvy): Replace Class property with Class2 property.
 foam.CLASS({
   package: 'foam.core',
   name: 'Class2',
   extends: 'Property',
+
   methods: [
     function installInProto(proto) {
       this.SUPER(proto);
@@ -310,7 +311,8 @@ foam.CLASS({
         get: function classGetter() {
           if ( typeof this[name] !== 'string' ) return this[name];
           return this.__context__.lookup(this[name], true);
-        }
+        },
+        configurable: true
       });
     }
   ]

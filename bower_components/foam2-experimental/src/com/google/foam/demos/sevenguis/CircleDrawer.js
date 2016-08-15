@@ -20,59 +20,65 @@ foam.CLASS({
   name: 'CircleDrawer',
   extends: 'foam.u2.Element',
 
-  traits: [ 'foam.memento.MementoMgr' ],
+  implements: [ 'foam.memento.MementoMgr' ],
 
   requires: [
     'foam.graphics.Circle',
-    'foam.graphics.CView',
+    'foam.graphics.Box as CView',
     'foam.ui.md.ChoiceMenuView',
-    'foam.ui.PopupView'
+    'foam.u2.PopupView'
   ],
+
+  exports: [ 'as data' ],
 
   constants: {
     SELECTED_COLOR:   '#ddd',
     UNSELECTED_COLOR: 'white'
   },
 
+  axioms: [
+    // TODO: remove '-' after ActionView when CSS naming fixed
+    foam.u2.CSS.create({
+      code: function() {/*
+      ^ { width:600px; margin: 20px; }
+      ^ canvas { border: 1px solid black; }
+      ^ .foam-u2-ActionView- { margin: 10px; }
+      ^ input[type='range'] { width: 400px; }
+      */}
+    })
+  ],
+
   classes: [
     {
       name: 'DiameterDialog',
-      extends: 'foam.u2.Element',
+      extends: 'foam.u2.View',
 
-      templates: [
-        function initE() {/*#U2
-          <span x:data={{this}}>
-            Adjust the diameter of the circle at (<:x mode="read-only"/>, <:y mode="read-only"/>).<br><br>
-            <:r model_="foam.ui.RangeView" maxValue="200" onKeyMode="true"/>
-          </span>
-        */}
+      requires: [
+        'foam.graphics.Circle',
+        'foam.u2.RangeView'
+      ],
+
+      methods: [
+        function initE() {
+          this.nodeName = 'span';
+          this.
+              cssClass(this.myCls()).
+              add('Adjust the diameter of the circle at (', this.data.x$, ', ', this.data.y$, ').').
+              tag('br').
+              add(this.RangeView.create({data$: this.data.radius$, maxValue: 200, onKey: true}));
+        }
       ]
     }
   ],
 
   properties: [
+    'feedback_',
     {
       name: 'selected',
       postSet: function(o, n) {
         if ( o ) o.color = this.UNSELECTED_COLOR;
         if ( n ) n.color = this.SELECTED_COLOR;
       }
-    },
-    {
-      name: 'memento',
-      postSet: function(_, m) {
-        if ( this.feedback_ ) return;
-        this.canvas.removeAllChildren();
-        for ( var i = 0 ; i < m.length ; i++ ) {
-          var c = m[i];
-          this.addCircle(c.x, c.y, c.r);
-        }
-        this.selected = null;
-      },
-    },
-    {
-      name: 'mementoValue',
-      factory: function() { return this.memento$; }
     },
     {
       name: 'canvas',
@@ -83,42 +89,61 @@ foam.CLASS({
   ],
 
   methods: [
-    /*
-      TODO: Need a canvas Element.
-    function initHTML() {
-      this.SUPER();
-      this.canvas.$.addEventListener('click',       this.onClick);
-      this.canvas.$.addEventListener('contextmenu', this.onRightClick);
-    },
-    */
 
-    function addCircle(x, y, opt_d) {
+    function initE() {
+      this.memento$.sub(function() {
+        var m = this.memento;
+        if ( this.feedback_ ) return;
+        this.canvas.children = [];
+        if ( m ) {
+          for ( var i = 0 ; i < m.length ; i++ ) {
+            var c = m[i];
+            this.addCircle(c.x, c.y, c.radius);
+          }
+        }
+        this.selected = null;
+      }.bind(this));
+
+      this.
+          cssClass(this.myCls()).
+          start('center').
+            start(this.BACK,  {label: 'Undo'}).end().
+            start(this.FORTH, {label: 'Redo'}).end().
+            tag('br').
+            start(this.canvas).
+              on('click',       this.onClick).
+              on('contextmenu', this.onRightClick).
+            end().
+          end();
+    },
+
+    function addCircle(x, y, opt_r) {
       var c = this.Circle.create({
         x: x,
         y: y,
-        r: opt_d || 25,
+        radius: opt_r || 25,
         color: this.UNSELECTED_COLOR,
         border: 'black'});
-      this.canvas.addChild(c);
+
+      this.canvas.addChildren(c);
+
       return c;
     },
 
     function updateMemento() {
-      var m = [];
-      var cs = this.canvas.children;
-      for ( var i = 0 ; i < cs.length ; i++ ) {
-        var c = cs[i];
-        m.push({x: c.x, y: c.y, r: c.r});
-      }
       this.feedback_ = true;
-      this.memento = m;
+      this.memento = this.canvas.children.map(function(c) {
+        return {x: c.x, y: c.y, radius: c.radius};
+      });;
       this.feedback_ = false;
     }
   ],
 
   listeners: [
     function onClick(evt) {
-      var x = evt.offsetX, y = evt.offsetY, c = this.canvas.findChildAt(x, y);
+      var x = evt.offsetX, y = evt.offsetY;
+      var c = this.canvas.findFirstChildAt(x, y);
+
       if ( c ) {
         this.selected = c;
       } else {
@@ -126,37 +151,24 @@ foam.CLASS({
         this.updateMemento();
       }
     },
+
     function onRightClick(evt) {
       evt.preventDefault();
+
       if ( ! this.selected ) return;
 
-      var p = this.PopupView.create({view: this.DiameterDialog.create({data: this.selected}), width: 450, height: 110});
-      p.openOn(this.$);
+      var p = this.PopupView.create({
+        width: 450,
+        height: 110
+      }).add(this.DiameterDialog.create({data: this.selected}));
+
+      this.add(p);
 
       // If the size is changed with the dialog, then create an updated memento
-      var oldR = this.selected.r;
-      p.subscribe(p.CLOSED_TOPIC, function() {
-        if ( this.selected.r !== oldR )
-          this.updateMemento();
-        p = null;
+      var oldRadius = this.selected.radius;
+      p.onunload.sub(function() {
+        if ( this.selected.radius !== oldRadius ) this.updateMemento();
       }.bind(this));
     }
-  ],
-
-  templates: [
-    function CSS() {/*
-      ^ { width:600px; margin: 20px; }
-      ^ canvas { border: 1px solid black; }
-      ^ .md-card { font-size: 20px; }
-      ^ .actionButton { margin: 10px; }
-      ^ input[type='range'] { width: 400px; }
-    */},
-
-    function initE() {/*#U2
-      <div class="^" x:data={{this}}>
-        <center class="^buttonRow"><:back label="Undo"}/> <:forth label="Redo"}/></center>
-        {{this.canvas}}
-      </div>
-    */}
   ]
 });

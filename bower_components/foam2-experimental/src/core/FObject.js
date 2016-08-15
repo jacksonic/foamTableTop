@@ -79,7 +79,6 @@ foam.CLASS({
 
     function hasOwnPrivate_(name) {
       return this.private_ && typeof this.private_[name] !== 'undefined';
-
     },
 
     function clearPrivate_(name) {
@@ -169,6 +168,11 @@ foam.CLASS({
       while ( listeners ) {
         var l = listeners.l;
         var s = listeners.sub;
+
+        // Update 'listeners' before notifying because the listener
+        // may set next to null.
+        listeners = listeners.next;
+
         // Like l.apply(l, [s].concat(Array.from(a))), but faster.
         // FUTURE: add benchmark to justify
         // ???: optional exception trapping, benchmark
@@ -185,7 +189,6 @@ foam.CLASS({
           case 9: l(s, a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]); break;
           default: l.apply(l, [s].concat(Array.from(a)));
         }
-        listeners = listeners.next;
         count++;
       }
       return count;
@@ -355,11 +358,19 @@ foam.CLASS({
     /**
       Creates a Slot for an Axiom.
     */
-    function slot(name) {
-      var axiom = this.cls_.getAxiomByName(name);
+    function slot(obj) {
+      if ( typeof obj === 'function' ) {
+        return foam.core.ExpressionSlot.create(
+          arguments.length == 1 ?
+            { code: obj, obj: this } :
+            { code: obj, args: Array.prototype.slice.call(arguments, 1) }
+        );
+      }
 
-      this.assert(axiom, 'Unknown axiom:', name);
-      this.assert(axiom.toSlot, 'Called slot() on unslotable axiom:', name);
+      var axiom = this.cls_.getAxiomByName(obj);
+
+      this.assert(axiom, 'Unknown axiom:', obj);
+      this.assert(axiom.toSlot, 'Called slot() on unslotable axiom:', obj);
 
       return axiom.toSlot(this);
     },
@@ -519,21 +530,65 @@ foam.CLASS({
      If an FObject is supplied, it doesn't need to be the same class as 'this'.
      Only properties that the two classes have in common will be copied.
      */
-    function copyFrom(o) {
-      var a = this.cls_.getAxiomsByClass(foam.core.Property);
+    function copyFrom(o, opt_warn) {
+      // When copying from a plain map, just enumerate the keys
+      if ( o.__proto__ === Object.prototype || ! o.__proto__ ) {
+        for ( var key in o ) {
+          var name = key.endsWith('$') ?
+              key.substring(0, key.length - 1) :
+              key ;
 
-      if ( foam.core.FObject.isInstance(o) ) {
-        for ( var i = 0 ; i < a.length ; i++ ) {
-          var name = a[i].name;
-          if ( o.hasOwnProperty(name) ) this[name] = o[name];
+          var a = this.cls_.getAxiomByName(name);
+          if ( a && foam.core.Property.isInstance(a) ) {
+            this[key] = o[key];
+          } else if ( opt_warn ) {
+            this.unknownArg(key, o[key]);
+          }
         }
-      } else {
-        for ( var i = 0 ; i < a.length ; i++ ) {
-          var name = a[i].name;
-          if ( typeof o[name] !== 'undefined' ) this[name] = o[name];
-        }
+        return this;
       }
 
+      // When copying from an object of the same class
+      // We don't copy default values or the values of expressions
+      // so that the unset state of those properties is preserved
+      var props = this.cls_.getAxiomsByClass(foam.core.Property);
+
+      if ( o.cls_ && ( o.cls_ === this.cls_ || o.cls_.isSubClass(this.cls_) ) ) {
+        for ( var i = 0 ; i < props.length ; i++ ) {
+          var name = props[i].name;
+
+          // Only copy values that are set or have a factory.
+          // Any default values or expressions will be the same
+          // for each object since they are of the exact same
+          // type.
+          if ( o.hasOwnProperty(name) || props[i].factory ) {
+            this[name] = o[name];
+          }
+        }
+        return this;
+      }
+
+      // If the source is an FObject, copy any properties
+      // that we have in common.
+      if ( foam.core.FObject.isInstance(o) ) {
+        for ( var i = 0 ; i < props.length ; i++ ) {
+          var name = props[i].name;
+          var otherProp = o.cls_.getAxiomByName(name);
+          if ( otherProp && foam.core.Property.isInstance(otherProp) ) {
+            this[name] = o[name];
+          }
+        }
+        return this;
+      }
+
+      // If the source is some unknown object, we do our best
+      // to copy any values that are not undefined.
+      for ( var i = 0 ; i < props.length ; i++ ) {
+        var name = props[i].name;
+        if ( typeof o[name] !== 'undefined' ) {
+          this[name] = o[name];
+        }
+      }
       return this;
     },
 

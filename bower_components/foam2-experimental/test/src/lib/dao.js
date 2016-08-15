@@ -103,3 +103,100 @@ describe('MDAO', function() {
     return Promise.resolve(foam.dao.MDAO.create({ of: model }));
   });
 });
+
+describe('LazyCacheDAO', function() {
+  // test caching against an IDBDAO remote and MDAO cache.
+  genericDAOTestBattery(function(model) {
+    var idbDAO = ( foam.dao.IDBDAO || foam.dao.LocalStorageDAO )
+      .create({ name: '_test_lazyCache_', of: model });
+    return idbDAO.removeAll().then(function() {
+      var mDAO = foam.dao.MDAO.create({ of: model });
+      return foam.dao.LazyCacheDAO.create({ delegate: idbDAO, cache: mDAO });
+    });
+  });
+});
+
+describe('CachingDAO', function() {
+  genericDAOTestBattery(function(model) {
+    var idbDAO = ( foam.dao.IDBDAO || foam.dao.LocalStorageDAO )
+      .create({ name: '_test_readCache_', of: model });
+    return idbDAO.removeAll().then(function() {
+      var mDAO = foam.dao.MDAO.create({ of: model });
+      return foam.dao.CachingDAO.create({ src: idbDAO, cache: mDAO });
+    });
+  });
+});
+
+describe('DeDupDAO', function() {
+  // test caching against an IDBDAO remote and MDAO cache.
+  genericDAOTestBattery(function(model) {
+    var mDAO = foam.dao.MDAO.create({ of: model });
+    return Promise.resolve(foam.dao.DeDupDAO.create({ delegate: mDAO }));
+  });
+});
+
+describe('LRUDAOManager', function() {
+  var mDAO;
+  var lruManager;
+
+  beforeEach(function() {
+    foam.CLASS({
+      package: 'test',
+      name: 'CompA',
+      properties: [ 'id', 'a' ]
+    });
+
+    mDAO = foam.dao.MDAO.create({ of: test.CompA });
+    lruManager = foam.dao.LRUDAOManager.create({ dao: mDAO, maxSize: 4 });
+  });
+  afterEach(function() {
+    mDAO = null;
+    lruManager = null;
+  });
+
+  it('accepts items up to its max size', function(done) {
+    // Note that MDAO and LRU do not go async for this test
+
+    mDAO.put(test.CompA.create({ id: 1, a: 'one' }));
+    mDAO.put(test.CompA.create({ id: 2, a: 'two' }));
+    mDAO.put(test.CompA.create({ id: 3, a: 'three' }));
+    mDAO.put(test.CompA.create({ id: 4, a: 'four' }));
+
+    mDAO.select(foam.mlang.sink.Count.create()).then(function(counter) {
+      expect(counter.value).toEqual(4);
+      done();
+    });
+  });
+
+  it('clears old items to maintain its max size', function(done) {
+
+
+    mDAO.put(test.CompA.create({ id: 1, a: 'one' }));
+    mDAO.put(test.CompA.create({ id: 2, a: 'two' }));
+    mDAO.put(test.CompA.create({ id: 3, a: 'three' }));
+    mDAO.put(test.CompA.create({ id: 4, a: 'four' }));
+    mDAO.put(test.CompA.create({ id: 5, a: 'five' }));
+
+    // LRU updates the dao slighly asynchronously, so give the notifies a
+    // frame to propagate (relevant for browser only, node promises are sync-y
+    // enough to get by)
+    setTimeout(function() {
+      mDAO.select(foam.mlang.sink.Count.create()).then(function(counter) {
+        expect(counter.value).toEqual(4);
+      }).then(function() {
+        mDAO.find(1).then(function() {
+          fail("Expected no item 1 to be found");
+          done();
+        },
+        function(err) {
+          //expected not to find it
+          done();
+        });
+
+      });
+    }, 100);
+
+
+  });
+});
+

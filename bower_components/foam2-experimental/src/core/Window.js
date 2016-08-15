@@ -56,6 +56,7 @@ foam.CLASS({
     'error',
     'framed',
     'info',
+    'installCSS',
     'log',
     'merged',
     'requestAnimationFrame',
@@ -99,10 +100,21 @@ foam.CLASS({
       return b;
     },
 
-    function error() { this.console.error.apply(this.console, arguments); },
-    function info()  { this.console.info.apply(this.console, arguments);  },
-    function log()   { this.console.log.apply(this.console, arguments);   },
-    function warn()  { this.console.warn.apply(this.console, arguments);  },
+    function error() {
+      this.console.error.apply(this.console, arguments);
+    },
+
+    function info() {
+      this.console.info.apply(this.console, arguments);
+    },
+
+    function log() {
+      this.console.log.apply(this.console, arguments);
+    },
+
+    function warn() {
+      this.console.warn.apply(this.console, arguments);
+    },
 
     function async(l) {
       /* Decorate a listener so that the event is delivered asynchronously. */
@@ -190,6 +202,11 @@ foam.CLASS({
     },
     function cancelAnimationFrame(id) {
       this.window.cancelAnimationFrame(id);
+    },
+    function installCSS(text) {
+      /* Create a new <style> tag containing the given CSS code. */
+      this.document.head.insertAdjacentHTML('beforeend',
+          '<style>' + text + '</style>');
     }
   ]
 });

@@ -98,6 +98,27 @@ var e13 = E('div').add(
         E('span').add('PONG').style({color: 'orange'});
     }
   }),
+  ' dynamic function2: ',
+  timer.second$.map(function(s) {
+    return s % 2 ?
+      E('span').add('PI', 'NG').style({color: 'aqua'}) :
+      E('span').add('PONG').style({color: 'orange'});
+  }),
+  ' dynamic function3: ',
+  timer.slot(function (second) {
+    return second % 2 ?
+      E('span').add('PI', 'NG').style({color: 'aqua'}) :
+      E('span').add('PONG').style({color: 'orange'});
+  }),
+  ' dynamic function4: ',
+  foam.core.ExpressionSlot.create({
+    args: [ timer.second$ ],
+    code: function(s) {
+      return s % 2 ?
+        E('span').add('PI', 'NG').style({color: 'aqua'}) :
+        E('span').add('PONG').style({color: 'orange'});
+    }
+  }),
   E('br'),
   'dynamic value: ', timer.i$,
   E('br'));
@@ -213,7 +234,7 @@ var s = p.firstName$;
 var input = foam.u2.tag.Input.create({data: 'william'});
 var input2 = foam.u2.tag.Input.create({data: 'john'});
 input.data$ = input2.data$;
-input.write(); 
+input.write();
 input2.write();
 
 Person.FIRST_NAME.toE(Y).write();
@@ -245,3 +266,105 @@ foam.u2.DetailView.create({
   properties: [ foam.util.Timer.INTERVAL, foam.util.Timer.I ],
   actions: [ foam.util.Timer.STOP, foam.util.Timer.START ]
 }).write();
+
+foam.CLASS({
+  name: 'CustomDetailView',
+  extends: 'foam.u2.Element',
+
+  exports: [ 'as data' ],
+
+  axioms: [
+    foam.u2.CSS.create({
+      code: function() {/*
+        important { color: red; }
+      */}
+    })
+  ],
+
+  properties: [
+    { class: 'Int', name: 'i' },
+    'field1',
+    'field2',
+    'flip'
+  ],
+
+  actions: [
+    function reset() { this.field1 = this.field2 = ''; },
+    function sayHello() { console.log('hello'); }
+  ],
+
+  listeners: [
+    {
+      name: 'flop',
+      isMerged: true,
+      mergeDelay: 1000,
+      code: function() {
+        this.i++;
+        this.flip = ! this.flip;
+        this.flop();
+      }
+    }
+  ],
+
+  methods: [
+    function initE() {
+      this.flop();
+
+      this.field1 = 'foo';
+      this.field2 = 'bar';
+
+      var o2 = this.cls_.create({field1: 'O2.f1', field2: 'O2.f2'});
+
+      this.
+        cssClass(this.slot(function(flip) {
+            return flip ? 'important' : '';
+          })).
+          tag('br').
+          tag('hr').
+          add(
+              'start: ',
+              this.field1$, ' ',
+              this.field2$, ' ',
+              this.field1$, ' ',
+              this.field2$, ' O2: ',
+              o2.field2$,
+              this.E('br'),
+              this.FIELD1, ' ',
+              this.FIELD2, ' ',
+              this.E('br'),
+              this.SAY_HELLO, ' ',
+              this.RESET,
+              this.E('br'),
+              'OnKey: '
+          ).
+          start(this.FIELD1).attrs({onKey: true}).end().
+          start(this.FIELD2).attrs({onKey: true}).end().
+          tag('br').
+
+          start(this.FIELD1, {data$: o2.field1$}).end().
+          start(this.FIELD2, {data$: o2.field2$}).end().
+
+          tag('br').
+          add('subContext: ').
+          startContext({data: o2}).
+            add(o2.FIELD1).
+            add(o2.FIELD2).
+            add(this.slot(function(flip) {
+              return flip ? o2.FIELD1 : o2.FIELD2;
+            })).
+          endContext();
+
+
+          /*
+          start('notimage').
+            attrs({
+              data: 'dragon.png',
+              displayWidth: this.slot(function(i) { return i * 10 % 100; })
+            }).
+          end().
+          */
+
+
+    }
+  ]
+}).create().write();

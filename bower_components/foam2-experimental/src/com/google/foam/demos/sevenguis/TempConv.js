@@ -15,27 +15,30 @@
  * limitations under the License.
  */
 
+// TODO: support 'precision' in FloatView
 foam.CLASS({
   package: 'com.google.foam.demos.sevenguis',
   name: 'TempConv',
+  extends: 'foam.u2.Element',
 
-  label: 'Temperature Converter',
+  exports: [ 'as data' ],
 
   properties: [
-    { type: 'Float', name: 'c' },
+    // TODO: why is 'value' required?
+    { type: 'Float', name: 'c', value: 0 },
     { type: 'Float', name: 'f' }
   ],
 
-  templates: [
-    // TODO: Outer <span> shouldn't be required.
-    // TODO: x:data={{this}} shouldn't be required, use this:c instead
-    // TODO: precision doesn't work
-    // TODO: Whitespace should be preserved as a single character
-    function toE() {/*#U2<span x:data={{this}}><:c onKeyMode="true" precision="4"/> Celsius = <:f onKeyMode="true" precision="4"/> Fahrenheit</span>*/}
-  ],
-
   methods: [
-    function init() { Events.relate(this.c$, this.f$, this.c2f, this.f2c); },
+    function initE() {
+      this.nodeName = 'span';
+      this.c$.relateTo(this.f$, this.c2f, this.f2c);
+      this.
+          start(this.C, {onKeyMode: true, precision: 4}).end().
+          add('Celsius = ').
+          start(this.F, {onKeyMode: true, precision: 4}).end().
+          add('Fahrenheit');
+    },
     function c2f(f) { return 9/5 * f + 32; },
     function f2c(c) { return 5/9 * ( c - 32 ); }
   ]

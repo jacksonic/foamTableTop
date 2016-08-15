@@ -128,13 +128,10 @@ global.genericDAOTestBattery = function(daoFactory) {
             expect(obj).toBeDefined();
             expect(obj.id).toBe(p.id);
 
-            listenerCalled = true;
-          });
-
-          dao.put(p).then(function() {
-            expect(listenerCalled).toBe(true);
             done();
           });
+
+          dao.put(p);
         });
       });
     });
@@ -234,6 +231,10 @@ global.genericDAOTestBattery = function(daoFactory) {
             fail('find() should fail after remove()');
           }, function(e) {
             expect(e).toBeDefined();
+          }).then(function() {
+            return dao.select().then(function(sink) {
+              expect(sink.a.length).toEqual(0);
+            });
           }).then(done);
         });
       });
@@ -251,13 +252,11 @@ global.genericDAOTestBattery = function(daoFactory) {
             expect(obj.id).toBe(p.id);
 
             listenerCalled = true;
+            done();
           });
 
           dao.put(p).then(function() {
             return dao.remove(p);
-          }).then(function() {
-            expect(listenerCalled).toBe(true);
-            done();
           });
         });
       });
@@ -341,7 +340,7 @@ global.genericDAOTestBattery = function(daoFactory) {
         beforeEach(function(done) {
           daoFactory(test.dao.generic.Person).then(function(idao) {
             dao = idao;
-            return idao.put(mkPerson1()).then(idao.put(mkPerson2()));
+            return idao.put(mkPerson1()).then(function() { return idao.put(mkPerson2()) } );
           }).then(done);
         });
 

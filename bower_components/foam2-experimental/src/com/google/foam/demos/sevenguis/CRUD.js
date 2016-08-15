@@ -19,7 +19,7 @@ foam.CLASS({
   package: 'foam.demos.sevenguis',
   name: 'Person',
 
-  tableProperties: [ 'surname', 'name' ],
+  tableProperties: [ 'id', 'surname', 'name' ],
 
   properties: [
     { name: 'id', hidden: true },
@@ -29,17 +29,39 @@ foam.CLASS({
 });
 
 
-FOAM.class({
+foam.CLASS({
   package: 'foam.demos.sevenguis',
   name: 'CRUD',
   extends: 'foam.u2.Element',
 
+  implements: [
+    'foam.mlang.Expressions'
+  ],
+
   requires: [
     'foam.u2.DetailView',
+    'foam.u2.TableView',
     'foam.dao.EasyDAO',
-    'foam.dao.IDBDAO', // TODO: This shouldn't be required
-    'foam.demos.sevenguisu2.Person',
-    'foam.u2.TableView'
+    'foam.demos.sevenguis.Person'
+  ],
+
+  exports: [ 'as data' ],
+
+  axioms: [
+    foam.u2.CSS.create({
+      code: function() {/*
+      ^ { padding: 10px; }
+      ^ .detailView { border: none; background: white; }
+      ^ .content span { margin-top: 24px; overflow: hidden !important; }
+      ^ .buttons { margin-top: 24px; }
+      ^ .content { width: 1000px; }
+      ^ .detailPane { width: 45%; display: inline-block; margin-left: 50px; margin-top: 16px; }
+      ^ .label { color: #039; font-size: 14px; padding-top: 6px; }
+      ^ .prefix { margin-left: 10px; }
+      ^ .summaryPane { width: 49%; display: inline-block; vertical-align: top; }
+      ^ .tableView { height: 184px; outline: none; }
+      */}
+    })
   ],
 
   properties: [
@@ -47,17 +69,22 @@ FOAM.class({
       name: 'prefix',
       label: 'Filter prefix',
       postSet: function(_, prefix) {
-        this.filteredDAO = this.dao.where(STARTS_WITH_IC(this.Person.SURNAME, prefix));
+        this.filteredDAO = this.dao.where(this.STARTS_WITH_IC(this.Person.SURNAME, prefix));
       }
     },
     {
       model_: 'foam.core.types.DAOProperty',
       name: 'dao',
       factory: function() {
+          /*
+        return foam.dao.MDAO.create({
+          of: foam.demos.sevenguis.Person
+        });
+*/
         return foam.dao.EasyDAO.create({
-          model: foam.demos.sevenguisu2.Person,
-          daoType: 'IDB',
-          cache: true,
+          of: foam.demos.sevenguis.Person,
+          daoType: 'MDAO',
+          cache: false,
           seqNo: true
         });
       }
@@ -68,6 +95,7 @@ FOAM.class({
       // TODO: replace with foam.u2.TableView when available
       toPropertyE: function(X) {
         return X.lookup('foam.u2.TableView').create({
+          of: foam.demos.sevenguis.Person,
           title: '',
           scrollEnabed: true,
           editColumns: false
@@ -80,72 +108,63 @@ FOAM.class({
       postSet: function(_, s) { this.data.copyFrom(s); }
     },
     {
-      name: 'data',
-      toPropertyE: 'foam.u2.DetailView',
+      name: 'person',
+      toPropertyE: function(X) { return X.lookup('foam.u2.DetailView').create({of: foam.demos.sevenguis.Person}, X); },
+//      toPropertyE: 'foam.u2.DetailView',
       factory: function() { return this.Person.create(); }
     }
   ],
 
-  templates: [
-    function CSS() {/*
-      ^ { padding: 10px; }
-      ^ .detailView { border: none; background: white; }
-      ^ .content span { margin-top: 24px; overflow: hidden !important; }
-      ^ .buttons { margin-top: 24px; }
-      ^ .content { width: 1000px; }
-      ^ .detailPane { width: 45%; display: inline-block; margin-left: 50px; margin-top: 16px; }
-      ^ .label { color: #039; font-size: 14px; padding-top: 6px; }
-      ^ .prefix { margin-left: 10px; }
-      ^ .summaryPane { width: 49%; display: inline-block; vertical-align: top; }
-      ^ .tableView { height: 184px; outline: none; }
-    */},
-    function initE() {/*#U2
-      <div class="^" x:data={{this}}>
-        <span class="prefix label">Filter prefix: </span> <:prefix onKeyMode="true" type="search"/>
-        <div class="content">
-          <span class="summaryPane"><:filteredDAO hardSelection$={{this.selection$}}/></span>
-          <span class="detailPane">
-            <:data/>
-            <div class="buttons"><:createItem/> <:updateItem/> <:deleteItem/></div>
-          </span>
-        </div>
-      </div>
-    */}
+  methods: [
+    function initE() {
+      this.nodeName = 'div';
+      this.
+          cssClass(this.myCls()).
+          start('span').cssClass('prefix', 'label').add('Filter prefix: ').end().
+          start(this.PREFIX, {onKey: true, type: 'search'}).end().
+          start('div').cssClass('content').
+            start('span').cssClass('summaryPane').
+              start(this.FILTERED_DAO, {hardSelection$: this.selection$}).end().
+            end().
+            start('span').cssClass('detailPane').
+              add(this.PERSON).
+              start('div').cssClass('buttons').
+                add(this.CREATE_ITEM, this.UPDATE_ITEM, this.DELETE_ITEM).
+              end().
+            end().
+          end();
+    }
   ],
 
   actions: [
     {
       name: 'createItem',
       label: 'Create',
-      isEnabled: function() {
-        var n = this.data.name, s = this.data.surname;
-        return n && s;
-      },
+//      isEnabled: function(person) { return person.name && person.surname; },
       code: function() {
-        var data = this.data.clone();
+        var data = this.person.clone();
         data.id = undefined;
-        this.dao.put(data, {
-          put: function(data) { this.data.copyFrom(data); }.bind(this)
-        });
+        this.dao.put(data).then(function(data) {
+          this.person.copyFrom(data);
+        }.bind(this));
       }
     },
     {
       name: 'updateItem',
       label: 'Update',
-      isEnabled: function() { return this.data.id; },
+//      isEnabled: function(person) { return person.id; },
       code: function() {
-        this.dao.put(this.data.clone(), {
-          put: function(data) { self.data = data; }
-        });
+        this.dao.put(this.person.clone());
       }
     },
     {
       name: 'deleteItem',
       label: 'Delete',
-      isEnabled: function() { return this.data.id; },
+//      isEnabled: function(person) { return person.id; },
       code: function() {
-        this.dao.remove(this.data.clone());
-        this.data.id = this.data.name = this.data.surname = '';
+        this.dao.remove(this.person).then(function() {
+          // this.person.id = this.person.name = this.person.surname = '';
+        }.bind(this));
       }
     }
   ]

@@ -76,7 +76,11 @@ foam.CLASS({
     */
     function follow(other) {
       var self = this;
-      var l = function() { self.set(other.get()); };
+      var l = function() {
+        if ( ! foam.util.equals(self.get(), other.get()) ) {
+          self.set(other.get());
+        }
+      };
       l();
       return other.sub(l);
     },
@@ -94,6 +98,10 @@ foam.CLASS({
 
     function mapTo(other, f) {
       return other.mapFrom(this, f);
+    },
+
+    function map(f) {
+      return foam.core.ExpressionSlot.create({code: f, args: [this]});
     },
 
     /**
@@ -348,7 +356,7 @@ foam.CLASS({
     {
       name: 'value',
       factory: function() {
-        return this.code.apply(this, this.args.map(function(a) {
+        return this.code.apply(this.obj || this, this.args.map(function(a) {
           return a.get();
         }));
       }
@@ -391,23 +399,5 @@ foam.CLASS({
   listeners: [
     function cleanup() { this.cleanup_ && this.cleanup_.destroy(); },
     function invalidate() { this.clearProperty('value'); }
-  ]
-});
-
-
-foam.CLASS({
-  package: 'foam.core',
-  name: 'ExpressionSlotHelper',
-
-  requires: [ 'foam.core.ExpressionSlot' ],
-
-  methods: [
-    function expression(fn /* ... args */) {
-      return this.ExpressionSlot.create(
-          arguments.length == 1 ?
-              { code: fn, obj: this } :
-              { code: fn, args: Array.prototype.slice.call(arguments, 1) }
-          );
-    }
   ]
 });
