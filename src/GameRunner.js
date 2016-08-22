@@ -64,13 +64,13 @@ foam.CLASS({
           var a = asink.a;
           for ( var i = 0; i < a.length; ++i ) {
             var e = a[i];
-            if ( ! e.destroyed ) e.moveStep(ft);
+            if ( e.instance_ ) e.moveStep(ft);
           }
         });
       }
     },
     function put(e) {
-      if ( ! e.destroyed ) e.moveStep(this.ft);
+      if ( e.instance_ ) e.moveStep(this.ft);
     },
   ]
 
@@ -85,7 +85,6 @@ foam.CLASS({
     'foam.graphics.Canvas',
     'tabletop.TestEntity',
     'tabletop.TestBoom',
-    'foam.dao.SpatialHashDAO',
     'foam.graphics.CView',
     'foam.dao.ArraySink',
     'tabletop.Entity',
@@ -95,6 +94,10 @@ foam.CLASS({
     'tabletop.PlayerManager',
     'foam.core.ObjectPool',
     'tabletop.EnemyWaveData',
+    'foam.dao.MDAO',
+    'foam.dao.LoggingDAO',
+    'foam.dao.index.SpatialHash',
+    'foam.dao.index.ValueIndex',
   ],
   exports: [
     'worldDAO',
@@ -109,14 +112,21 @@ foam.CLASS({
     {
       name: 'worldDAO',
       factory: function() {
-        return this.SpatialHashDAO.create({
-          space: [
-            [ this.Entity.BX, this.Entity.BX2 ],
-            [ this.Entity.BY, this.Entity.BY2 ],
-            [ this.Entity.BPLANE, this.Entity.BPLANE2 ]
-          ],
-          bucketWidths: [40, 40, 1]
+        var mdao = this.MDAO.create({
+          of: this.Entity
         });
+        // create a spatial hash specifically
+        var index = this.SpatialHash.create({ 
+          prop: this.Entity.BOUNDS,
+          bucketWidths: { x: 40, y: 40, plane: 1 },
+          tailFactory: this.Entity.ID.toIndex(this.ValueIndex.create())
+        })
+        mdao.addRawIndex(index);
+
+        //mdao.on.put.sub(function(sub, on, put, obj) { console.log("put ", obj.id, obj.controller.cls_.name); });
+        //mdao.on.remove.sub(function(sub, on, put, obj) { console.log("remove ", obj.id, obj.controller.cls_.name); });
+
+        return mdao;
       }
     },
     {

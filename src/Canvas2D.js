@@ -142,8 +142,9 @@ foam.CLASS({
       // quick path to skip caluclating the matrix
       // use owner position
       var o = this.owner || this;
+      var loc = ( this.owner && this.owner.location ) || this;
 
-      x.translate(o.x, o.y);
+      x.translate(loc.x, loc.y);
       x.rotate(o.rotation + Math.PI/2);
       x.scale(this.scaleX, this.scaleY);
     },
@@ -238,7 +239,6 @@ foam.CLASS({
     {
       name: 'sprite',
       factory: function() {
-        this.propertyChange.sub(this.updateSprite);
         return this.ImageSprite.create({
           x: this.x,
           y: this.y,
@@ -280,7 +280,6 @@ foam.CLASS({
     {
       name: 'sprite',
       factory: function() {
-        this.propertyChange.sub(this.updateSprite);
         return this.ImageSprite.create({
           x: this.x,
           y: this.y,

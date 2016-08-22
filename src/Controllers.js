@@ -63,7 +63,6 @@ foam.CLASS({
       this.frameTime = ft;
       this.move();
       this.collide();
-      e.updateSprite();
       this.worldUpdate();
     },
 
@@ -77,8 +76,8 @@ foam.CLASS({
       e.vrotation += e.arotation * ft;
 
       /** Changes position of the given entity. */
-      e.x += e.vx * ft;
-      e.y += e.vy * ft;
+      e.location.x += e.vx * ft;
+      e.location.y += e.vy * ft;
       e.rotation += e.vrotation * ft;
 
       e.engine.applyThrust(e);
@@ -113,8 +112,8 @@ foam.CLASS({
     },
     function worldUpdate() {
       var e = this.owner; if ( ! e ) return;
-      if ( e.x > 1600+1000 || e.y > 900+1000 || // be default, check for waaay out of bounds
-           e.x < -1000 || e.y < -1000 ) {
+      if ( e.location.x > 1600+1000 || e.location.y > 900+1000 || // be default, check for waaay out of bounds
+           e.location.x < -1000 || e.location.y < -1000 ) {
         e.uninstall();
       } else {
         this.worldDAO.put(e);
@@ -132,8 +131,8 @@ foam.CLASS({
     /** Also check for out of bounds and destroy self */
     function worldUpdate() {
       var e = this.owner; if ( ! e ) return;
-      if ( e.x > 1600+100 || e.y > 900+100 ||
-           e.x < -100 || e.y < -100 ) {
+      if ( e.location.x > 1600+100 || e.location.y > 900+100 ||
+           e.location.x < -100 || e.location.y < -100 ) {
         e.uninstall();
       } else {
         this.worldDAO.put(e);
@@ -143,7 +142,7 @@ foam.CLASS({
     function collideWith(o) {
       this.SUPER(o);
       var e = this.owner; if ( ! e ) return;
-      e.x = -99999; // trigger removal
+      e.location.x = -99999; // trigger removal
       e.damage.iHitYou(o);
     }
   ]
@@ -167,8 +166,8 @@ foam.CLASS({
     function worldUpdate() {
       var e = this.owner; if ( ! e ) return;
       var r = e.br*2;
-      if ( e.x > 1600+100+r || e.y > 900+100+r ||
-           e.x < -100-r || e.y < -100-r ) {
+      if ( e.location.x > 1600+100+r || e.location.y > 900+100+r ||
+           e.location.x < -100-r || e.location.y < -100-r ) {
         e.uninstall();
       } else {
         this.worldDAO.put(e);
@@ -184,8 +183,8 @@ foam.CLASS({
       e.vrotation += e.arotation * ft;
 
       /** Changes position of the given entity. */
-      e.x += e.vx * ft;
-      e.y += e.vy * ft;
+      e.location.x += e.vx * ft;
+      e.location.y += e.vy * ft;
       e.rotation += e.vrotation * ft;
 
       e.engine.applyThrust(e);
@@ -246,7 +245,8 @@ foam.CLASS({
   name: 'AwesomeShotControllerTrait',
   requires: [
     'tabletop.Entity',
-    'tabletop.BulletController'
+    'tabletop.BulletController',
+    'tabletop.Point'
   ],
 
   constants: {
@@ -283,12 +283,10 @@ foam.CLASS({
     function shoot() {
       var e = this.owner; if ( ! e ) return;
       var b = this.Entity.create({
-        x: e.x,
-        y: e.y,
+        location: this.Point.create({ x: e.location.x, y: e.location.y, plane: e.location.plane }),
         br: 5,
         hull: {basehp:1, currhp: 1},
-        bplane: e.bplane,
-        collisionPlane: this.target.bplane,
+        collisionPlane: this.target.location.plane,
         rotation: e.rotation,
         manager: e,
         controller: this.BulletController.create(),
@@ -297,14 +295,14 @@ foam.CLASS({
       b.damage.hurt = 1; // TODO: weapon
 
       // TODO: clean up sprite init
-      b.sprite.x = e.x;
-      b.sprite.y = e.y;
+      b.sprite.x = e.location.x;
+      b.sprite.y = e.location.y;
       b.sprite.rotation = e.rotation;
       b.sprite.imageIndex = 'enemyprojectile';
       b.sprite.scaleX = 0.3;
       b.sprite.scaleY = 0.3;
 
-      this.aimTowards({ x: this.target.x, y: this.target.y }, b, 100, Math.random() * 0.4 - 0.2);
+      this.aimTowards(this.target, b, 100, Math.random() * 0.4 - 0.2);
       b.install();
       e.audioManager.play("Laser_Gun", e);
     }
@@ -443,7 +441,7 @@ foam.CLASS({
 
     function shoot() {
       var e = this.owner; if ( ! e ) return;
-      this.wave && this.wave.install(e.x, e.y);
+      this.wave && this.wave.install(e.location.x, e.location.y);
     }
   ],
 });

@@ -70,12 +70,12 @@ foam.CLASS({
         dist += this.enemyDefs[d]().br*2; // bounding radius
       }
 
-      e.x = x + Math.cos(angle) * dist;
-      e.y = y + Math.sin(angle) * dist;
+      e.location.x = x + Math.cos(angle) * dist;
+      e.location.y = y + Math.sin(angle) * dist;
       e.rotation = angle;
       //e.vx = Math.cos(angle) * dist;
       //e.vy = Math.sin(angle) * dist;
-      e.bplane = 0;
+      e.location.plane = 0;
     }
   ],
 });

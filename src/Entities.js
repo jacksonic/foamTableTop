@@ -30,6 +30,9 @@ foam.CLASS({
     'tabletop.Hull',
     'tabletop.Damage',
     'tabletop.Engine',
+    'tabletop.Point',
+    'tabletop.RadialBoundingBox',
+    'tabletop.ProxyBoundingBox',
   ],
   imports: [
     'worldDAO',
@@ -42,15 +45,13 @@ foam.CLASS({
   properties: [
     {
       name: 'id',
-      factory: function() { return this.$UID; }
+      factory: function() { return ""+this.$UID; }
     },
-    { /** World coords */
-      class: 'Simple',
-      name: 'x',
-    },
-    { /** World coords */
-      class: 'Simple',
-      name: 'y',
+    {
+      class: 'foam.geo.PointProperty',
+      of: 'tabletop.Point',
+      name: 'location',
+      factory: function() { return this.Point.create(); }
     },
     { /** World relative */
       class: 'Simple',
@@ -82,7 +83,6 @@ foam.CLASS({
       class: 'Simple',
       name: 'arotation',
     },
-
     {
       name: 'mass',
       value: 1,
@@ -91,39 +91,16 @@ foam.CLASS({
     { /** Bounding box size (radius from x,y) */
       name: 'br',
     },
-    { /** Axis aligned bounding box, World coords */
-      name: 'bx',
-      getter: function() {
-        return this.x - this.br;
-      }
-    },
-    { /** AABB, World coords */
-      name: 'by',
-      getter: function() {
-        return this.y - this.br;
-      }
-    },
-    { /** AABB, World coords */
-      name: 'bx2',
-      getter: function() {
-        return this.x + this.br;
-      }
-    },
-    { /** AABB, World coords */
-      name: 'by2',
-      getter: function() {
-        return this.y + this.br;
-      }
-    },
     {
-      /** AABB, third dimension: player, bullet, enemy, etc. */
-      class: 'Simple',
-      name: 'bplane',
-    },
-    {
-      /** AABB, by default objects occupy a single plane */
-      name: 'bplane2',
-      getter: function() { return this.bplane; }
+      class: 'foam.geo.BoundingBoxProperty',
+      of: 'tabletop.Point',
+      name: 'bounds',
+      factory: function() { 
+        var ret = this.RadialBoundingBox.create(); 
+        ret.location$.linkFrom(this.location$);
+        ret.radius$.linkFrom(this.br$);
+        return ret;
+      }
     },
     {
       /** The EntityManager that owns this entity. */
@@ -167,11 +144,11 @@ foam.CLASS({
       /** The bounding box of the collision target area. (search
         for entities in this box when colliding) */
       name: 'targetBounds_',
-      factory: function() {
-        // TODO: make this a proxy
-        var obj = Object.create(this.BOUNDS_WRAPPER);
-        obj.owner_ = this;
-        return obj;
+      expression: function(bounds, collisionPlane) {
+        return this.ProxyBoundingBox.create({
+          source: bounds,
+          overridePlane: collisionPlane
+        })
       }
     },
     {
@@ -179,7 +156,7 @@ foam.CLASS({
       name: 'overlappingEntities',
       factory: function() {
         return this.worldDAO.where(this.INTERSECTS(
-          this.worldDAO.space,
+          this.BOUNDS,
           this.BY_REF(this.targetBounds_)
         ));
       }
@@ -223,26 +200,10 @@ foam.CLASS({
 
   ],
 
-  constants: {
-    /** Experimental proxy thing, to change the apparent bplane of the object to its collisionPlane */
-    BOUNDS_WRAPPER: (function() {
-        var obj = {};
-        Object.defineProperty(obj, 'bx', { get: function() { return this.owner_.bx; } });
-        Object.defineProperty(obj, 'by', { get: function() { return this.owner_.by; } });
-
-        Object.defineProperty(obj, 'bx2', { get: function() { return this.owner_.bx2; } });
-        Object.defineProperty(obj, 'by2', { get: function() { return this.owner_.by2; } });
-        // redirect collisionPlane's value into bplane for colliding
-        Object.defineProperty(obj, 'bplane', { get: function() { return this.owner_.collisionPlane; } });
-        Object.defineProperty(obj, 'bplane2', { get: function() { return this.owner_.collisionPlane; } });
-        return obj;
-      })()
-  },
-
   methods: [
     function init() {
-      this.x = this.x || 0;
-      this.y = this.y || 0;
+      this.location.x = this.location.x || 0;
+      this.location.y = this.location.y || 0;
       this.rotation = this.rotation || 0;
       this.vx = this.vx || 0;
       this.vy = this.vy || 0;
@@ -252,15 +213,14 @@ foam.CLASS({
       this.arotation = this.arotation || 0;
 
       this.br = this.br || 10;
-      this.bplane = this.bplane || 0;
       this.collisionPlane = this.collisionPlane || 0;
 
       this.onDestroy(this.clearSubModules);
     },
 
     function pooledDestroy() {
-      this.x = 0;
-      this.y = 0;
+      this.location.x = 0;
+      this.location.y = 0;
       this.rotation = 0;
       this.vx = 0;
       this.vy = 0;
@@ -270,7 +230,6 @@ foam.CLASS({
       this.arotation = 0;
 
       this.br = 10;
-      this.bplane = 0;
       this.collisionPlane = 0;
 
       this.controller = undefined;
@@ -294,17 +253,6 @@ foam.CLASS({
       this.destroy();
     },
 
-    {
-      /** This is standing in for buggy direct bindings */
-      name: 'updateSprite',
-      //isFramed: true, // ends up taking too much time
-      code: function() {
-//         var s = this.sprite;
-//         s.x = this.x;
-//         s.y = this.y;
-//         s.rotation = this.rotation;
-      }
-    },
   ],
   listeners: [
     {

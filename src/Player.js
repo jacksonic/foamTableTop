@@ -22,6 +22,7 @@ foam.CLASS({
   requires: [
     'tabletop.BulletController',
     'tabletop.Entity',
+    'tabletop.Point',
   ],
   constants: {
     SHOT_COOL_DOWN: 0.15
@@ -29,10 +30,10 @@ foam.CLASS({
   properties: [
     [ 'coolDown', 1 ],
     {
-      name: 'target',
-      factory: function() { return { x: 800, y: 450 }; }
+      name: 'location',
+      factory: function() { return this.Point.create({ x: 800, y: 450 }); }
     },
-
+    
 
   ],
 
@@ -55,10 +56,8 @@ foam.CLASS({
       code: function() {
         var e = this.owner;
         var b = this.Entity.create({
-          x: e.x,
-          y: e.y,
+          location: this.Point.create({ x: e.location.x, y: e.location.y, plane: 1 }),
           br: 10,
-          bplane: 1,
           collisionPlane: 0,
           rotation: e.rotation,
           manager: e,
@@ -69,14 +68,14 @@ foam.CLASS({
         b.damage.killed.sub(e.manager.killedSomething);
 
         // TODO: clean up sprite init
-        b.sprite.x = e.x;
-        b.sprite.y = e.y;
+        b.sprite.x = e.location.x;
+        b.sprite.y = e.location.y;
         b.sprite.rotation = e.rotation;
         b.sprite.imageIndex = 'playerprojectile';
         b.sprite.scaleX = 0.3;
         b.sprite.scaleY = 0.3;
 
-        this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
+        this.aimTowards(this, b, 1000, Math.random() * 0.2 - 0.1);
         e.rotation = b.rotation;
         b.install();
         e.audioManager.play("impact", e);
@@ -95,7 +94,8 @@ foam.CLASS({
     'tabletop.ImageSprite',
     'tabletop.TextSprite',
     'tabletop.Hull',
-    'tabletop.PlayerController'
+    'tabletop.PlayerController',
+    'tabletop.Point',
   ],
   imports: [
     'worldDAO',
@@ -133,7 +133,7 @@ foam.CLASS({
 
         return this.Entity.create({
           id: 'player' + this.$UID,
-          bplane: 3,
+          location: this.Point.create({ x: 0, y: 0, plane: 3 }),
           vx: 1,
           br: 40,
           sprite: s,
@@ -162,8 +162,8 @@ foam.CLASS({
         Math.PI * ( nu[0] ? 1 : -1 ) * ( nu[1] ? 1/4 : 3/4 );
 
         if ( this.main ) {
-          this.main.x = nu[0] ? 1600 - 20 : 20;
-          this.main.y = nu[1] ? 900 - 20 : 20;
+          this.main.location.x = nu[0] ? 1600 - 20 : 20;
+          this.main.location.y = nu[1] ? 900 - 20 : 20;
           this.main.rotation = r;
         }
         this.restartButton.x = nu[0] ? 1600 - 20 : 20;
@@ -200,7 +200,8 @@ foam.CLASS({
       console.log('player click', this.corner, x, y);
 
       if ( this.main ) {
-        this.main.controller.target = { x: x, y: y };
+        this.main.controller.location.x = x;
+        this.main.controller.location.y = y;
       } else {
         this.reset();
       }
