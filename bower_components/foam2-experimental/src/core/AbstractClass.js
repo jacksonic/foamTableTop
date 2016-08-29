@@ -20,13 +20,15 @@
   The FObject Class extends AbstractClass.
  */
 foam.LIB({
+  // ???: Why is this is 'foam' instead of 'foam.core'
   name: 'foam.AbstractClass',
 
   // documentation: "Root prototype for all classes.",
 
   constants: {
     prototype: Object.prototype,
-    axiomMap_: {}
+    axiomMap_: {},
+    private_:  { axiomCache: {} }
   },
 
   methods: [
@@ -50,7 +52,7 @@ foam.LIB({
       // init(), if defined, is called when object is created.
       // This is where class specific initialization code should
       // be put (not in initArgs).
-      obj.init && obj.init();
+      obj.init();
 
       return obj;
     },
@@ -67,18 +69,18 @@ foam.LIB({
     function installAxioms(axs) {
       this.private_.axiomCache = {};
 
+      // We install in two passes to avoid ordering issues from Axioms which
+      // need to access other axioms, like ids: and exports:.
+
       for ( var i = 0 ; i < axs.length ; i++ ) {
         var a = axs[i];
 
-        // Store the destination class in the Axiom.  Used by describe().
+        // Store the destination class in the Axiom. Used by describe().
         // Store source class on a clone of 'a' so that the Axiom can be
         // reused without corrupting the sourceCls_.
-        // Disabled: is causing dramatic performance slow-down.
-        // a = Object.create(a);
         a.sourceCls_ = this;
 
-        this.axiomMap_[a.name] =
-          ( a.mergeOnto ) ? a.mergeOnto(this.axiomMap_[a.name]) : a;
+        this.axiomMap_[a.name] = a;
       }
 
       for ( var i = 0 ; i < axs.length ; i++ ) {
@@ -99,7 +101,7 @@ foam.LIB({
 
     function installConstant(key, value) {
       var cName = foam.String.constantize(key);
-      var prev = this[cName];
+      var prev  = this[cName];
 
       // Detect constant name collisions
       if ( prev && prev.name !== key ) {
@@ -142,6 +144,11 @@ foam.LIB({
       return this.axiomMap_[name];
     },
 
+    /** Find an axiom by the specified name from an ancestor. */
+    function getSuperAxiomByName(name) {
+      return this.axiomMap_.__proto__[name];
+    },
+
     /**
       Returns all axioms defined on this class or its parent classes
       that are instances of the specified class.
@@ -173,7 +180,7 @@ foam.LIB({
       directly, regardless of what parent classes define.
     */
     function hasOwnAxiom(name) {
-      return this.axiomMap_.hasOwnProperty(name);
+      return Object.hasOwnProperty.call(this.axiomMap_, name);
     },
 
     /** Returns all axioms defined on this class or its parent classes. */
@@ -214,7 +221,17 @@ foam.LIB({
           if ( typeof a === 'function' ) {
             m.methods[i] = a = { name: a.name, code: a };
           }
-          this.prototype[a.name] = a.code;
+
+          if ( foam.core.Method ) {
+            console.assert(a.cls_ !== foam.core.Method,
+              'Method', a.name, 'on', m.name,
+              'has already been upgraded to a Method');
+
+            a = foam.core.Method.create(a);
+            this.installAxiom(a);
+          } else {
+            this.prototype[a.name] = a.code;
+          }
         }
       }
 

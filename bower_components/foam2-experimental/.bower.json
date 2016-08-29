@@ -1,13 +1,13 @@
 {
   "name": "foam2-experimental",
   "homepage": "https://github.com/foam-framework/foam2-experimental",
-  "_release": "9cda0117db",
+  "_release": "cd2feb5b2c",
   "_resolution": {
     "type": "branch",
-    "branch": "ImplementFix",
-    "commit": "9cda0117dbd97a511ed0ae65a68b40032053cd0f"
+    "branch": "GeoIndex",
+    "commit": "cd2feb5b2cb4e3ca7b1a0bee7cef7c76c78b643a"
   },
   "_source": "git://github.com/foam-framework/foam2-experimental.git",
-  "_target": "ImplementFix",
+  "_target": "GeoIndex",
   "_originalSource": "foam-framework/foam2-experimental"
 }
