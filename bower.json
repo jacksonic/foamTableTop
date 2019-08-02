@@ -1,5 +1,5 @@
 {
-  "name": "foamSpace",
+  "name": "foam-space",
   "authors": [
     "Jackson Stone <jacksonic@google.com>",
     "Michael Stone <micuu1@google.com>"
@@ -22,6 +22,6 @@
     "tests"
   ],
   "dependencies": {
-    "foam2-experimental": "foam-framework/foam2-experimental#ImplementFix"
+    "foam2-experimental": "foam-framework/foam2-experimental#GeoIndex"
   }
 }

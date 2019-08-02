@@ -122,7 +122,7 @@ foam.CLASS({
     },
     {
       name: 'srcSpriteSheet',
-      value: spritesheetplot_sm
+      value: spritesheetplot
     },
     {
       name: 'opacity',
@@ -172,10 +172,10 @@ foam.CLASS({
       }
 
       x.drawImage(this.imageElement,imageInfo.left,imageInfo.top,imageInfo.width,imageInfo.height,
-        -(imageInfo.centerX - imageInfo.left) * 2,
-        -(imageInfo.centerY - imageInfo.top) * 2,
-        imageInfo.width * 2,
-        imageInfo.height * 2 // scale values are for "large" sprite sheet FIX
+        -(imageInfo.centerX),
+        -(imageInfo.centerY),
+        imageInfo.width,
+        imageInfo.height 
       );
 //         if ( noDraw__ && this.owner ) {
 //           x.scale(1/this.scaleX, 1/this.scaleY);

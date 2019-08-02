@@ -21,7 +21,7 @@ foam.CLASS({
   name: 'Intersects',
   extends: 'foam.mlang.predicate.Binary',
   requires: [
-    'foam.mlang.predicate.Constant',
+    'foam.mlang.Constant',
   ],
   properties: [
     {
@@ -95,7 +95,7 @@ foam.CLASS({
 foam.CLASS({
   package: 'foam.mlang.predicate',
   name: 'ByRefConstant',
-  extends: 'foam.mlang.predicate.Constant',
+  extends: 'foam.mlang.Constant',
   methods: [
     function clone() {
       return this.cls_.create({ value: this.value });

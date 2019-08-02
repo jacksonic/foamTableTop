@@ -196,47 +196,32 @@ foam.CLASS({
 
   methods: [
     /**
-      Merge onto a base property using 'extends' behavior. Properties of the
-      base are overwritten by this.
+      Handle overriding of Property definition from parent class by
+      copying undefined values from parent Property, if it exists.
     */
-    function mergeOnto(baseAxiom) {
-      var prop = this;
+    function installInClass(c) {
+      var prop      = this;
+      var superProp = c.getSuperAxiomByName(prop.name);
 
-      if (  baseAxiom &&
-            foam.core.Property.isInstance(baseAxiom) &&
-            baseAxiom.__context__ // this check prevents endBoot-phase2 problems. This HACK is not to survive past the ImplementsFix branch!
-          ) {
-        prop = baseAxiom.createChildProperty_(prop);
+      if ( superProp && foam.core.Property.isInstance(superProp) ) {
+        prop = superProp.createChildProperty_(prop);
 
-        // If properties would be shadowed by baseAxiom properties, then
+        // If properties would be shadowed by superProp properties, then
         // clear the shadowing property since the new value should
         // take precedence since it was set later.
         var es = foam.core.Property.SHADOW_MAP || {};
         for ( var key in es ) {
           var e = es[key];
           for ( var j = 0 ; j < e.length ; j++ ) {
-            if ( this.hasOwnProperty(e[j]) && baseAxiom[key] ) {
+            if ( this.hasOwnProperty(e[j]) && superProp[key] ) {
               prop.clearProperty(key);
               break;
             }
           }
         }
+
+        c.axiomMap_[prop.name] = prop;
       }
-      return prop;
-    },
-
-    /**
-      Handle overriding of Property definition from parent class by
-      copying undefined values from parent Property, if it exists.
-    */
-    function installInClass(c) {
-      var prop = this;
-      var superProp = c.__proto__.getAxiomByName(prop.name);
-
-      if ( superProp ) {
-        c.axiomMap_[prop.name] = prop.mergeOnto(superProp);
-      }
-
 
       var reinstall = foam.events.oneTime(function reinstall(_,_,_,axiom) {
         // We only care about Property axioms.
@@ -244,6 +229,15 @@ foam.CLASS({
         // FUTURE: we really only care about those properties that affect
         // the definition of the property getter and setter, so an extra
         // check would help eliminate extra reinstalls.
+
+        // Handle special case of axiom being installed into itself.
+        // For example foam.core.String has foam.core.String axioms for things
+        // like "label"
+        // In the future this shouldn't be required if a reinstall is
+        // only triggered on this which affect getter/setter.
+        if ( prop.cls_ === c ) {
+          return;
+        }
 
         if ( foam.core.Property.isInstance(axiom) ) {
           // console.log('**************** Updating Property: ', c.name, prop.name);
@@ -347,7 +341,7 @@ foam.CLASS({
           }
 
           this.setPrivate_(FIP, true);
-          this[name] = factory.call(this);
+          this[name] = factory.call(this, prop);
           this.clearPrivate_(FIP);
 
           return this.instance_[name];
@@ -491,6 +485,8 @@ foam.CLASS({
 
         return child;
       }
+
+      prop.sourceCls_ = child.sourceCls_;
 
       for ( var key in child.instance_ ) {
         prop.instance_[key] = child.instance_[key];

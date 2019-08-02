@@ -1,158 +1,121 @@
 spritesheetplot = {
-  enemy: {
-    "name": "enemy",
-    "left": 0,
-    "top": 0,
-    "width": 122,
-    "height": 152,
-    "centerX": 61,
-    "centerY": 76
+  mushroomBlue: {
+    "name": "mushroomBlue",
+    "left": 24,
+    "top": 37,
+    "width": 108,
+    "height": 134,
+    "centerX": 55,
+    "centerY": 115
   },
-  missileflight: {
-    "name": "missileflight",
-    "left": 127,
-    "top": 0,
-    "width": 77,
-    "height": 197,
-    "centerX": 166,
-    "centerY": 98
+  mushroomRed: {
+    "name": "mushroomRed",
+    "left": 155,
+    "top": 35,
+    "width": 92,
+    "height": 112,
+    "centerX": 47,
+    "centerY": 91
   },
-  playerprojectile: {
-    "name": "playerprojectile",
-    "left": 211,
-    "top": 0,
-    "width": 19,
-    "height": 54,
-    "centerX": 220,
-    "centerY": 27
+  coin: {
+    "name": "coin",
+    "left": 277,
+    "top": 25,
+    "width": 83,
+    "height": 83,
+    "centerX": 42,
+    "centerY": 42
   },
-  enemyprojectile: {
-    "name": "enemyprojectile",
-    "left": 236,
-    "top": 0,
-    "width": 23,
-    "height": 22,
-    "centerX": 247,
-    "centerY": 11
+  bullet: {
+    "name": "bullet",
+    "left": 268,
+    "top": 122,
+    "width": 26,
+    "height": 47,
+    "centerX": 13,
+    "centerY": 24
   },
-  turret: {
-    "name": "turret",
-    "left": 267,
-    "top": 0,
-    "width": 135,
-    "height": 140,
-    "centerX": 334,
-    "centerY": 70
+  mechBall: {
+    "name": "mechBall",
+    "left": 264,
+    "top": 177,
+    "width": 36,
+    "height": 36,
+    "centerX": 18,
+    "centerY": 18
   },
-  gun: {
-    "name": "gun",
-    "left": 413,
-    "top": 0,
-    "width": 29,
-    "height": 168,
-    "centerX": 427,
-    "centerY": 84
+  mechSlice: {
+    "name": "mechSlice",
+    "left": 304,
+    "top": 134,
+    "width": 87,
+    "height": 18,
+    "centerX": 43,
+    "centerY": 9
   },
-  missileready: {
-    "name": "missileready",
-    "left": 455,
-    "top": 0,
-    "width": 76,
-    "height": 161,
-    "centerX": 493,
-    "centerY": 80
+  mechPlate: {
+    "name": "mechPlate",
+    "left": 306,
+    "top": 159,
+    "width": 86,
+    "height": 57,
+    "centerX": 43,
+    "centerY": 28
   },
-  rift: {
-    "name": "rift",
-    "left": 550,
-    "top": 0,
-    "width": 802,
-    "height": 316,
-    "centerX": 951,
-    "centerY": 158
+  claw: {
+    "name": "claw",
+    "left": 404,
+    "top": 145,
+    "width": 105,
+    "height": 85,
+    "centerX": 52,
+    "centerY": 19
+  },
+  greenSlice: {
+    "name": "greenSlice",
+    "left": 403,
+    "top": 87,
+    "width": 132,
+    "height": 30,
+    "centerX": 66,
+    "centerY": 15
+  },
+  greenPlate: {
+    "name": "greenPlate",
+    "left": 403,
+    "top": 87,
+    "width": 132,
+    "height": 30,
+    "centerX": 66,
+    "centerY": 15
+  },
+  misha: {
+    "name": "misha",
+    "left": 566,
+    "top": 20,
+    "width": 158,
+    "height": 216,
+    "centerX": 79,
+    "centerY": 108
+  },
+  planet: {
+    "name": "planet",
+    "left": 16,
+    "top": 259,
+    "width": 633,
+    "height": 633,
+    "centerX": 316,
+    "centerY": 316
   },
   explosion: {
     "name": "explosion",
-    "sequence": [{
-      "left": 1372,
-      "top": 0,
-      "width": 233,
-      "height": 178,
-      "centerX": 1488,
-      "centerY": 89
-    }, {
-      "left": 1623,
-      "top": 0,
-      "width": 244,
-      "height": 197,
-      "centerX": 1745,
-      "centerY": 98
-    }, {
-      "left": 1881,
-      "top": 0,
-      "width": 320,
-      "height": 242,
-      "centerX": 2041,
-      "centerY": 121
-    }, {
-      "left": 2223,
-      "top": 0,
-      "width": 414,
-      "height": 348,
-      "centerX": 2430,
-      "centerY": 174
-    }, {
-      "left": 0,
-      "top": 342,
-      "width": 725,
-      "height": 541,
-      "centerX": 362,
-      "centerY": 612
-    }],
+    sequence: [ {
+    "left": 277,
+    "top": 25,
+    "width": 83,
+    "height": 83,
+    "centerX": 42,
+    "centerY": 42
+    } ]
   },
-  carrier: {
-    "name": "carrier",
-    "left": 797,
-    "top": 366,
-    "width": 303,
-    "height": 603,
-    "centerX": 950,
-    "centerY": 600
-  },
-  drone: {
-    "name": "drone",
-    "left": 1124,
-    "top": 368,
-    "width": 72,
-    "height": 72,
-    "centerX": 1160,
-    "centerY": 404
-  }
 };
-
-spritesheetplot_sm = {};
-for (var key in spritesheetplot) {
-  var src = spritesheetplot[key];
-  var dst = {};
-  for (var ikey in src) {
-    if ( typeof src[ikey] === 'number' ) {
-      dst[ikey] = src[ikey] / 2;
-    } else if ( Array.isArray(src[ikey]) ) {
-      dst[ikey] = [];
-      for ( var i = 0; i < src[ikey].length; i++ ) {
-        var item = {};
-        for (var jkey in src[ikey][i]) {
-          if ( typeof src[ikey][i][jkey] === 'number' ) {
-            item[jkey] = src[ikey][i][jkey] / 2;
-          } else {
-            item[jkey] = src[ikey][i][jkey];
-          }
-        }
-        dst[ikey][i] = item;
-      }
-    } else {
-      dst[ikey] = src[ikey];
-    }
-  }
-  spritesheetplot_sm[key] = dst;
-}

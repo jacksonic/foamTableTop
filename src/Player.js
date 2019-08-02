@@ -72,9 +72,9 @@ foam.CLASS({
         b.sprite.x = e.x;
         b.sprite.y = e.y;
         b.sprite.rotation = e.rotation;
-        b.sprite.imageIndex = 'playerprojectile';
-        b.sprite.scaleX = 0.3;
-        b.sprite.scaleY = 0.3;
+        b.sprite.imageIndex = 'bullet';
+        b.sprite.scaleX = 0.1;
+        b.sprite.scaleY = 0.1;
 
         this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
         e.rotation = b.rotation;
@@ -114,8 +114,10 @@ foam.CLASS({
         var s = this.ImageSprite.create({
           x: this.x,
           y: this.y,
+          scaleX: 0.5,
+          scaleY: 0.5,
           rotation: this.rotation,
-          imageIndex: 'enemy',
+          imageIndex: 'claw',
         });
         var t = this.TextSprite.create({
           y: -55,
@@ -175,7 +177,7 @@ foam.CLASS({
       name: 'restartButton',
       factory: function() {
         var s = this.ImageSprite.create({
-          imageIndex: 'enemy',
+          imageIndex: 'greenPlate',
         });
         var t = this.TextSprite.create({
           y: -55,

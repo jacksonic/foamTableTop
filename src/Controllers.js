@@ -300,9 +300,9 @@ foam.CLASS({
       b.sprite.x = e.x;
       b.sprite.y = e.y;
       b.sprite.rotation = e.rotation;
-      b.sprite.imageIndex = 'enemyprojectile';
-      b.sprite.scaleX = 0.3;
-      b.sprite.scaleY = 0.3;
+      b.sprite.imageIndex = 'coin';
+      b.sprite.scaleX = 0.1;
+      b.sprite.scaleY = 0.1;
 
       this.aimTowards({ x: this.target.x, y: this.target.y }, b, 100, Math.random() * 0.4 - 0.2);
       b.install();

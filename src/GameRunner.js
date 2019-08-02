@@ -50,6 +50,9 @@ foam.CLASS({
       this.previousTime = this.time;
       this.time$.sub(this.runFrame);
     },
+    function put(e) {
+      if ( ! e.destroyed ) e.moveStep(this.ft);
+    },
   ],
 
   listeners: [
@@ -69,9 +72,7 @@ foam.CLASS({
         });
       }
     },
-    function put(e) {
-      if ( ! e.destroyed ) e.moveStep(this.ft);
-    },
+   
   ]
 
 });
