@@ -111,36 +111,36 @@ spritesheetplot = {
     "name": "explosion",
     sequence: [ 
       {
-        "left": 277,
-        "top": 25,
-        "width": 83,
-        "height": 83,
-        "centerX": 42,
-        "centerY": 42
+        "left": 735,
+        "top": 251,
+        "width": 94,
+        "height": 124,
+        "centerX": 48,
+        "centerY": 64
       },
       {
-        "left": 277,
-        "top": 25,
-        "width": 83,
-        "height": 83,
-        "centerX": 35,
-        "centerY": 35
+        "left": 418,
+        "top": 380,
+        "width": 102,
+        "height": 124,
+        "centerX": 54,
+        "centerY": 65
       },
       {
-        "left": 277,
-        "top": 25,
-        "width": 83,
-        "height": 83,
-        "centerX": 42,
-        "centerY": 42
+        "left": 704,
+        "top": 507,
+        "width": 126,
+        "height": 166,
+        "centerX": 66,
+        "centerY": 83
       },
       {
-        "left": 277,
-        "top": 25,
-        "width": 83,
-        "height": 83,
-        "centerX": 47,
-        "centerY": 48
+        "left": 649,
+        "top": 678,
+        "width": 181,
+        "height": 215,
+        "centerX": 98,
+        "centerY": 106
       },
     ]
   },
