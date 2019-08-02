@@ -73,8 +73,8 @@ foam.CLASS({
         b.sprite.y = e.y;
         b.sprite.rotation = e.rotation;
         b.sprite.imageIndex = 'bullet';
-        b.sprite.scaleX = 0.1;
-        b.sprite.scaleY = 0.1;
+        b.sprite.scaleX = 0.2;
+        b.sprite.scaleY = 0.2;
 
         this.aimTowards({ x: this.target.x, y: this.target.y }, b, 1000, Math.random() * 0.2 - 0.1);
         e.rotation = b.rotation;
