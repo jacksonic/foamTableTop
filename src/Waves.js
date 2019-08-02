@@ -39,6 +39,10 @@ foam.CLASS({
       name: 'enemyCounts',
       factory: function() { return []; }
     },
+    {
+      name: 'duration',
+      value: 6,
+    },
   ],
   listeners: [
     function install(opt_x, opt_y) {
@@ -104,6 +108,7 @@ foam.CLASS({
 
       const mushrooms = () => { return this.EnemyWave.create({
           id: ++waveCt,
+          duration: 2,
           enemyDefs: [
             function() { return {
               br: 20,
@@ -151,50 +156,6 @@ foam.CLASS({
           id: ++waveCt,
           enemyDefs: [
             function() { return {
-              br: 100,
-              hull: {basehp:100, currhp: 100},
-              engine: { thrust: 80000 },
-              mass: 10000,
-              arotation: 0.01,
-              sprite: {
-                imageIndex: 'misha',
-                scaleX: 1,
-                scaleY: 1,
-              },
-              controller: self.CarrierController.create({
-                wave: self.EnemyWave.create({
-                  id: waveCt+"drones",
-                  enemyDefs: [
-                    function() { return {
-                      br: 30,
-                      hull: {basehp:2, currhp: 2},
-                      engine: { thrust: 500 },
-                      mass: 5,
-                      arotation: Math.random() - 0.5,
-                      sprite: {
-                        imageIndex: 'misha',
-                        scaleX: 0.5,
-                        scaleY: 0.5,
-                      },
-                      controller: self.ShootPlayerController.create(),
-                    }; },
-                  ],
-                  enemyCounts: [
-                    6,
-                  ],
-                }),
-              }),
-            }; },
-          ],
-          enemyCounts: [
-            2,
-          ],
-        }),
-        mushrooms(),
-        this.EnemyWave.create({
-          id: ++waveCt,
-          enemyDefs: [
-            function() { return {
               br: 10,
               hull: {basehp:1, currhp: 1},
               engine: { thrust: 800 },
@@ -233,6 +194,8 @@ foam.CLASS({
               controller: self.CarrierController.create({
                 wave: self.EnemyWave.create({
                   id: waveCt+"missiles",
+                  duration: 1,
+                  duration: 1,
                   enemyDefs: [
                     function() { return {
                       br: 10,
@@ -260,7 +223,7 @@ foam.CLASS({
             }; },
           ],
           enemyCounts: [
-            4,
+            8,
           ],
         }),
         mushrooms(),
@@ -281,6 +244,7 @@ foam.CLASS({
               controller: self.CarrierController.create({
                 wave: self.EnemyWave.create({
                   id: waveCt+"missiles",
+                  durtation: 1,
                   enemyDefs: [
                     function() { return {
                       br: 20,
@@ -301,7 +265,7 @@ foam.CLASS({
                     }; },
                   ],
                   enemyCounts: [
-                    1,
+                    2,
                   ],
                 }),
               })
@@ -314,14 +278,60 @@ foam.CLASS({
         mushrooms(),
         this.EnemyWave.create({
           id: ++waveCt,
+          duration: 14,
+          enemyDefs: [
+            function() { return {
+              br: 100,
+              hull: {basehp:100, currhp: 100},
+              engine: { thrust: 80000 },
+              mass: 10000,
+              arotation: 0.01,
+              sprite: {
+                imageIndex: 'misha',
+                scaleX: 1,
+                scaleY: 1,
+              },
+              controller: self.CarrierController.create({
+                wave: self.EnemyWave.create({
+                  id: waveCt+"drones",
+                  duration: 3,
+                  enemyDefs: [
+                    function() { return {
+                      br: 30,
+                      hull: {basehp:2, currhp: 2},
+                      engine: { thrust: 500 },
+                      mass: 5,
+                      arotation: Math.random() - 0.5,
+                      sprite: {
+                        imageIndex: 'misha',
+                        scaleX: 0.5,
+                        scaleY: 0.5,
+                      },
+                      controller: self.ShootPlayerController.create(),
+                    }; },
+                  ],
+                  enemyCounts: [
+                    6,
+                  ],
+                }),
+              }),
+            }; },
+          ],
+          enemyCounts: [
+            2,
+          ],
+        }),
+        mushrooms(),
+        this.EnemyWave.create({
+          id: ++waveCt,
+          duration: 30,
           enemyDefs: [
             function() { return {
               dist: -50,
               br: 150,
-              hull: {basehp:100, currhp: 100},
+              hull: {basehp:200, currhp: 200},
               engine: { thrust: 0 },
               arotation: 0.1,
-              ay: 1,
               mass: 10000,
               sprite: {
                 imageIndex: 'planet',
@@ -331,6 +341,7 @@ foam.CLASS({
               controller: self.CarrierController.create({
                 wave: self.EnemyWave.create({
                   id: waveCt+"drones",
+                  duration: 8,
                   enemyDefs: [
                     function() { return {
                       dist: 150,

@@ -307,10 +307,11 @@ window.onload = function() {
 
     var curWave = 0;
     var enemyCreate = function() {
-      g.enemyWaves.data[curWave++].install();
+      var waveData = g.enemyWaves.data[curWave++]
+      waveData.install();
       if ( curWave >= g.enemyWaves.data.length ) curWave = 0;
-      setTimeout(enemyCreate, 4000);
+      setTimeout(enemyCreate, waveData.duration * 1000);
     }
-    setTimeout(enemyCreate, 4000);
+    setTimeout(enemyCreate, 6000);
   });
 };

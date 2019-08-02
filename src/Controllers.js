@@ -406,10 +406,6 @@ foam.CLASS({
     'tabletop.Entity',
   ],
 
-  constants: {
-    SHOT_COOL_DOWN: 4 // TODO: weapon
-  },
-
   properties: [
     {
       name: 'coolDown',
@@ -435,7 +431,7 @@ foam.CLASS({
         // shoot!
         this.coolDown -= this.frameTime;
         if ( this.coolDown < 0 ) {
-          this.coolDown = this.SHOT_COOL_DOWN;
+          this.coolDown = this.wave.duration;
           this.shoot();
         }
       }
